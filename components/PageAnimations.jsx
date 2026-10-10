@@ -56,14 +56,14 @@ export default function PageAnimations() {
           });
         }
 
-        // 2. Featured photo spread reveal
-        const featuredPhotos = document.querySelectorAll(".photo-featured .photo-button");
-        if (featuredPhotos.length > 0) {
-          animate(featuredPhotos, {
+        // 2. Bento gallery tiles reveal
+        const bentoPhotos = document.querySelectorAll(".gallery-bento-item");
+        if (bentoPhotos.length > 0) {
+          animate(bentoPhotos, {
             opacity: [0, 1],
-            translateY: [28, 0],
-            duration: 950,
-            delay: stagger(160, { start: 200 }),
+            translateY: [20, 0],
+            duration: 850,
+            delay: stagger(100, { start: 200 }),
             ease: "outCubic",
           });
         }
