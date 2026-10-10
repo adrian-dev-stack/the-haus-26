@@ -64,7 +64,7 @@ export default function Navbar({ name, rate }) {
           )}
           <a
             href="#inquire"
-            className="inline-flex h-9 items-center justify-center rounded-full bg-accent px-4 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-95"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-95"
           >
             Reserve stay
           </a>

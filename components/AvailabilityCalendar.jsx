@@ -91,24 +91,24 @@ export default function AvailabilityCalendar({
             type="button"
             onClick={prevMonth}
             disabled={isPrevDisabled}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-30"
+            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Previous month"
           >
-            ←
+            <span aria-hidden="true">←</span>
           </button>
           <button
             type="button"
             onClick={nextMonth}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink"
+            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Next month"
           >
-            →
+            <span aria-hidden="true">→</span>
           </button>
         </div>
       </div>
 
       {/* Day of Week Headers */}
-      <div className="mt-6 grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase tracking-wider text-muted">
+      <div className="mt-6 grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase tracking-wider text-muted" aria-hidden="true">
         {DAYS_OF_WEEK.map((day) => (
           <div key={day} className="py-2">
             {day}
@@ -117,10 +117,10 @@ export default function AvailabilityCalendar({
       </div>
 
       {/* Calendar Grid */}
-      <div className="mt-1 grid grid-cols-7 gap-1.5 sm:gap-2">
+      <div className="mt-1 grid grid-cols-7 gap-1.5 sm:gap-2" role="grid" aria-label={`${MONTH_NAMES[currentMonth]} ${currentYear} calendar`}>
         {calendarDays.map((day, idx) => {
           if (!day) {
-            return <div key={`empty-${idx}`} className="h-11 sm:h-12" />;
+            return <div key={`empty-${idx}`} className="h-11 sm:h-12" aria-hidden="true" />;
           }
 
           const dateStr = formatDateString(currentYear, currentMonth, day);
@@ -129,7 +129,7 @@ export default function AvailabilityCalendar({
           const isSelected = selectedDate === dateStr;
 
           let btnClass =
-            "relative flex h-11 sm:h-12 flex-col items-center justify-center rounded-xl text-sm font-medium transition-all ";
+            "relative flex h-11 sm:h-12 flex-col items-center justify-center rounded-xl text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-accent ";
 
           if (isSelected) {
             btnClass += "bg-accent text-white shadow-sm ring-2 ring-accent/30 font-semibold scale-[1.02]";
@@ -143,11 +143,21 @@ export default function AvailabilityCalendar({
               "bg-paper hover:bg-accent/10 hover:text-accent text-ink border border-line/60 active:scale-95";
           }
 
+          const statusText = isBooked
+            ? "Reserved"
+            : isPast
+            ? "Past date"
+            : isSelected
+            ? "Selected"
+            : "Available";
+
           return (
             <button
               key={dateStr}
               type="button"
               disabled={isPast || isBooked}
+              aria-pressed={isSelected}
+              aria-label={`${MONTH_NAMES[currentMonth]} ${day}, ${currentYear}, ${statusText}`}
               onClick={() => onSelectDate && onSelectDate(dateStr)}
               className={btnClass}
               title={
@@ -158,9 +168,9 @@ export default function AvailabilityCalendar({
                   : "Available for 22-hour stay"
               }
             >
-              <span>{day}</span>
+              <span aria-hidden="true">{day}</span>
               {!isPast && !isBooked && !isSelected && (
-                <span className="mt-0.5 h-1 w-1 rounded-full bg-accent/60" />
+                <span className="mt-0.5 h-1 w-1 rounded-full bg-accent/60" aria-hidden="true" />
               )}
             </button>
           );
