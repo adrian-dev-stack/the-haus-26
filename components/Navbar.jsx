@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const NAV_LINKS = [
   { href: "#gallery", label: "Gallery" },
@@ -12,12 +12,27 @@ const NAV_LINKS = [
 
 export default function Navbar({ name, rate }) {
   const [scrolled, setScrolled] = useState(false);
+  const [hiddenOnMobile, setHiddenOnMobile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 30);
+      const currentY = window.scrollY;
+      setScrolled(currentY > 30);
+
+      // On mobile: if scrolled down beyond the header and moving downward, hide completely!
+      if (currentY > 40 && currentY > lastScrollY.current) {
+        setHiddenOnMobile(true);
+        setMobileMenuOpen(false); // dismiss menu if open when scrolling down
+      } else {
+        // Scrolling up or back at the top: smoothly reveal
+        setHiddenOnMobile(false);
+      }
+
+      lastScrollY.current = currentY;
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -33,16 +48,22 @@ export default function Navbar({ name, rate }) {
   }, [mobileMenuOpen]);
 
   return (
-    <header className="sticky top-3.5 z-40 mx-auto w-full max-w-5xl px-3.5 transition-all duration-300 sm:px-6">
+    <header
+      className={`sticky top-3.5 z-40 mx-auto w-full max-w-5xl px-3.5 transition-all duration-300 sm:px-6 ${
+        hiddenOnMobile
+          ? "-translate-y-24 opacity-0 pointer-events-none sm:translate-y-0 sm:opacity-100 sm:pointer-events-auto"
+          : "translate-y-0 opacity-100"
+      }`}
+    >
       <nav
         aria-label="Main Navigation"
-        className={`flex items-center justify-between rounded-full border border-line bg-surface/90 px-3.5 py-2 backdrop-blur-md transition-all duration-300 sm:px-6 sm:py-2.5 ${
+        className={`flex w-full items-center justify-between rounded-full border border-line bg-surface/90 px-3.5 py-2 backdrop-blur-md transition-all duration-300 sm:px-6 sm:py-2.5 ${
           scrolled ? "shadow-lg shadow-black/50 ring-1 ring-white/10" : "shadow-xs"
         }`}
       >
         {/* Brand Monogram */}
         <a href="#main" className="group flex items-center gap-2.5 text-left">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white shadow-[0_0_12px_rgba(2,132,199,0.35)] transition-transform group-hover:scale-105">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white shadow-[0_0_12px_rgba(2,132,199,0.35)] transition-transform group-hover:scale-105">
             26
           </span>
           <div className="flex flex-col">
@@ -89,7 +110,7 @@ export default function Navbar({ name, rate }) {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-ink transition-colors hover:border-white/20 sm:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-ink transition-colors hover:border-white/20 sm:hidden active:scale-95"
           >
             {mobileMenuOpen ? (
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
