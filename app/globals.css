@@ -8,6 +8,7 @@
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-figtree), system-ui, sans-serif;
 }
+html { scroll-behavior: smooth; }
 body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); }
 :focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; }
 

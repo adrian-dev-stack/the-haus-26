@@ -86,7 +86,7 @@ export default function PhotoGallery({ photos }) {
   if (!photos.length) return null;
 
   return (
-    <section className="photo-gallery" aria-label="Photos of the house">
+    <section id="gallery" className="photo-gallery scroll-mt-24" aria-label="Photos of the house">
       <div className={`photo-featured ${photos.length === 1 ? "photo-featured-single" : ""}`}>
         {photos.slice(0, 2).map((photo, index) => photoButton(photo, index, true))}
       </div>
