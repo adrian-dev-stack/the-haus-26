@@ -5,10 +5,51 @@ import { useEffect, useRef, useState } from "react";
 
 export default function PhotoGallery({ photos }) {
   const [selected, setSelected] = useState(null);
+  const [activeMobileIndex, setActiveMobileIndex] = useState(0);
   const dialogRef = useRef(null);
   const openerRef = useRef(null);
   const thumbStripRef = useRef(null);
   const touchStartRef = useRef(null);
+  const mobileCarouselRef = useRef(null);
+
+  function handleMobileScroll() {
+    if (!mobileCarouselRef.current) return;
+    const container = mobileCarouselRef.current;
+    const width = container.clientWidth;
+    if (!width) return;
+
+    const children = Array.from(container.children);
+    let closestIndex = 0;
+    let minDistance = Infinity;
+    const containerCenter = container.scrollLeft + width / 2;
+
+    children.forEach((child, idx) => {
+      const childCenter = child.offsetLeft + child.offsetWidth / 2;
+      const distance = Math.abs(containerCenter - childCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = idx;
+      }
+    });
+
+    if (closestIndex !== activeMobileIndex && closestIndex >= 0 && closestIndex < photos.length) {
+      setActiveMobileIndex(closestIndex);
+    }
+  }
+
+  function scrollToMobileSlide(idx) {
+    if (!mobileCarouselRef.current) return;
+    const container = mobileCarouselRef.current;
+    const child = container.children[idx];
+    if (child) {
+      child.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+      setActiveMobileIndex(idx);
+    }
+  }
 
   const isOpen = selected !== null;
   const activePhoto = isOpen ? photos[selected] : null;
@@ -170,72 +211,142 @@ export default function PhotoGallery({ photos }) {
           })}
         </div>
 
-        {/* MOBILE BENTO LAYOUT (Screen < md) */}
-        <div className="p-2 md:hidden">
-          {/* Main Hero Card */}
-          <button
-            type="button"
-            className="gallery-bento-item group relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-surface text-left focus-visible:outline-2 focus-visible:outline-accent"
-            onClick={(e) => openPhoto(0, e)}
-            aria-label={`View full photo: ${heroPhoto.title || heroPhoto.alt}`}
-            aria-haspopup="dialog"
+        {/* MOBILE SWIPEABLE CAROUSEL (Screen < md) */}
+        <div className="p-3 md:hidden">
+          {/* Swipeable track */}
+          <div
+            ref={mobileCarouselRef}
+            onScroll={handleMobileScroll}
+            className="flex gap-3 overflow-x-auto pb-1 pt-0.5 snap-x snap-mandatory hide-scrollbar -mx-1 px-1 scroll-smooth"
+            tabIndex={0}
+            role="region"
+            aria-label="Swipeable photos"
           >
-            <Image
-              src={heroPhoto.src}
-              alt={heroPhoto.alt}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              style={{ objectPosition: heroPhoto.position || "center" }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-90" />
-            <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
-              <div>
-                <span className="inline-block rounded-full bg-accent/30 px-2 py-0.5 text-[9px] font-semibold tracking-wider text-accent-glow backdrop-blur-md border border-accent/30">
-                  FEATURED
-                </span>
-                <p className="mt-0.5 text-xs font-semibold text-white">{heroPhoto.title}</p>
-              </div>
-            </div>
-          </button>
+            {photos.map((photo, index) => (
+              <button
+                key={photo.src}
+                type="button"
+                onClick={(e) => openPhoto(index, e)}
+                className="group relative aspect-[16/10] w-[82vw] max-w-[340px] shrink-0 snap-center overflow-hidden rounded-xl border border-line bg-surface text-left shadow-sm transition-transform active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-accent"
+                aria-label={`View photo ${index + 1} of ${photos.length}: ${photo.title || photo.alt}`}
+                aria-haspopup="dialog"
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  priority={index === 0}
+                  sizes="(max-width: 768px) 85vw, 400px"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  style={{ objectPosition: photo.position || "center" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-90" />
 
-          {/* 2x2 Grid of Secondary Photos */}
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            {sidePhotos.map((photo, index) => {
-              const photoIndex = index + 1;
-              return (
+                {/* Top Badge & Zoom */}
+                <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between">
+                  {index === 0 ? (
+                    <span className="rounded-full bg-accent/40 border border-accent/40 px-2 py-0.5 text-[9px] font-semibold tracking-wider text-accent-glow backdrop-blur-md">
+                      FEATURED
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-black/50 border border-white/10 px-2 py-0.5 text-[9px] font-medium text-white/80 backdrop-blur-md">
+                      {index + 1} of {photos.length}
+                    </span>
+                  )}
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white/90 backdrop-blur-md">
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    </svg>
+                  </span>
+                </div>
+
+                {/* Bottom Caption */}
+                <div className="absolute bottom-2.5 left-2.5 right-2.5">
+                  <p className="truncate text-xs font-semibold text-white drop-shadow-xs">
+                    {photo.title}
+                  </p>
+                  <p className="mt-0.5 truncate text-[10px] text-white/70">
+                    Tap to expand full screen
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Carousel Controls Bar */}
+          <div className="mt-3 flex items-center justify-between pt-1">
+            {/* Interactive Dot Indicators */}
+            <div className="flex items-center gap-1.5" role="tablist" aria-label="Photo pagination">
+              {photos.map((_, i) => (
                 <button
-                  key={photo.src}
+                  key={i}
                   type="button"
-                  className="gallery-bento-item group relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-surface text-left focus-visible:outline-2 focus-visible:outline-accent"
-                  onClick={(e) => openPhoto(photoIndex, e)}
-                  aria-label={`View full photo: ${photo.title || photo.alt}`}
-                  aria-haspopup="dialog"
+                  onClick={() => scrollToMobileSlide(i)}
+                  aria-label={`Go to photo ${i + 1}`}
+                  aria-selected={activeMobileIndex === i}
+                  role="tab"
+                  className={`h-1.5 transition-all duration-300 rounded-full ${
+                    activeMobileIndex === i
+                      ? "w-6 bg-accent-glow"
+                      : "w-1.5 bg-white/20 hover:bg-white/40"
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Quick Actions: Navigation buttons, Counter & Full gallery view */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => scrollToMobileSlide(Math.max(0, activeMobileIndex - 1))}
+                  disabled={activeMobileIndex === 0}
+                  aria-label="Previous slide"
+                  className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-surface-elevated text-ink disabled:opacity-30 disabled:pointer-events-none transition-transform active:scale-90"
                 >
-                  <Image
-                    src={photo.src}
-                    alt={photo.alt}
-                    fill
-                    sizes="50vw"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    style={{ objectPosition: photo.position || "center" }}
-                  />
-                  <div className="absolute inset-0 bg-black/25" />
-                  <div className="absolute bottom-1.5 left-1.5 right-1.5">
-                    <p className="truncate text-[10px] font-medium text-white drop-shadow-xs">{photo.title}</p>
-                  </div>
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
                 </button>
-              );
-            })}
+                <span className="font-mono text-[11px] text-muted min-w-[2.5rem] text-center">
+                  {activeMobileIndex + 1}/{photos.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => scrollToMobileSlide(Math.min(photos.length - 1, activeMobileIndex + 1))}
+                  disabled={activeMobileIndex === photos.length - 1}
+                  aria-label="Next slide"
+                  className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-surface-elevated text-ink disabled:opacity-30 disabled:pointer-events-none transition-transform active:scale-90"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={(e) => openPhoto(activeMobileIndex, e)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-elevated/90 px-2.5 py-1 text-[11px] font-semibold text-ink shadow-xs backdrop-blur-md transition-transform active:scale-95"
+                aria-haspopup="dialog"
+              >
+                <svg className="h-3 w-3 text-accent-glow" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <rect x="1" y="1" width="6" height="6" rx="1.5" />
+                  <rect x="9" y="1" width="6" height="6" rx="1.5" />
+                  <rect x="1" y="9" width="6" height="6" rx="1.5" />
+                  <rect x="9" y="9" width="6" height="6" rx="1.5" />
+                </svg>
+                <span>All</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* FLOATING LUXE BADGE BUTTON: "View all 6 photos" */}
+        {/* FLOATING LUXE BADGE BUTTON (Desktop only): "View all photos" */}
         <button
           type="button"
           onClick={(e) => openPhoto(0, e)}
-          className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-2 rounded-full border border-line bg-surface-elevated/90 px-3.5 py-2 text-xs font-semibold text-ink shadow-lg backdrop-blur-md transition-all hover:bg-surface-elevated hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-accent sm:bottom-4 sm:right-4 sm:px-4 sm:py-2.5"
+          className="hidden md:inline-flex absolute bottom-3 right-3 z-10 items-center gap-2 rounded-full border border-line bg-surface-elevated/90 px-3.5 py-2 text-xs font-semibold text-ink shadow-lg backdrop-blur-md transition-all hover:bg-surface-elevated hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-accent sm:bottom-4 sm:right-4 sm:px-4 sm:py-2.5"
           aria-label={`Open photo viewer with all ${photos.length} photos`}
           aria-haspopup="dialog"
         >
