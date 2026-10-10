@@ -30,6 +30,17 @@ export default function Page() {
         </dl>
       )}
 
+      {p.pricingNotes && p.pricingNotes.length > 0 && (
+        <section className="mt-8 border-b border-line pb-8" aria-labelledby="rates-guide">
+          <h2 id="rates-guide" className="font-display text-xl">Rates guide</h2>
+          <ul className="mt-3 space-y-1.5 text-sm text-muted">
+            {p.pricingNotes.map((note) => (
+              <li key={note}>• {note}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {(p.amenities.length > 0 || p.rules.length > 0) && (
         <section className="mt-12 grid gap-10 sm:grid-cols-2">
           {p.amenities.length > 0 && <div><h2 className="font-display text-2xl">What's included</h2>
@@ -44,13 +55,19 @@ export default function Page() {
         {p.address && <p className="mt-2 text-muted">{p.address}</p>}
         <iframe title={`Map showing ${p.name}`} loading="lazy" className="mt-4 h-80 w-full rounded-lg border border-line"
           src={`https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`} />
-        <a href={p.mapsLink} className="mt-3 inline-block font-medium text-accent underline underline-offset-4">Open in Google Maps for directions</a>
+        <a href={p.mapsLink} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block font-medium text-accent underline underline-offset-4">Open in Google Maps for directions</a>
       </section>
 
       <section id="inquire" className="mt-14 scroll-mt-6" aria-labelledby="inq">
         <h2 id="inq" className="font-display text-2xl">Check availability</h2>
         <div className="mt-4"><InquiryForm name={p.name} phone={p.contact.phone} maxGuests={p.maxGuests} /></div>
-        {p.contact.messengerUrl && <p className="mt-4"><a className="font-medium text-accent underline underline-offset-4" href={p.contact.messengerUrl}>Or message on Messenger</a></p>}
+        {p.contact.messengerUrl && (
+          <p className="mt-4">
+            <a className="font-medium text-accent underline underline-offset-4" href={p.contact.messengerUrl} target="_blank" rel="noopener noreferrer">
+              Or message on Facebook / Messenger
+            </a>
+          </p>
+        )}
       </section>
 
       <footer className="mt-16 border-t border-line pt-6 text-sm text-muted">{p.name}</footer>

@@ -6,14 +6,20 @@ const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
 
 export const metadata = {
+  metadataBase: new URL("https://thehaus26.com"),
   title: `${property.name} | Staycation rental`,
   description: property.tagline || `Staycation rental. ${property.name}. Send an inquiry to book.`,
+  openGraph: {
+    title: `${property.name} | Staycation rental`,
+    description: property.tagline,
+    images: property.photos[0] ? [{ url: property.photos[0].src, alt: property.photos[0].alt }] : [],
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${figtree.variable}`}>
-      <body>
+    <html lang="en" className={`${fraunces.variable} ${figtree.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:m-3 focus:rounded focus:bg-accent focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
         {children}
       </body>

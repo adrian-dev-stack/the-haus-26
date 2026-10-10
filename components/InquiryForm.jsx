@@ -5,6 +5,8 @@ const field = "mt-1 w-full rounded-md border border-line bg-white px-3 py-2.5 te
 
 export default function InquiryForm({ name, phone, maxGuests }) {
   const [sent, setSent] = useState(false);
+  const [checkin, setCheckin] = useState("");
+
   function onSubmit(e) {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.currentTarget));
@@ -17,9 +19,24 @@ export default function InquiryForm({ name, phone, maxGuests }) {
       <label className="sm:col-span-2 text-sm font-medium">Your name
         <input name="name" required autoComplete="name" className={field} /></label>
       <label className="text-sm font-medium">Check-in
-        <input name="checkin" type="date" required className={field} /></label>
+        <input
+          name="checkin"
+          type="date"
+          required
+          value={checkin}
+          onChange={(e) => setCheckin(e.target.value)}
+          className={field}
+        />
+      </label>
       <label className="text-sm font-medium">Check-out
-        <input name="checkout" type="date" required className={field} /></label>
+        <input
+          name="checkout"
+          type="date"
+          required
+          min={checkin || undefined}
+          className={field}
+        />
+      </label>
       <label className="text-sm font-medium">Guests
         <input name="guests" type="number" min="1" max={maxGuests || undefined} required className={field} /></label>
       <label className="sm:col-span-2 text-sm font-medium">Note (optional)
