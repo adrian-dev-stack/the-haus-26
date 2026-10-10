@@ -469,7 +469,7 @@ export default function Page() {
         </section>
 
         {/* Reservation Suite */}
-        <section id="inquire" className="mt-20 scroll-mt-24" aria-labelledby="inq-heading">
+        <section id="reservation-section" className="mt-20 scroll-mt-24" aria-labelledby="inq-heading">
           <div className="grid gap-10 lg:grid-cols-12">
             {/* Left Column: Direct Host Booking Assurance */}
             <div className="flex flex-col justify-between lg:col-span-5">
@@ -524,7 +524,7 @@ export default function Page() {
             </div>
 
             {/* Right Column: Interactive Booking Card */}
-            <div className="lg:col-span-7">
+            <div id="inquire" className="scroll-mt-24 lg:col-span-7">
               <InquiryForm
                 name={p.name}
                 phone={p.contact.phone}
