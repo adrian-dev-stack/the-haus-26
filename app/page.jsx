@@ -1,6 +1,7 @@
 import { property as p } from "@/lib/property";
 import InquiryForm from "@/components/InquiryForm";
 import PhotoGallery from "@/components/PhotoGallery";
+import PageAnimations from "@/components/PageAnimations";
 
 const facts = [
   ["Check-in", p.checkIn], ["Check-out", p.checkOut],
@@ -11,6 +12,7 @@ export default function Page() {
   const { lat, lng } = p.coords;
   return (
     <main id="main" className="site-shell">
+      <PageAnimations />
       <header className="stay-header">
         <div>
           <p className="stay-category">Staycation rental</p>
