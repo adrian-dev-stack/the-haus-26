@@ -1,5 +1,6 @@
 import { property as p } from "@/lib/property";
 import InquiryForm from "@/components/InquiryForm";
+import PhotoGallery from "@/components/PhotoGallery";
 
 const facts = [
   ["Check-in", p.checkIn], ["Check-out", p.checkOut],
@@ -9,21 +10,17 @@ const facts = [
 export default function Page() {
   const { lat, lng } = p.coords;
   return (
-    <main id="main" className="mx-auto max-w-5xl px-5 py-10 sm:py-16">
-      <header>
-        <p className="text-sm font-medium uppercase tracking-widest text-accent">Staycation rental</p>
-        <h1 className="mt-3 font-display text-5xl font-semibold sm:text-7xl">{p.name}</h1>
-        {p.tagline && <p className="mt-4 max-w-xl text-lg text-muted">{p.tagline}</p>}
-        <a href="#inquire" className="mt-8 inline-block rounded-md bg-accent px-6 py-3 font-semibold text-white">Check availability</a>
+    <main id="main" className="site-shell">
+      <header className="stay-header">
+        <div>
+          <p className="stay-category">Staycation rental</p>
+          <h1>{p.name}</h1>
+          {p.tagline && <p className="stay-tagline">{p.tagline}</p>}
+        </div>
+        <a href="#inquire" className="availability-link">Check availability</a>
       </header>
 
-      {p.photos.length > 0 && (
-        <section aria-label="Photos" className="mt-12 grid gap-3 sm:grid-cols-2">
-          {p.photos.map((ph) => (
-            <img key={ph.src} src={ph.src} alt={ph.alt} loading="lazy" className="aspect-[4/3] w-full rounded-lg object-cover" />
-          ))}
-        </section>
-      )}
+      <PhotoGallery photos={p.photos} />
 
       {facts.length > 0 && (
         <dl className="mt-12 grid grid-cols-2 gap-6 border-y border-line py-6 sm:grid-cols-4">

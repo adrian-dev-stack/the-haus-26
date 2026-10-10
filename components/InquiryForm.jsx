@@ -29,7 +29,7 @@ export default function InquiryForm({ name, phone, maxGuests }) {
           Send inquiry by text message
         </button>
         <p className="mt-2 text-sm text-muted" aria-live="polite">
-          {!phone ? "Add a phone number in lib/property.js to enable this form." : sent ? "Your messaging app should have opened. Nothing is booked until the host confirms." : "Opens your messaging app with the details filled in. Nothing is booked until the host confirms."}
+          {!phone ? "Online inquiries are not available yet. Please check back for booking details." : sent ? "Your messaging app should have opened. Nothing is booked until the host confirms." : "Opens your messaging app with the details filled in. Nothing is booked until the host confirms."}
         </p>
       </div>
     </form>
