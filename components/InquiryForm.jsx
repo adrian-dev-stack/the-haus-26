@@ -114,14 +114,14 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
   }
 
   const fieldStyle =
-    "mt-1.5 w-full rounded-xl border border-line bg-paper/60 px-3.5 py-2.5 text-sm text-ink transition-colors focus:border-accent focus:bg-white focus:outline-none";
+    "mt-1.5 w-full rounded-xl border border-line bg-surface-elevated/70 px-3.5 py-2.5 text-sm text-ink transition-colors focus:border-accent-glow focus:bg-surface-elevated focus:outline-none";
 
   return (
-    <div className="rounded-3xl border border-line bg-white p-6 shadow-xs sm:p-8">
+    <div className="rounded-3xl border border-line bg-surface p-6 shadow-xs sm:p-8">
       {/* Header with Live Estimate */}
       <div className="flex flex-col gap-2 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-accent-glow">
             Reservation Inquiry
           </span>
           <h3 className="mt-0.5 font-display text-2xl font-medium tracking-tight text-ink sm:text-3xl">
@@ -131,11 +131,11 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
             Exclusive 22-hour private rental · Live inquiry generator
           </p>
         </div>
-        <div className="rounded-2xl border border-line bg-paper px-4 py-2.5 text-left sm:text-right">
+        <div className="rounded-2xl border border-line bg-surface-elevated px-4 py-2.5 text-left sm:text-right">
           <span className="block text-[10px] uppercase tracking-wider text-muted">
             Estimated Rate
           </span>
-          <span className="font-display text-xl font-semibold text-accent">
+          <span className="font-display text-xl font-semibold text-accent-glow">
             {estimatedRate}
           </span>
         </div>
@@ -173,8 +173,8 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
                 onClick={() => setOccasion(occ)}
                 className={`rounded-full border px-3.5 py-1 text-xs font-medium transition-colors ${
                   occasion === occ
-                    ? "border-accent bg-accent text-white"
-                    : "border-line bg-paper text-muted hover:border-ink hover:text-ink"
+                    ? "border-accent bg-accent text-white shadow-[0_0_12px_rgba(2,132,199,0.3)]"
+                    : "border-line bg-surface-elevated text-muted hover:border-white/20 hover:text-ink"
                 }`}
               >
                 {occ}
@@ -254,8 +254,8 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
                   onClick={() => setGuests(String(count))}
                   className={`h-10 min-w-10 rounded-xl border px-3 text-xs font-medium transition-colors ${
                     Number(guests) === count
-                      ? "border-accent bg-accent text-white"
-                      : "border-line bg-paper text-muted hover:border-ink hover:text-ink"
+                      ? "border-accent bg-accent text-white shadow-[0_0_12px_rgba(2,132,199,0.3)]"
+                      : "border-line bg-surface-elevated text-muted hover:border-white/20 hover:text-ink"
                   }`}
                 >
                   {count}
@@ -282,29 +282,29 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
         </div>
 
         {/* LIVE GENERATED MESSAGE PREVIEW */}
-        <div className="sm:col-span-2 rounded-2xl border border-accent/20 bg-paper/80 p-4 sm:p-5">
+        <div className="sm:col-span-2 rounded-2xl border border-line bg-surface-elevated/40 p-4 sm:p-5">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-accent" />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
+              <span className="h-2 w-2 rounded-full bg-accent-glow" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-accent-glow">
                 Live Generated Message Preview
               </span>
             </div>
             <button
               type="button"
               onClick={copyMessageToClipboard}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-paper active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:border-white/20 hover:bg-surface-hover active:scale-95"
             >
               {copied ? "✓ Copied!" : "Copy text"}
             </button>
           </div>
 
-          <pre className="mt-3 whitespace-pre-wrap font-sans text-xs leading-relaxed text-ink/90 selection:bg-accent/20">
+          <pre className="mt-3 whitespace-pre-wrap font-sans text-xs leading-relaxed text-ink/90 selection:bg-accent/30">
             {generatedMessage}
           </pre>
 
           {copied && (
-            <p className="mt-2 text-[11px] font-medium text-accent">
+            <p className="mt-2 text-[11px] font-medium text-accent-glow">
               ✓ Message copied to your clipboard. You can paste it directly into Messenger or SMS.
             </p>
           )}
@@ -315,7 +315,7 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
           <button
             type="submit"
             disabled={!phone}
-            className="flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(2,132,199,0.25)] transition-all hover:bg-accent-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span>Send prefilled inquiry by SMS</span>
             <span aria-hidden="true">→</span>
@@ -327,7 +327,7 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleMessengerClick}
-              className="mt-3 flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl border border-line bg-paper px-6 py-3 text-sm font-medium text-ink transition-colors hover:border-ink hover:bg-white active:scale-[0.98]"
+              className="mt-3 flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl border border-line bg-surface-elevated px-6 py-3 text-sm font-medium text-ink transition-colors hover:border-white/20 hover:bg-surface-hover active:scale-[0.98]"
             >
               <span>Copy message & chat on Facebook / Messenger</span>
               <span aria-hidden="true">↗</span>

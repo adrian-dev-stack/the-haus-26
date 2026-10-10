@@ -149,17 +149,17 @@ export default function Page() {
       <PageAnimations />
 
       <main id="main" className="site-shell">
-        {/* Modern Editorial Masthead */}
+        {/* Modern Nocturnal Villa Masthead */}
         <section id="overview" className="stay-header pt-4 sm:pt-8" aria-labelledby="hero-title">
           <div className="max-w-3xl">
             <div className="flex items-center gap-2">
-              <span className="inline-block h-2 w-2 rounded-full bg-accent" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">
+              <span className="inline-block h-2 w-2 rounded-full bg-accent-glow shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-glow">
                 Private Pool Villa · Limay, Bataan
               </span>
             </div>
 
-            <h1 id="hero-title" className="mt-3 font-display text-4xl font-normal tracking-tight text-ink sm:text-6xl md:text-7xl">
+            <h1 id="hero-title" className="mt-3 font-display text-4xl font-semibold tracking-tight text-ink sm:text-6xl md:text-7xl">
               {p.name}
             </h1>
 
@@ -169,16 +169,16 @@ export default function Page() {
 
             {/* Quick Hero Feature Badges */}
             <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-muted">
-              <span className="hero-badge rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium shadow-xs">
+              <span className="hero-badge rounded-full border border-line bg-surface/80 px-3.5 py-1 font-medium shadow-xs">
                 22-Hour Exclusive Stay
               </span>
-              <span className="hero-badge rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium shadow-xs">
+              <span className="hero-badge rounded-full border border-line bg-surface/80 px-3.5 py-1 font-medium shadow-xs">
                 Starting from ₱5,000
               </span>
-              <span className="hero-badge rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium shadow-xs">
+              <span className="hero-badge rounded-full border border-line bg-surface/80 px-3.5 py-1 font-medium shadow-xs">
                 Private Pool & Billiards
               </span>
-              <span className="hero-badge rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium shadow-xs">
+              <span className="hero-badge rounded-full border border-line bg-surface/80 px-3.5 py-1 font-medium shadow-xs">
                 Gated 2-Car Parking
               </span>
             </div>
@@ -186,13 +186,13 @@ export default function Page() {
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <a
                 href="#calendar"
-                className="hero-cta-btn inline-flex min-h-[46px] items-center justify-center rounded-full bg-accent px-6 py-2.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-95"
+                className="hero-cta-btn inline-flex min-h-[46px] items-center justify-center rounded-full bg-accent px-6 py-2.5 text-xs font-semibold text-white shadow-[0_0_20px_rgba(2,132,199,0.3)] transition-all hover:bg-accent-hover active:scale-95"
               >
                 Check live availability calendar
               </a>
               <a
                 href="#gallery"
-                className="hero-cta-btn inline-flex min-h-[46px] items-center justify-center rounded-full border border-line bg-paper px-5 py-2.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-white active:scale-95"
+                className="hero-cta-btn inline-flex min-h-[46px] items-center justify-center rounded-full border border-line bg-surface px-5 py-2.5 text-xs font-medium text-ink transition-colors hover:border-white/20 hover:bg-surface-elevated active:scale-95"
               >
                 View photos of the house
               </a>
@@ -208,12 +208,12 @@ export default function Page() {
         {/* Live Availability Calendar Section */}
         <section id="calendar" className="mt-20 scroll-mt-24" aria-labelledby="cal-heading">
           <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-accent-glow">
               Calendar & Schedule
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
-                <h2 id="cal-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
+                <h2 id="cal-heading" className="font-display text-3xl font-medium tracking-tight text-ink sm:text-4xl">
                   Check available dates
                 </h2>
                 <p className="mt-1 max-w-xl text-xs text-muted">
@@ -222,10 +222,10 @@ export default function Page() {
               </div>
               <div className="flex items-center gap-4 text-xs text-muted">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span className="h-2 w-2 rounded-full bg-accent" /> Available
+                  <span className="h-2 w-2 rounded-full bg-accent shadow-[0_0_8px_rgba(2,132,199,0.8)]" /> Available
                 </span>
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span className="h-2 w-2 rounded-full bg-black/20" /> Reserved
+                  <span className="h-2 w-2 rounded-full bg-white/20" /> Reserved
                 </span>
               </div>
             </div>
@@ -245,11 +245,11 @@ export default function Page() {
           <h2 id="specs-heading" className="sr-only">
             Property Specifications
           </h2>
-          <div className="rounded-3xl border border-line bg-white/70 p-6 shadow-xs backdrop-blur-xs sm:p-8">
+          <div className="rounded-3xl border border-line bg-surface/75 p-6 shadow-xs backdrop-blur-md sm:p-8">
             <dl className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
               {specs.map((item, idx) => (
                 <div key={item.label} className={idx > 0 ? "border-l-0 md:border-l md:border-line md:pl-6" : ""}>
-                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-accent-glow">
                     {item.label}
                   </dt>
                   <dd className="mt-1 font-display text-2xl font-medium tracking-tight text-ink sm:text-3xl">
@@ -264,14 +264,14 @@ export default function Page() {
           </div>
         </section>
 
-        {/* Curated Amenities Grid with Modern Icons */}
+        {/* Curated Amenities Grid */}
         <section id="amenities" className="mt-20 scroll-mt-24" aria-labelledby="amenities-heading">
           <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-accent-glow">
               Included Amenities
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <h2 id="amenities-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
+              <h2 id="amenities-heading" className="font-display text-3xl font-medium tracking-tight text-ink sm:text-4xl">
                 What this retreat includes
               </h2>
               <p className="max-w-md text-xs text-muted sm:text-right">
@@ -284,7 +284,7 @@ export default function Page() {
             {amenityCategories.map((cat) => (
               <div
                 key={cat.title}
-                className="flex flex-col justify-between rounded-3xl border border-line bg-white/70 p-6 shadow-xs backdrop-blur-xs transition-shadow hover:shadow-sm"
+                className="flex flex-col justify-between rounded-3xl border border-line bg-surface/80 p-6 shadow-xs backdrop-blur-md transition-all hover:border-accent/40 hover:shadow-[0_0_24px_rgba(2,132,199,0.12)]"
               >
                 <div>
                   <h3 className="font-display text-xl font-medium tracking-tight text-ink">
@@ -298,7 +298,7 @@ export default function Page() {
                       const IconComponent = it.Icon;
                       return (
                         <li key={it.name} className="flex items-start gap-3 border-t border-line/60 pt-3.5">
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent/15 border border-accent/25 text-accent-glow">
                             <IconComponent className="h-4 w-4" />
                           </span>
                           <div>
@@ -319,7 +319,7 @@ export default function Page() {
           </div>
 
           {/* House Guidelines Capsule */}
-          <div className="mt-8 rounded-3xl border border-line bg-paper/80 p-6 sm:p-7">
+          <div className="mt-8 rounded-3xl border border-line bg-surface/60 p-6 sm:p-7">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
@@ -330,13 +330,13 @@ export default function Page() {
                 </h3>
               </div>
               <div className="flex flex-wrap gap-2">
-                <span className="rounded-full border border-line bg-white px-3.5 py-1 text-xs font-medium text-muted">
+                <span className="rounded-full border border-line bg-surface-elevated px-3.5 py-1 text-xs font-medium text-muted">
                   Quiet hours after 10:00 PM
                 </span>
-                <span className="rounded-full border border-line bg-white px-3.5 py-1 text-xs font-medium text-muted">
+                <span className="rounded-full border border-line bg-surface-elevated px-3.5 py-1 text-xs font-medium text-muted">
                   Non-smoking interior
                 </span>
-                <span className="rounded-full border border-line bg-white px-3.5 py-1 text-xs font-medium text-muted">
+                <span className="rounded-full border border-line bg-surface-elevated px-3.5 py-1 text-xs font-medium text-muted">
                   Pets welcome
                 </span>
               </div>
@@ -347,11 +347,11 @@ export default function Page() {
         {/* Transparent Rates & Packages Suite */}
         <section id="rates" className="mt-20 scroll-mt-24" aria-labelledby="rates-heading">
           <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-accent-glow">
               Pricing & Packages
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <h2 id="rates-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
+              <h2 id="rates-heading" className="font-display text-3xl font-medium tracking-tight text-ink sm:text-4xl">
                 Rates & group packages
               </h2>
               <p className="max-w-md text-xs text-muted sm:text-right">
@@ -366,12 +366,12 @@ export default function Page() {
                 key={tier.tier}
                 className={`relative flex flex-col justify-between rounded-3xl border p-6 transition-all ${
                   tier.popular
-                    ? "border-accent bg-white shadow-sm ring-1 ring-accent/30"
-                    : "border-line bg-white/70 shadow-xs backdrop-blur-xs"
+                    ? "border-accent/60 bg-surface shadow-[0_0_24px_rgba(2,132,199,0.18)] ring-1 ring-accent-glow/30"
+                    : "border-line bg-surface/75 shadow-xs backdrop-blur-md hover:border-white/20"
                 }`}
               >
                 {tier.popular && (
-                  <span className="absolute -top-3 right-6 rounded-full bg-accent px-3 py-0.5 text-[10px] font-semibold tracking-wider text-white uppercase">
+                  <span className="absolute -top-3 right-6 rounded-full bg-accent px-3 py-0.5 text-[10px] font-semibold tracking-wider text-white uppercase shadow-[0_0_10px_rgba(2,132,199,0.5)]">
                     Most Popular
                   </span>
                 )}
@@ -385,7 +385,7 @@ export default function Page() {
                     </span>
                     <span className="ml-1 text-xs text-muted">/ 22 hrs</span>
                   </div>
-                  <span className="mt-1 block text-xs font-medium text-accent">
+                  <span className="mt-1 block text-xs font-medium text-accent-glow">
                     {tier.guests}
                   </span>
                   <p className="mt-4 border-t border-line/70 pt-3 text-xs leading-relaxed text-muted">
@@ -400,7 +400,7 @@ export default function Page() {
             ))}
           </div>
 
-          <div className="mt-4 rounded-2xl border border-line bg-paper/50 px-4 py-3 text-center text-xs text-muted">
+          <div className="mt-4 rounded-2xl border border-line bg-surface/50 px-4 py-3 text-center text-xs text-muted">
             Rates are subject to seasonal schedule and host confirmation. Prices may adjust without prior notice.
           </div>
         </section>
@@ -408,11 +408,11 @@ export default function Page() {
         {/* Location & Directions Suite */}
         <section id="location" className="mt-20 scroll-mt-24" aria-labelledby="loc-heading">
           <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-accent-glow">
               The Destination
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <h2 id="loc-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
+              <h2 id="loc-heading" className="font-display text-3xl font-medium tracking-tight text-ink sm:text-4xl">
                 Location & getting here
               </h2>
               <p className="max-w-md text-xs text-muted sm:text-right">
@@ -423,7 +423,7 @@ export default function Page() {
 
           <div className="mt-8 grid gap-6 lg:grid-cols-3">
             {/* Arrival Information Card */}
-            <div className="flex flex-col justify-between rounded-3xl border border-line bg-white/80 p-6 shadow-xs backdrop-blur-xs sm:p-8">
+            <div className="flex flex-col justify-between rounded-3xl border border-line bg-surface/80 p-6 shadow-xs backdrop-blur-md sm:p-8">
               <div>
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                   Exact Address
@@ -449,7 +449,7 @@ export default function Page() {
                   href={p.mapsLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-11 w-full items-center justify-center rounded-xl bg-accent px-5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#104846] active:scale-95"
+                  className="flex h-11 w-full items-center justify-center rounded-xl bg-accent px-5 text-xs font-semibold text-white shadow-[0_0_20px_rgba(2,132,199,0.25)] transition-colors hover:bg-accent-hover active:scale-95"
                 >
                   Open in Google Maps for directions
                 </a>
@@ -457,7 +457,7 @@ export default function Page() {
             </div>
 
             {/* Embedded Google Maps Plate */}
-            <div className="overflow-hidden rounded-3xl border border-line bg-white/70 p-2 shadow-xs lg:col-span-2">
+            <div className="overflow-hidden rounded-3xl border border-line bg-surface/70 p-2 shadow-xs lg:col-span-2">
               <iframe
                 title={`Map showing ${p.name}`}
                 loading="lazy"
@@ -474,20 +474,20 @@ export default function Page() {
             {/* Left Column: Direct Host Booking Assurance */}
             <div className="flex flex-col justify-between lg:col-span-5">
               <div>
-                <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-accent-glow">
                   Direct Reservation
                 </span>
-                <h2 id="inq-heading" className="mt-2 font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
+                <h2 id="inq-heading" className="mt-2 font-display text-3xl font-medium tracking-tight text-ink sm:text-4xl">
                   Reserve directly with the host
                 </h2>
                 <p className="mt-4 text-sm leading-relaxed text-muted sm:text-base">
                   Book directly with zero third-party platform markups. Select your preferred dates and guest count to create a prefilled text inquiry or start a conversation on Facebook Messenger.
                 </p>
 
-                <div className="mt-8 space-y-4 rounded-3xl border border-line bg-white/70 p-6 backdrop-blur-xs">
+                <div className="mt-8 space-y-4 rounded-3xl border border-line bg-surface/70 p-6 backdrop-blur-md">
                   <div className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
-                      ✓
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 border border-accent/30 text-xs font-semibold text-accent-glow">
+                      ✦
                     </span>
                     <div>
                       <span className="text-xs font-semibold text-ink">Zero hidden cleaning fees</span>
@@ -495,8 +495,8 @@ export default function Page() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
-                      ✓
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 border border-accent/30 text-xs font-semibold text-accent-glow">
+                      ✦
                     </span>
                     <div>
                       <span className="text-xs font-semibold text-ink">Direct host communication</span>
@@ -504,8 +504,8 @@ export default function Page() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
-                      ✓
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/20 border border-accent/30 text-xs font-semibold text-accent-glow">
+                      ✦
                     </span>
                     <div>
                       <span className="text-xs font-semibold text-ink">Flexible guest capacity</span>
@@ -517,7 +517,7 @@ export default function Page() {
 
               <div className="mt-8 border-t border-line/70 pt-6 text-xs text-muted">
                 <span>Direct inquiries: </span>
-                <a href={`tel:${p.contact.phone}`} className="font-medium text-ink underline underline-offset-4">
+                <a href={`tel:${p.contact.phone}`} className="font-medium text-accent-glow underline underline-offset-4">
                   {p.contact.phone || "09524566669"}
                 </a>
               </div>
@@ -545,7 +545,7 @@ export default function Page() {
               <span className="font-mono text-[11px] text-muted">
                 14.5340° N, 120.5875° E
               </span>
-              <a href="#main" className="text-ink transition-colors hover:text-accent">
+              <a href="#main" className="text-ink transition-colors hover:text-accent-glow">
                 Back to top ↑
               </a>
             </div>

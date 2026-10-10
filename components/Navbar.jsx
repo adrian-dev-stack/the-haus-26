@@ -36,13 +36,13 @@ export default function Navbar({ name, rate }) {
     <header className="sticky top-3.5 z-40 mx-auto w-full max-w-5xl px-3.5 transition-all duration-300 sm:px-6">
       <nav
         aria-label="Main Navigation"
-        className={`flex items-center justify-between rounded-full border border-line bg-paper/95 px-3.5 py-2 backdrop-blur-md transition-all duration-300 sm:px-6 sm:py-2.5 ${
-          scrolled ? "shadow-md ring-1 ring-black/5" : "shadow-xs"
+        className={`flex items-center justify-between rounded-full border border-line bg-surface/90 px-3.5 py-2 backdrop-blur-md transition-all duration-300 sm:px-6 sm:py-2.5 ${
+          scrolled ? "shadow-lg shadow-black/50 ring-1 ring-white/10" : "shadow-xs"
         }`}
       >
         {/* Brand Monogram */}
         <a href="#main" className="group flex items-center gap-2.5 text-left">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white transition-transform group-hover:scale-105">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white shadow-[0_0_12px_rgba(2,132,199,0.35)] transition-transform group-hover:scale-105">
             26
           </span>
           <div className="flex flex-col">
@@ -78,7 +78,7 @@ export default function Navbar({ name, rate }) {
 
           <a
             href="#inquire"
-            className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-95"
+            className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-accent px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all hover:bg-accent-hover active:scale-95"
           >
             Reserve stay
           </a>
@@ -89,7 +89,7 @@ export default function Navbar({ name, rate }) {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink sm:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-ink transition-colors hover:border-white/20 sm:hidden"
           >
             {mobileMenuOpen ? (
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -106,13 +106,13 @@ export default function Navbar({ name, rate }) {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="mt-2 flex flex-col gap-1 rounded-2xl border border-line bg-paper/95 p-3 shadow-lg backdrop-blur-md sm:hidden">
+        <div className="mt-2 flex flex-col gap-1 rounded-2xl border border-line bg-surface/95 p-3 shadow-xl backdrop-blur-md sm:hidden">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="rounded-xl px-4 py-2.5 text-xs font-medium text-ink transition-colors hover:bg-black/5 active:bg-accent/10 active:text-accent"
+              className="rounded-xl px-4 py-2.5 text-xs font-medium text-ink transition-colors hover:bg-white/5 active:bg-accent/20 active:text-accent-glow"
             >
               {link.label}
             </a>

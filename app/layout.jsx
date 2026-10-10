@@ -1,14 +1,14 @@
-import { Fraunces, Figtree } from "next/font/google";
+import { Outfit, Figtree } from "next/font/google";
 import "./globals.css";
 import { property } from "@/lib/property";
 import JsonLd from "@/components/JsonLd";
 
-const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
 
 export const viewport = {
-  themeColor: "#faf7f2",
-  colorScheme: "light",
+  themeColor: "#0b0e14",
+  colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
 };
@@ -74,7 +74,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${figtree.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${outfit.variable} ${figtree.variable} dark`} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <JsonLd />
         <a

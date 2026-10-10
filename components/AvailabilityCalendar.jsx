@@ -90,11 +90,11 @@ export default function AvailabilityCalendar({
     currentYear === today.getFullYear() && currentMonth <= today.getMonth();
 
   return (
-    <div className="rounded-3xl border border-line bg-white p-6 shadow-xs sm:p-8">
+    <div className="rounded-3xl border border-line bg-surface p-6 shadow-xs sm:p-8">
       {/* Month Header */}
       <div className="flex items-center justify-between border-b border-line pb-5">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-glow">
             Live Calendar
           </span>
           <h3 className="font-display text-2xl font-medium text-ink">
@@ -107,7 +107,7 @@ export default function AvailabilityCalendar({
             type="button"
             onClick={prevMonth}
             disabled={isPrevDisabled}
-            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink hover:bg-white disabled:cursor-not-allowed disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-surface-elevated text-ink transition-colors hover:border-white/20 hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Previous month"
           >
             <span aria-hidden="true">←</span>
@@ -115,7 +115,7 @@ export default function AvailabilityCalendar({
           <button
             type="button"
             onClick={nextMonth}
-            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink hover:bg-white focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-surface-elevated text-ink transition-colors hover:border-white/20 hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Next month"
           >
             <span aria-hidden="true">→</span>
@@ -148,15 +148,15 @@ export default function AvailabilityCalendar({
             "relative flex h-11 sm:h-12 flex-col items-center justify-center rounded-xl text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-accent ";
 
           if (isSelected) {
-            btnClass += "bg-accent text-white shadow-sm ring-2 ring-accent/30 font-semibold scale-[1.02]";
+            btnClass += "bg-accent text-white shadow-[0_0_16px_rgba(2,132,199,0.5)] ring-2 ring-accent-glow/50 font-semibold scale-[1.02]";
           } else if (isBooked) {
             btnClass +=
-              "bg-black/[0.04] text-muted/40 cursor-not-allowed line-through";
+              "bg-white/[0.02] text-muted/30 cursor-not-allowed line-through";
           } else if (isPast) {
-            btnClass += "text-muted/30 cursor-not-allowed";
+            btnClass += "text-muted/20 cursor-not-allowed";
           } else {
             btnClass +=
-              "bg-paper hover:bg-accent/10 hover:text-accent text-ink border border-line/60 active:scale-95";
+              "bg-surface-elevated hover:bg-surface-hover hover:border-accent-glow hover:text-accent-glow text-ink border border-line/80 active:scale-95";
           }
 
           const statusText = isBooked
@@ -186,7 +186,7 @@ export default function AvailabilityCalendar({
             >
               <span aria-hidden="true">{day}</span>
               {!isPast && !isBooked && !isSelected && (
-                <span className="mt-0.5 h-1 w-1 rounded-full bg-accent/60" aria-hidden="true" />
+                <span className="mt-0.5 h-1 w-1 rounded-full bg-accent-glow/70" aria-hidden="true" />
               )}
             </button>
           );
@@ -197,11 +197,11 @@ export default function AvailabilityCalendar({
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-5 text-xs text-muted">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-accent" />
+            <span className="h-2 w-2 rounded-full bg-accent shadow-[0_0_8px_rgba(2,132,199,0.6)]" />
             <span>Available</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-black/20" />
+            <span className="h-2 w-2 rounded-full bg-white/20" />
             <span>Reserved</span>
           </div>
         </div>
@@ -210,10 +210,10 @@ export default function AvailabilityCalendar({
 
       {/* Interactive Selection Action Bar */}
       {activeSelectedDate && (
-        <div className="mt-5 rounded-2xl border border-accent/30 bg-accent/5 p-4 sm:p-5">
+        <div className="mt-5 rounded-2xl border border-accent/40 bg-accent/10 p-4 sm:p-5 shadow-[0_0_20px_rgba(2,132,199,0.12)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-accent">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-accent-glow">
                 Selected Check-in Date
               </span>
               <p className="font-display text-lg font-semibold text-ink">
@@ -226,7 +226,7 @@ export default function AvailabilityCalendar({
             <div className="flex flex-wrap gap-2">
               <a
                 href="#inquire"
-                className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#104846] active:scale-95"
+                className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-hover active:scale-95"
               >
                 Use date in inquiry form ↓
               </a>
@@ -234,7 +234,7 @@ export default function AvailabilityCalendar({
                 href={`sms:${(phone || "").replace(/[^0-9+]/g, "")}?body=${encodeURIComponent(
                   `Hi! I would like to book The HauS 26 for check-in on ${activeSelectedDate} (22-hour stay). Is this date still open?`
                 )}`}
-                className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-paper"
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-elevated px-4 text-xs font-medium text-ink transition-colors hover:border-white/20 hover:bg-surface-hover"
               >
                 Inquire via SMS
               </a>
@@ -243,7 +243,7 @@ export default function AvailabilityCalendar({
                   href={messengerUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-paper"
+                  className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-elevated px-4 text-xs font-medium text-ink transition-colors hover:border-white/20 hover:bg-surface-hover"
                 >
                   Facebook Messenger
                 </a>

@@ -87,7 +87,7 @@ export default function PhotoGallery({ photos }) {
       {/* Gallery Section Header */}
       <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
         <div>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
             The Property
           </span>
           <h2 className="mt-1 font-display text-2xl font-normal tracking-tight text-ink sm:text-3xl">
@@ -100,13 +100,13 @@ export default function PhotoGallery({ photos }) {
       </div>
 
       {/* LUXE BENTO GRID CONTAINER */}
-      <div className="relative overflow-hidden rounded-2xl border border-line bg-stone-100 shadow-xs sm:rounded-3xl">
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-surface/60 shadow-xs sm:rounded-3xl">
         {/* DESKTOP BENTO GRID (md and above): 4 cols x 2 rows */}
         <div className="hidden h-[480px] w-full grid-cols-4 grid-rows-2 gap-2 p-2 md:grid lg:h-[560px] lg:gap-2.5 lg:p-2.5">
           {/* Hero Tile (Left 50% - spans 2 columns & 2 rows) */}
           <button
             type="button"
-            className="gallery-bento-item group relative col-span-2 row-span-2 h-full w-full overflow-hidden rounded-xl bg-stone-200 text-left focus-visible:outline-2 focus-visible:outline-accent"
+            className="gallery-bento-item group relative col-span-2 row-span-2 h-full w-full overflow-hidden rounded-xl bg-surface text-left focus-visible:outline-2 focus-visible:outline-accent"
             onClick={(e) => openPhoto(0, e)}
             aria-label={`View full photo: ${heroPhoto.title || heroPhoto.alt}`}
             aria-haspopup="dialog"
@@ -121,19 +121,19 @@ export default function PhotoGallery({ photos }) {
               style={{ objectPosition: heroPhoto.position || "center" }}
             />
             {/* Subtle Gradient & Hover Vignette */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-90" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-85 transition-opacity duration-300 group-hover:opacity-95" />
 
             {/* Hero Caption Chip */}
             <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
               <div>
-                <span className="inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-white backdrop-blur-md">
+                <span className="inline-block rounded-full bg-accent/30 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-accent-glow backdrop-blur-md border border-accent/30">
                   FEATURED VIEW
                 </span>
                 <p className="mt-1 text-sm font-semibold text-white drop-shadow-xs sm:text-base">
                   {heroPhoto.title}
                 </p>
               </div>
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-transform duration-300 group-hover:scale-110">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition-transform duration-300 group-hover:scale-110">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                 </svg>
@@ -148,7 +148,7 @@ export default function PhotoGallery({ photos }) {
               <button
                 key={photo.src}
                 type="button"
-                className="gallery-bento-item group relative col-span-1 row-span-1 h-full w-full overflow-hidden rounded-xl bg-stone-200 text-left focus-visible:outline-2 focus-visible:outline-accent"
+                className="gallery-bento-item group relative col-span-1 row-span-1 h-full w-full overflow-hidden rounded-xl bg-surface text-left focus-visible:outline-2 focus-visible:outline-accent"
                 onClick={(e) => openPhoto(photoIndex, e)}
                 aria-label={`View full photo: ${photo.title || photo.alt}`}
                 aria-haspopup="dialog"
@@ -161,8 +161,8 @@ export default function PhotoGallery({ photos }) {
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   style={{ objectPosition: photo.position || "center" }}
                 />
-                <div className="absolute inset-0 bg-black/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <div className="absolute bottom-2 left-2 right-2 rounded-md bg-black/50 px-2 py-1 backdrop-blur-xs opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                <div className="absolute inset-0 bg-black/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="absolute bottom-2 left-2 right-2 rounded-md bg-black/60 px-2 py-1 backdrop-blur-xs opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                   <p className="truncate text-[11px] font-medium text-white">{photo.title}</p>
                 </div>
               </button>
@@ -175,7 +175,7 @@ export default function PhotoGallery({ photos }) {
           {/* Main Hero Card */}
           <button
             type="button"
-            className="gallery-bento-item group relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-stone-200 text-left focus-visible:outline-2 focus-visible:outline-accent"
+            className="gallery-bento-item group relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-surface text-left focus-visible:outline-2 focus-visible:outline-accent"
             onClick={(e) => openPhoto(0, e)}
             aria-label={`View full photo: ${heroPhoto.title || heroPhoto.alt}`}
             aria-haspopup="dialog"
@@ -189,10 +189,10 @@ export default function PhotoGallery({ photos }) {
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               style={{ objectPosition: heroPhoto.position || "center" }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-85" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-90" />
             <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
               <div>
-                <span className="inline-block rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-semibold tracking-wider text-white backdrop-blur-md">
+                <span className="inline-block rounded-full bg-accent/30 px-2 py-0.5 text-[9px] font-semibold tracking-wider text-accent-glow backdrop-blur-md border border-accent/30">
                   FEATURED
                 </span>
                 <p className="mt-0.5 text-xs font-semibold text-white">{heroPhoto.title}</p>
@@ -208,7 +208,7 @@ export default function PhotoGallery({ photos }) {
                 <button
                   key={photo.src}
                   type="button"
-                  className="gallery-bento-item group relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-stone-200 text-left focus-visible:outline-2 focus-visible:outline-accent"
+                  className="gallery-bento-item group relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-surface text-left focus-visible:outline-2 focus-visible:outline-accent"
                   onClick={(e) => openPhoto(photoIndex, e)}
                   aria-label={`View full photo: ${photo.title || photo.alt}`}
                   aria-haspopup="dialog"
@@ -221,7 +221,7 @@ export default function PhotoGallery({ photos }) {
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     style={{ objectPosition: photo.position || "center" }}
                   />
-                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute inset-0 bg-black/25" />
                   <div className="absolute bottom-1.5 left-1.5 right-1.5">
                     <p className="truncate text-[10px] font-medium text-white drop-shadow-xs">{photo.title}</p>
                   </div>
@@ -235,12 +235,12 @@ export default function PhotoGallery({ photos }) {
         <button
           type="button"
           onClick={(e) => openPhoto(0, e)}
-          className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-2 rounded-full border border-black/15 bg-white/95 px-3.5 py-2 text-xs font-semibold text-ink shadow-lg backdrop-blur-md transition-all hover:bg-white hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-accent sm:bottom-4 sm:right-4 sm:px-4 sm:py-2.5"
+          className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-2 rounded-full border border-line bg-surface-elevated/90 px-3.5 py-2 text-xs font-semibold text-ink shadow-lg backdrop-blur-md transition-all hover:bg-surface-elevated hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-accent sm:bottom-4 sm:right-4 sm:px-4 sm:py-2.5"
           aria-label={`Open photo viewer with all ${photos.length} photos`}
           aria-haspopup="dialog"
         >
           {/* 4-Square Bento Icon */}
-          <svg className="h-3.5 w-3.5 text-ink" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <svg className="h-3.5 w-3.5 text-accent-glow" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
             <rect x="1" y="1" width="6" height="6" rx="1.5" />
             <rect x="9" y="1" width="6" height="6" rx="1.5" />
             <rect x="1" y="9" width="6" height="6" rx="1.5" />
@@ -253,7 +253,7 @@ export default function PhotoGallery({ photos }) {
       {/* FULLSCREEN LIGHTBOX DIALOG */}
       <dialog
         ref={dialogRef}
-        className="fixed inset-0 m-auto h-[92vh] max-h-[820px] w-[95vw] max-w-5xl rounded-2xl border border-line bg-paper p-0 text-ink shadow-2xl backdrop:bg-stone-950/80 backdrop:backdrop-blur-sm"
+        className="fixed inset-0 m-auto h-[92vh] max-h-[820px] w-[95vw] max-w-5xl rounded-2xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-stone-950/85 backdrop:backdrop-blur-md"
         aria-labelledby="photo-dialog-title"
         onClose={closeDialog}
         onClick={(event) => {
@@ -296,7 +296,7 @@ export default function PhotoGallery({ photos }) {
             </div>
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-ink transition-colors hover:bg-stone-200 active:scale-95"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface-elevated text-ink transition-colors hover:bg-surface-hover active:scale-95"
               onClick={closeDialog}
               aria-label="Close photo viewer"
             >
@@ -330,7 +330,7 @@ export default function PhotoGallery({ photos }) {
               <>
                 <button
                   type="button"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white/90 p-2.5 text-ink shadow-md backdrop-blur-xs transition-transform hover:scale-110 hover:bg-white active:scale-95 sm:left-4"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full border border-line bg-surface-elevated/90 p-2.5 text-ink shadow-md backdrop-blur-xs transition-transform hover:scale-110 hover:bg-surface-elevated active:scale-95 sm:left-4"
                   onClick={() => stepPhoto(-1)}
                   aria-label="Previous photo"
                 >
@@ -340,7 +340,7 @@ export default function PhotoGallery({ photos }) {
                 </button>
                 <button
                   type="button"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white/90 p-2.5 text-ink shadow-md backdrop-blur-xs transition-transform hover:scale-110 hover:bg-white active:scale-95 sm:right-4"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-line bg-surface-elevated/90 p-2.5 text-ink shadow-md backdrop-blur-xs transition-transform hover:scale-110 hover:bg-surface-elevated active:scale-95 sm:right-4"
                   onClick={() => stepPhoto(1)}
                   aria-label="Next photo"
                 >
@@ -369,8 +369,8 @@ export default function PhotoGallery({ photos }) {
                   onClick={() => setSelected(idx)}
                   className={`relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                     selected === idx
-                      ? "border-accent ring-2 ring-accent/30 scale-105"
-                      : "border-transparent opacity-60 hover:opacity-100"
+                      ? "border-accent-glow ring-2 ring-accent/30 scale-105"
+                      : "border-transparent opacity-50 hover:opacity-100"
                   }`}
                   aria-label={`Jump to photo ${idx + 1}: ${photo.title || photo.alt}`}
                 >

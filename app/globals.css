@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #faf7f2;
-  --color-ink: #1c1917;
-  --color-muted: #57534e;
-  --color-line: #e7e0d5;
-  --color-accent: #0f5c5a;
-  --font-display: var(--font-fraunces), Georgia, serif;
+  --color-paper: #0b0e14;
+  --color-surface: #121824;
+  --color-surface-elevated: #182030;
+  --color-surface-hover: #1e293b;
+  --color-ink: #f8fafc;
+  --color-muted: #94a3b8;
+  --color-line: #1e293b;
+  --color-line-focus: #38bdf8;
+  --color-accent: #0284c7;
+  --color-accent-hover: #0369a1;
+  --color-accent-glow: #38bdf8;
+  --font-display: var(--font-outfit), var(--font-sans), sans-serif;
   --font-sans: var(--font-figtree), system-ui, sans-serif;
 }
 
@@ -14,12 +20,14 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  color-scheme: dark;
 }
 
 html {
   scroll-behavior: smooth;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  background: #0b0e14;
 }
 
 body {
@@ -30,7 +38,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-accent-glow);
   outline-offset: 2px;
 }
 
@@ -54,7 +62,7 @@ body {
   }
 }
 
-/* Tactile micro-interactions (Emil Kowalski design philosophy) */
+/* Tactile micro-interactions */
 button:not(:disabled),
 a[role="button"] {
   transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
@@ -71,9 +79,9 @@ dialog[open] {
 }
 
 dialog::backdrop {
-  background: rgba(18, 16, 15, 0.78);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(5, 7, 10, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   animation: backdropFadeIn 180ms var(--ease-out) forwards;
 }
 
@@ -97,7 +105,7 @@ dialog::backdrop {
   }
 }
 
-/* Clean, unobtrusive scrollbars for horizontal lists */
+/* Clean, unobtrusive scrollbars */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
