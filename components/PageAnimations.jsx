@@ -129,7 +129,7 @@ export default function PageAnimations() {
         );
 
         const targets = document.querySelectorAll(
-          ".photo-more, #specs, #amenities, #rates, #location, #inquire"
+          ".photo-more, #calendar, #specs, #amenities, #rates, #location, #inquire"
         );
 
         targets.forEach((el) => {

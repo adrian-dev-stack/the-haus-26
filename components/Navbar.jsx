@@ -37,12 +37,12 @@ export default function Navbar({ name, rate }) {
         </a>
 
         {/* Desktop Quick Nav Links */}
-        <div className="hidden items-center gap-7 text-xs font-medium tracking-wide text-muted sm:flex">
+        <div className="hidden items-center gap-6 text-xs font-medium tracking-wide text-muted sm:flex">
           <a href="#gallery" className="transition-colors hover:text-ink">
             Gallery
           </a>
-          <a href="#specs" className="transition-colors hover:text-ink">
-            Specifications
+          <a href="#calendar" className="transition-colors hover:text-ink">
+            Availability
           </a>
           <a href="#amenities" className="transition-colors hover:text-ink">
             Amenities

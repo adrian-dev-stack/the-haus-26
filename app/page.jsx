@@ -3,6 +3,17 @@ import Navbar from "@/components/Navbar";
 import InquiryForm from "@/components/InquiryForm";
 import PhotoGallery from "@/components/PhotoGallery";
 import PageAnimations from "@/components/PageAnimations";
+import AvailabilityCalendar from "@/components/AvailabilityCalendar";
+import {
+  PoolIcon,
+  BilliardsIcon,
+  GrillIcon,
+  BedIcon,
+  KitchenIcon,
+  WifiIcon,
+  CarIcon,
+  PawIcon,
+} from "@/components/AmenityIcons";
 
 const specs = [
   {
@@ -32,27 +43,63 @@ const amenityCategories = [
     title: "Water & Outdoor Leisure",
     description: "Designed for day-long outdoor living and evening relaxation.",
     items: [
-      { name: "Private Swimming Pool", detail: "Deep blue-tiled pool with inflatable lounger and evening perimeter illumination" },
-      { name: "Billiards Lounge", detail: "Indoor billiard table with curved warm overhead lighting and spectator seating" },
-      { name: "Outdoor BBQ Grill", detail: "Dedicated patio grill station under shade umbrella beside the pool deck" },
+      {
+        name: "Private Swimming Pool",
+        detail: "Deep blue-tiled pool with inflatable lounger and evening perimeter illumination",
+        Icon: PoolIcon,
+      },
+      {
+        name: "Billiards Lounge",
+        detail: "Indoor billiard table with curved warm overhead lighting and spectator seating",
+        Icon: BilliardsIcon,
+      },
+      {
+        name: "Outdoor BBQ Grill",
+        detail: "Dedicated patio grill station under shade umbrella beside the pool deck",
+        Icon: GrillIcon,
+      },
     ],
   },
   {
     title: "Suites & Interior Living",
     description: "Air-conditioned interior spaces to rest and recharge.",
     items: [
-      { name: "2 Air-Conditioned Rooms", detail: "Equipped with cooling air conditioning for peaceful overnight sleep" },
-      { name: "Bunk Bed Suite", detail: "Sturdy black-framed multi-level bunk beds with customizable ambient mood lighting" },
-      { name: "Fully Equipped Kitchen", detail: "Kitchen space featuring a full refrigerator, cooking stove, and prep area" },
+      {
+        name: "2 Air-Conditioned Rooms",
+        detail: "Equipped with cooling air conditioning for peaceful overnight sleep",
+        Icon: BedIcon,
+      },
+      {
+        name: "Bunk Bed Suite",
+        detail: "Sturdy black-framed multi-level bunk beds with customizable ambient mood lighting",
+        Icon: BedIcon,
+      },
+      {
+        name: "Fully Equipped Kitchen",
+        detail: "Kitchen space featuring a full refrigerator, cooking stove, and prep area",
+        Icon: KitchenIcon,
+      },
     ],
   },
   {
     title: "Convenience & Sanctuary Rules",
     description: "Essential comforts and community guidelines for a pleasant stay.",
     items: [
-      { name: "High-Speed Wi-Fi", detail: "Wireless internet coverage for streaming music, work, and messaging" },
-      { name: "Free Gated Parking", detail: "Dedicated private parking space on property that comfortably fits two sedans" },
-      { name: "Pets Welcome", detail: "Pet-friendly property so you do not have to leave furry family members behind" },
+      {
+        name: "High-Speed Wi-Fi",
+        detail: "Wireless internet coverage for streaming music, work, and messaging",
+        Icon: WifiIcon,
+      },
+      {
+        name: "Free Gated Parking",
+        detail: "Dedicated private parking space on property that comfortably fits two sedans",
+        Icon: CarIcon,
+      },
+      {
+        name: "Pets Welcome",
+        detail: "Pet-friendly property so you do not have to leave furry family members behind",
+        Icon: PawIcon,
+      },
     ],
   },
 ];
@@ -97,7 +144,7 @@ export default function Page() {
       <PageAnimations />
 
       <main id="main" className="site-shell">
-        {/* Editorial Masthead */}
+        {/* Modern Editorial Masthead */}
         <section id="overview" className="stay-header pt-4 sm:pt-8" aria-labelledby="hero-title">
           <div className="max-w-3xl">
             <div className="flex items-center gap-2">
@@ -115,18 +162,34 @@ export default function Page() {
               {p.tagline || "Private staycation rental with pool in Limay, Bataan."}
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            {/* Quick Hero Feature Badges */}
+            <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-muted">
+              <span className="rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium">
+                22-Hour Exclusive Stay
+              </span>
+              <span className="rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium">
+                Starting from ₱5,000
+              </span>
+              <span className="rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium">
+                Private Pool & Billiards
+              </span>
+              <span className="rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium">
+                Gated 2-Car Parking
+              </span>
+            </div>
+
+            <div className="mt-7 flex flex-wrap items-center gap-3">
               <a
-                href="#inquire"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-accent px-6 py-2.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-95"
+                href="#calendar"
+                className="inline-flex min-h-[46px] items-center justify-center rounded-full bg-accent px-6 py-2.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-95"
               >
-                Check dates & availability
+                Check live availability calendar
               </a>
               <a
-                href="#location"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-line bg-paper px-5 py-2.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-white"
+                href="#gallery"
+                className="inline-flex min-h-[46px] items-center justify-center rounded-full border border-line bg-paper px-5 py-2.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-white"
               >
-                View map & directions
+                View photos of the house
               </a>
             </div>
           </div>
@@ -137,12 +200,47 @@ export default function Page() {
           <PhotoGallery photos={p.photos} />
         </div>
 
+        {/* Live Availability Calendar Section */}
+        <section id="calendar" className="mt-20 scroll-mt-24" aria-labelledby="cal-heading">
+          <div className="flex flex-col gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+              01 / Real-Time Availability
+            </span>
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <h2 id="cal-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
+                  Check available dates
+                </h2>
+                <p className="mt-1 max-w-xl text-xs text-muted">
+                  Browse open dates on the live calendar. Tap any available day to inspect stay hours and reserve directly with the host.
+                </p>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-muted">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span className="h-2 w-2 rounded-full bg-accent" /> Available
+                </span>
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span className="h-2 w-2 rounded-full bg-black/20" /> Reserved
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <AvailabilityCalendar
+              bookedDates={p.bookedDates || []}
+              phone={p.contact.phone}
+              messengerUrl={p.contact.messengerUrl}
+            />
+          </div>
+        </section>
+
         {/* Architectural Specifications Ribbon */}
-        <section id="specs" className="mt-16 scroll-mt-24" aria-labelledby="specs-heading">
+        <section id="specs" className="mt-20 scroll-mt-24" aria-labelledby="specs-heading">
           <h2 id="specs-heading" className="sr-only">
             Property Specifications
           </h2>
-          <div className="rounded-2xl border border-line bg-white/70 p-6 shadow-xs backdrop-blur-xs sm:p-8">
+          <div className="rounded-3xl border border-line bg-white/70 p-6 shadow-xs backdrop-blur-xs sm:p-8">
             <dl className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
               {specs.map((item, idx) => (
                 <div key={item.label} className={idx > 0 ? "border-l-0 md:border-l md:border-line md:pl-6" : ""}>
@@ -161,11 +259,11 @@ export default function Page() {
           </div>
         </section>
 
-        {/* Curated Amenities Grid */}
+        {/* Curated Amenities Grid with Modern Icons */}
         <section id="amenities" className="mt-20 scroll-mt-24" aria-labelledby="amenities-heading">
           <div className="flex flex-col gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
-              01 / Architecture & Comfort
+              02 / Architecture & Comfort
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <h2 id="amenities-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
@@ -181,7 +279,7 @@ export default function Page() {
             {amenityCategories.map((cat) => (
               <div
                 key={cat.title}
-                className="flex flex-col justify-between rounded-2xl border border-line bg-white/70 p-6 shadow-xs backdrop-blur-xs transition-shadow hover:shadow-sm"
+                className="flex flex-col justify-between rounded-3xl border border-line bg-white/70 p-6 shadow-xs backdrop-blur-xs transition-shadow hover:shadow-sm"
               >
                 <div>
                   <h3 className="font-display text-xl font-medium tracking-tight text-ink">
@@ -190,25 +288,33 @@ export default function Page() {
                   <p className="mt-1 text-xs text-muted">
                     {cat.description}
                   </p>
-                  <ul className="mt-5 space-y-3.5">
-                    {cat.items.map((it) => (
-                      <li key={it.name} className="border-t border-line/60 pt-3">
-                        <span className="block text-sm font-medium text-ink">
-                          {it.name}
-                        </span>
-                        <span className="mt-0.5 block text-xs leading-relaxed text-muted">
-                          {it.detail}
-                        </span>
-                      </li>
-                    ))}
+                  <ul className="mt-5 space-y-4">
+                    {cat.items.map((it) => {
+                      const IconComponent = it.Icon;
+                      return (
+                        <li key={it.name} className="flex items-start gap-3 border-t border-line/60 pt-3.5">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent">
+                            <IconComponent className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <span className="block text-sm font-medium text-ink">
+                              {it.name}
+                            </span>
+                            <span className="mt-0.5 block text-xs leading-relaxed text-muted">
+                              {it.detail}
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* House Rules Capsule */}
-          <div className="mt-8 rounded-2xl border border-line bg-paper/80 p-6 sm:p-7">
+          {/* House Guidelines Capsule */}
+          <div className="mt-8 rounded-3xl border border-line bg-paper/80 p-6 sm:p-7">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
@@ -237,7 +343,7 @@ export default function Page() {
         <section id="rates" className="mt-20 scroll-mt-24" aria-labelledby="rates-heading">
           <div className="flex flex-col gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
-              02 / Transparent Pricing
+              03 / Transparent Pricing
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <h2 id="rates-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
@@ -253,7 +359,7 @@ export default function Page() {
             {rateTiers.map((tier) => (
               <div
                 key={tier.tier}
-                className={`relative flex flex-col justify-between rounded-2xl border p-6 transition-all ${
+                className={`relative flex flex-col justify-between rounded-3xl border p-6 transition-all ${
                   tier.popular
                     ? "border-accent bg-white shadow-sm ring-1 ring-accent/30"
                     : "border-line bg-white/70 shadow-xs backdrop-blur-xs"
@@ -298,7 +404,7 @@ export default function Page() {
             ))}
           </div>
 
-          <div className="mt-4 rounded-xl border border-line bg-paper/50 px-4 py-3 text-center text-xs text-muted">
+          <div className="mt-4 rounded-2xl border border-line bg-paper/50 px-4 py-3 text-center text-xs text-muted">
             Rates are subject to seasonal schedule and host confirmation. Prices may adjust without prior notice.
           </div>
         </section>
@@ -307,7 +413,7 @@ export default function Page() {
         <section id="location" className="mt-20 scroll-mt-24" aria-labelledby="loc-heading">
           <div className="flex flex-col gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
-              03 / The Destination
+              04 / The Destination
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <h2 id="loc-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
@@ -321,7 +427,7 @@ export default function Page() {
 
           <div className="mt-8 grid gap-6 lg:grid-cols-3">
             {/* Arrival Information Card */}
-            <div className="flex flex-col justify-between rounded-2xl border border-line bg-white/80 p-6 shadow-xs backdrop-blur-xs sm:p-8">
+            <div className="flex flex-col justify-between rounded-3xl border border-line bg-white/80 p-6 shadow-xs backdrop-blur-xs sm:p-8">
               <div>
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                   Exact Address
@@ -355,11 +461,11 @@ export default function Page() {
             </div>
 
             {/* Embedded Google Maps Plate */}
-            <div className="overflow-hidden rounded-2xl border border-line bg-white/70 p-2 shadow-xs lg:col-span-2">
+            <div className="overflow-hidden rounded-3xl border border-line bg-white/70 p-2 shadow-xs lg:col-span-2">
               <iframe
                 title={`Map showing ${p.name}`}
                 loading="lazy"
-                className="h-80 w-full rounded-xl border-0 sm:h-96"
+                className="h-80 w-full rounded-2xl border-0 sm:h-96"
                 src={`https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`}
               />
             </div>
@@ -373,7 +479,7 @@ export default function Page() {
             <div className="flex flex-col justify-between lg:col-span-5">
               <div>
                 <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
-                  04 / Direct Reservation
+                  05 / Direct Reservation
                 </span>
                 <h2 id="inq-heading" className="mt-2 font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
                   Reserve directly with the host
@@ -382,7 +488,7 @@ export default function Page() {
                   Book directly with zero third-party platform markups. Select your preferred dates and guest count to create a prefilled text inquiry or start a conversation on Facebook Messenger.
                 </p>
 
-                <div className="mt-8 space-y-4 rounded-2xl border border-line bg-white/70 p-6 backdrop-blur-xs">
+                <div className="mt-8 space-y-4 rounded-3xl border border-line bg-white/70 p-6 backdrop-blur-xs">
                   <div className="flex items-start gap-3">
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
                       ✓
@@ -432,7 +538,7 @@ export default function Page() {
           </div>
         </section>
 
-        {/* Architectural Footer */}
+        {/* Modern Minimalist Footer */}
         <footer className="mt-24 border-t border-line pt-10 pb-8 text-xs text-muted">
           <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div>
