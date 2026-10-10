@@ -199,7 +199,7 @@ export default function AvailabilityCalendar({
             </div>
             <div className="flex flex-wrap gap-2">
               <a
-                href={`sms:${phone}?&body=${encodeURIComponent(
+                href={`sms:${(phone || "").replace(/[^0-9+]/g, "")}?body=${encodeURIComponent(
                   `Hi! I would like to book The HauS 26 for check-in on ${selectedDate} (22-hour stay). Is this date still open?`
                 )}`}
                 className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#104846]"

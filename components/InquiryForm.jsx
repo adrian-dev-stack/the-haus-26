@@ -52,19 +52,23 @@ export default function InquiryForm({ name, phone, messengerUrl }) {
     }
   }
 
+  // Sanitized values for message generation
+  const cleanName = fullName.trim();
+  const cleanNote = note.trim();
+
   // Live generated message
   const generatedMessage = `Hi! I would like to inquire about booking ${name}.
-Guest name: ${fullName || "[Your Name]"}
+Guest name: ${cleanName || "[Your Name]"}
 Purpose: ${occasion}
 Check-in: ${checkin || "[Select Date]"} (11:00 AM)
 Check-out: ${checkout || "[Select Date]"} (Next day 1:00 PM)
 Duration: 22-hour exclusive stay
 Guests: ${guests} (Estimated rate: ${estimatedRate})
-${note ? `Notes: ${note}\n` : ""}Is this date open for booking? Thank you!`;
+${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank you!`;
 
   function copyMessageToClipboard() {
-    if (navigator?.clipboard) {
-      navigator.clipboard.writeText(generatedMessage);
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(generatedMessage).catch(() => {});
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
     }
@@ -72,7 +76,12 @@ ${note ? `Notes: ${note}\n` : ""}Is this date open for booking? Thank you!`;
 
   function onSubmit(e) {
     e.preventDefault();
-    window.location.href = `sms:${phone}?&body=${encodeURIComponent(generatedMessage)}`;
+    const cleanPhone = (phone || "").replace(/[^0-9+]/g, "");
+    const isIOS =
+      typeof navigator !== "undefined" &&
+      /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const separator = isIOS ? "&" : "?";
+    window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(generatedMessage)}`;
     setSent(true);
   }
 
