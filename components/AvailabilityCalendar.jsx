@@ -12,13 +12,16 @@ const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export default function AvailabilityCalendar({
   bookedDates = [],
   onSelectDate,
-  selectedDate,
+  selectedDate: controlledSelectedDate,
   phone = "+639524566669",
   messengerUrl,
 }) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [internalSelectedDate, setInternalSelectedDate] = useState("");
+
+  const activeSelectedDate = controlledSelectedDate !== undefined ? controlledSelectedDate : internalSelectedDate;
 
   // Navigation
   function nextMonth() {
@@ -70,16 +73,29 @@ export default function AvailabilityCalendar({
     return bookedDates.includes(dateStr);
   }
 
+  function handleSelectDate(dateStr) {
+    setInternalSelectedDate(dateStr);
+    if (onSelectDate) {
+      onSelectDate(dateStr);
+    }
+    // Dispatch event so InquiryForm can synchronize date instantly
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("haus26:select-date", { detail: { date: dateStr } })
+      );
+    }
+  }
+
   const isPrevDisabled =
     currentYear === today.getFullYear() && currentMonth <= today.getMonth();
 
   return (
-    <div className="rounded-3xl border border-line bg-white p-6 shadow-sm sm:p-8">
+    <div className="rounded-3xl border border-line bg-white p-6 shadow-xs sm:p-8">
       {/* Month Header */}
       <div className="flex items-center justify-between border-b border-line pb-5">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-            Live Schedule
+            Live Calendar
           </span>
           <h3 className="font-display text-2xl font-medium text-ink">
             {MONTH_NAMES[currentMonth]} {currentYear}
@@ -91,7 +107,7 @@ export default function AvailabilityCalendar({
             type="button"
             onClick={prevMonth}
             disabled={isPrevDisabled}
-            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink hover:bg-white disabled:cursor-not-allowed disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Previous month"
           >
             <span aria-hidden="true">←</span>
@@ -99,7 +115,7 @@ export default function AvailabilityCalendar({
           <button
             type="button"
             onClick={nextMonth}
-            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-paper text-ink transition-colors hover:border-ink hover:bg-white focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Next month"
           >
             <span aria-hidden="true">→</span>
@@ -126,7 +142,7 @@ export default function AvailabilityCalendar({
           const dateStr = formatDateString(currentYear, currentMonth, day);
           const isPast = isDatePast(currentYear, currentMonth, day);
           const isBooked = isDateBooked(dateStr);
-          const isSelected = selectedDate === dateStr;
+          const isSelected = activeSelectedDate === dateStr;
 
           let btnClass =
             "relative flex h-11 sm:h-12 flex-col items-center justify-center rounded-xl text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-accent ";
@@ -158,7 +174,7 @@ export default function AvailabilityCalendar({
               disabled={isPast || isBooked}
               aria-pressed={isSelected}
               aria-label={`${MONTH_NAMES[currentMonth]} ${day}, ${currentYear}, ${statusText}`}
-              onClick={() => onSelectDate && onSelectDate(dateStr)}
+              onClick={() => handleSelectDate(dateStr)}
               className={btnClass}
               title={
                 isBooked
@@ -177,7 +193,7 @@ export default function AvailabilityCalendar({
         })}
       </div>
 
-      {/* Legend & Selected Date Summary */}
+      {/* Legend & Summary */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-5 text-xs text-muted">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
@@ -186,14 +202,14 @@ export default function AvailabilityCalendar({
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-black/20" />
-            <span>Reserved / Booked</span>
+            <span>Reserved</span>
           </div>
         </div>
-        <span className="text-[11px]">All stays are 22 hours exclusive</span>
+        <span className="text-[11px]">All bookings are 22-hour exclusive stays</span>
       </div>
 
       {/* Interactive Selection Action Bar */}
-      {selectedDate && (
+      {activeSelectedDate && (
         <div className="mt-5 rounded-2xl border border-accent/30 bg-accent/5 p-4 sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -201,7 +217,7 @@ export default function AvailabilityCalendar({
                 Selected Check-in Date
               </span>
               <p className="font-display text-lg font-semibold text-ink">
-                {selectedDate} (11:00 AM check-in)
+                {activeSelectedDate} (11:00 AM check-in)
               </p>
               <p className="text-xs text-muted">
                 Check-out: Next day at 1:00 PM · 22-hour exclusive access
@@ -209,21 +225,27 @@ export default function AvailabilityCalendar({
             </div>
             <div className="flex flex-wrap gap-2">
               <a
-                href={`sms:${(phone || "").replace(/[^0-9+]/g, "")}?body=${encodeURIComponent(
-                  `Hi! I would like to book The HauS 26 for check-in on ${selectedDate} (22-hour stay). Is this date still open?`
-                )}`}
-                className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#104846]"
+                href="#inquire"
+                className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#104846] active:scale-95"
               >
-                Book via SMS
+                Use date in inquiry form ↓
+              </a>
+              <a
+                href={`sms:${(phone || "").replace(/[^0-9+]/g, "")}?body=${encodeURIComponent(
+                  `Hi! I would like to book The HauS 26 for check-in on ${activeSelectedDate} (22-hour stay). Is this date still open?`
+                )}`}
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-paper"
+              >
+                Inquire via SMS
               </a>
               {messengerUrl && (
                 <a
                   href={messengerUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-xs font-medium text-ink transition-colors hover:border-ink"
+                  className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-white px-4 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-paper"
                 >
-                  Message on Facebook
+                  Facebook Messenger
                 </a>
               )}
             </div>

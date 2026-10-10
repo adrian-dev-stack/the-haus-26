@@ -4,6 +4,7 @@ import InquiryForm from "@/components/InquiryForm";
 import PhotoGallery from "@/components/PhotoGallery";
 import PageAnimations from "@/components/PageAnimations";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
+import TierSelectButton from "@/components/TierSelectButton";
 import {
   PoolIcon,
   BilliardsIcon,
@@ -108,6 +109,7 @@ const rateTiers = [
   {
     tier: "Intimate Stay",
     guests: "Up to 4 Guests",
+    guestCount: 4,
     price: "₱5,000",
     note: "Minimum stay rate. 2 to 4 guests welcome at the same base price.",
     popular: false,
@@ -115,6 +117,7 @@ const rateTiers = [
   {
     tier: "Barkada / Group",
     guests: "6 Guests",
+    guestCount: 6,
     price: "₱7,000",
     note: "Ideal tier for close friends, colleagues, or small family getaways.",
     popular: true,
@@ -122,6 +125,7 @@ const rateTiers = [
   {
     tier: "Full Family Gathering",
     guests: "8 to 10 Guests",
+    guestCount: 8,
     price: "₱8,000",
     note: "Perfect for family reunions, celebrations, and larger gatherings.",
     popular: false,
@@ -129,6 +133,7 @@ const rateTiers = [
   {
     tier: "Extended Group",
     guests: "11+ Guests",
+    guestCount: 11,
     price: "Inquire for quote",
     note: "For groups of 11 or more, an additional fee per guest applies.",
     popular: false,
@@ -148,7 +153,7 @@ export default function Page() {
         <section id="overview" className="stay-header pt-4 sm:pt-8" aria-labelledby="hero-title">
           <div className="max-w-3xl">
             <div className="flex items-center gap-2">
-              <span className="inline-block h-2 w-2 rounded-full bg-accent animate-pulse" />
+              <span className="inline-block h-2 w-2 rounded-full bg-accent" />
               <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">
                 Private Pool Villa · Limay, Bataan
               </span>
@@ -164,16 +169,16 @@ export default function Page() {
 
             {/* Quick Hero Feature Badges */}
             <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-muted">
-              <span className="rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium">
+              <span className="hero-badge rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium shadow-xs">
                 22-Hour Exclusive Stay
               </span>
-              <span className="rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium">
+              <span className="hero-badge rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium shadow-xs">
                 Starting from ₱5,000
               </span>
-              <span className="rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium">
+              <span className="hero-badge rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium shadow-xs">
                 Private Pool & Billiards
               </span>
-              <span className="rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium">
+              <span className="hero-badge rounded-full border border-line bg-white/80 px-3.5 py-1 font-medium shadow-xs">
                 Gated 2-Car Parking
               </span>
             </div>
@@ -181,13 +186,13 @@ export default function Page() {
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <a
                 href="#calendar"
-                className="inline-flex min-h-[46px] items-center justify-center rounded-full bg-accent px-6 py-2.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-95"
+                className="hero-cta-btn inline-flex min-h-[46px] items-center justify-center rounded-full bg-accent px-6 py-2.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-95"
               >
                 Check live availability calendar
               </a>
               <a
                 href="#gallery"
-                className="inline-flex min-h-[46px] items-center justify-center rounded-full border border-line bg-paper px-5 py-2.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-white"
+                className="hero-cta-btn inline-flex min-h-[46px] items-center justify-center rounded-full border border-line bg-paper px-5 py-2.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-white active:scale-95"
               >
                 View photos of the house
               </a>
@@ -204,7 +209,7 @@ export default function Page() {
         <section id="calendar" className="mt-20 scroll-mt-24" aria-labelledby="cal-heading">
           <div className="flex flex-col gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
-              01 / Real-Time Availability
+              Calendar & Schedule
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
@@ -263,7 +268,7 @@ export default function Page() {
         <section id="amenities" className="mt-20 scroll-mt-24" aria-labelledby="amenities-heading">
           <div className="flex flex-col gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
-              02 / Architecture & Comfort
+              Included Amenities
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <h2 id="amenities-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
@@ -343,7 +348,7 @@ export default function Page() {
         <section id="rates" className="mt-20 scroll-mt-24" aria-labelledby="rates-heading">
           <div className="flex flex-col gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
-              03 / Transparent Pricing
+              Pricing & Packages
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <h2 id="rates-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
@@ -389,16 +394,7 @@ export default function Page() {
                 </div>
 
                 <div className="mt-6 pt-2">
-                  <a
-                    href="#inquire"
-                    className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-semibold transition-colors ${
-                      tier.popular
-                        ? "bg-accent text-white hover:bg-[#104846]"
-                        : "border border-line bg-paper text-ink hover:border-ink hover:bg-white"
-                    }`}
-                  >
-                    Select this tier
-                  </a>
+                  <TierSelectButton guests={tier.guestCount} popular={tier.popular} />
                 </div>
               </div>
             ))}
@@ -413,7 +409,7 @@ export default function Page() {
         <section id="location" className="mt-20 scroll-mt-24" aria-labelledby="loc-heading">
           <div className="flex flex-col gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
-              04 / The Destination
+              The Destination
             </span>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <h2 id="loc-heading" className="font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
@@ -453,7 +449,7 @@ export default function Page() {
                   href={p.mapsLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-11 w-full items-center justify-center rounded-xl bg-accent px-5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#104846]"
+                  className="flex h-11 w-full items-center justify-center rounded-xl bg-accent px-5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#104846] active:scale-95"
                 >
                   Open in Google Maps for directions
                 </a>
@@ -479,7 +475,7 @@ export default function Page() {
             <div className="flex flex-col justify-between lg:col-span-5">
               <div>
                 <span className="text-[11px] font-semibold uppercase tracking-widest text-accent">
-                  05 / Direct Reservation
+                  Direct Reservation
                 </span>
                 <h2 id="inq-heading" className="mt-2 font-display text-3xl font-normal tracking-tight text-ink sm:text-4xl">
                   Reserve directly with the host

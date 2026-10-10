@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 function getRateEstimate(guestCount) {
   const count = Number(guestCount) || 4;
@@ -35,10 +35,10 @@ export default function InquiryForm({ name, phone, messengerUrl }) {
 
   const estimatedRate = getRateEstimate(guests);
 
-  // Auto-set checkout to next day when checkin changes if not set
+  // Auto-set checkout to next day when checkin changes
   function handleCheckinChange(val) {
     setCheckin(val);
-    if (val && !checkout) {
+    if (val) {
       try {
         const nextDay = new Date(val);
         nextDay.setDate(nextDay.getDate() + 1);
@@ -51,6 +51,30 @@ export default function InquiryForm({ name, phone, messengerUrl }) {
       }
     }
   }
+
+  // Listen for date & guest selections from other components
+  useEffect(() => {
+    function handleSelectDateEvent(event) {
+      if (event.detail && event.detail.date) {
+        handleCheckinChange(event.detail.date);
+      }
+    }
+
+    function handleSelectGuestsEvent(event) {
+      if (event.detail && event.detail.guests) {
+        setGuests(String(event.detail.guests));
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("haus26:select-date", handleSelectDateEvent);
+      window.addEventListener("haus26:select-guests", handleSelectGuestsEvent);
+      return () => {
+        window.removeEventListener("haus26:select-date", handleSelectDateEvent);
+        window.removeEventListener("haus26:select-guests", handleSelectGuestsEvent);
+      };
+    }
+  }, []);
 
   // Sanitized values for message generation
   const cleanName = fullName.trim();
@@ -261,7 +285,7 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
         <div className="sm:col-span-2 rounded-2xl border border-accent/20 bg-paper/80 p-4 sm:p-5">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-accent" />
               <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
                 Live Generated Message Preview
               </span>
@@ -269,7 +293,7 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
             <button
               type="button"
               onClick={copyMessageToClipboard}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:border-ink"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-paper active:scale-95"
             >
               {copied ? "✓ Copied!" : "Copy text"}
             </button>
@@ -291,7 +315,7 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
           <button
             type="submit"
             disabled={!phone}
-            className="flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-sm font-semibold text-white shadow-xs transition-all hover:bg-[#104846] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span>Send prefilled inquiry by SMS</span>
             <span aria-hidden="true">→</span>
@@ -303,7 +327,7 @@ ${cleanNote ? `Notes: ${cleanNote}\n` : ""}Is this date open for booking? Thank 
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleMessengerClick}
-              className="mt-3 flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl border border-line bg-paper px-6 py-3 text-sm font-medium text-ink transition-colors hover:border-ink hover:bg-white"
+              className="mt-3 flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl border border-line bg-paper px-6 py-3 text-sm font-medium text-ink transition-colors hover:border-ink hover:bg-white active:scale-[0.98]"
             >
               <span>Copy message & chat on Facebook / Messenger</span>
               <span aria-hidden="true">↗</span>

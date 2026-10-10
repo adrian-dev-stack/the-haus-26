@@ -7,6 +7,9 @@ export default function PhotoGallery({ photos }) {
   const [selected, setSelected] = useState(null);
   const dialogRef = useRef(null);
   const openerRef = useRef(null);
+  const thumbStripRef = useRef(null);
+  const touchStartRef = useRef(null);
+
   const isOpen = selected !== null;
   const activePhoto = isOpen ? photos[selected] : null;
 
@@ -18,6 +21,20 @@ export default function PhotoGallery({ photos }) {
       document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
+
+  // Keep thumbnail strip scrolled to selected photo
+  useEffect(() => {
+    if (selected !== null && thumbStripRef.current) {
+      const activeThumb = thumbStripRef.current.children[selected];
+      if (activeThumb) {
+        activeThumb.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  }, [selected]);
 
   function openPhoto(index, event) {
     if (event?.currentTarget) {
@@ -41,15 +58,27 @@ export default function PhotoGallery({ photos }) {
     setSelected((current) => (current + direction + photos.length) % photos.length);
   }
 
+  // Touch swipe support for mobile lightbox
+  function handleTouchStart(e) {
+    touchStartRef.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e) {
+    if (touchStartRef.current === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStartRef.current - touchEnd;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        stepPhoto(1); // Swiped left -> next
+      } else {
+        stepPhoto(-1); // Swiped right -> prev
+      }
+    }
+    touchStartRef.current = null;
+  }
+
   if (!photos || photos.length === 0) return null;
 
-  // We feature the first 5 photos in the primary Bento Grid:
-  // Photo 0: Hero (Pool at dusk)
-  // Photo 1: The patio
-  // Photo 2: Beside the pool
-  // Photo 3: Billiards
-  // Photo 4: The bunk room
-  // Remaining photo (Photo 5: Art console) accessible via modal and thumbnail strip
   const heroPhoto = photos[0];
   const sidePhotos = photos.slice(1, 5);
 
@@ -66,13 +95,13 @@ export default function PhotoGallery({ photos }) {
           </h2>
         </div>
         <p className="text-xs text-muted sm:text-sm">
-          Click any photo to explore all {photos.length} views in high resolution
+          Select any view to explore all {photos.length} photos in full detail
         </p>
       </div>
 
       {/* LUXE BENTO GRID CONTAINER */}
       <div className="relative overflow-hidden rounded-2xl border border-line bg-stone-100 shadow-xs sm:rounded-3xl">
-        {/* DESKTOP BENTO GRID (md and above): 4 cols x 2 rows, perfectly balanced */}
+        {/* DESKTOP BENTO GRID (md and above): 4 cols x 2 rows */}
         <div className="hidden h-[480px] w-full grid-cols-4 grid-rows-2 gap-2 p-2 md:grid lg:h-[560px] lg:gap-2.5 lg:p-2.5">
           {/* Hero Tile (Left 50% - spans 2 columns & 2 rows) */}
           <button
@@ -267,7 +296,7 @@ export default function PhotoGallery({ photos }) {
             </div>
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-ink transition-colors hover:bg-stone-200"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-ink transition-colors hover:bg-stone-200 active:scale-95"
               onClick={closeDialog}
               aria-label="Close photo viewer"
             >
@@ -278,7 +307,11 @@ export default function PhotoGallery({ photos }) {
           </div>
 
           {/* Active Image Display Stage */}
-          <div className="relative flex flex-1 items-center justify-center overflow-hidden py-3">
+          <div
+            className="relative flex flex-1 items-center justify-center overflow-hidden py-3"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             {activePhoto && (
               <div className="relative h-full w-full">
                 <Image
@@ -325,7 +358,10 @@ export default function PhotoGallery({ photos }) {
               {activePhoto?.alt}
             </p>
             {/* Thumbnail selector row */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1">
+            <div
+              ref={thumbStripRef}
+              className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 hide-scrollbar"
+            >
               {photos.map((photo, idx) => (
                 <button
                   key={photo.src}

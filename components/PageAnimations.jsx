@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 export default function PageAnimations() {
   useEffect(() => {
-    // Respect reduced motion preferences
+    // Respect reduced motion preferences immediately
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
@@ -12,36 +12,36 @@ export default function PageAnimations() {
     let observer;
     let cancelled = false;
 
-    // Dynamically import Anime.js only on the client inside useEffect
+    // Dynamically load animejs on client
     import("animejs")
-      .then((anime) => {
+      .then((animeModule) => {
         if (cancelled) return;
 
-        const animate = anime.animate;
-        const stagger = anime.stagger;
+        const animate = animeModule.animate;
+        const stagger = animeModule.stagger;
 
         if (typeof animate !== "function") return;
 
-        // 1. Header entrance with staggered typography
+        // 1. Subtle, crisp hero entrance without hiding content upfront
         const headerTitle = document.querySelector("#hero-title");
-        const headerMeta = document.querySelectorAll(".stay-header span, .stay-header p");
-        const ctaBtns = document.querySelectorAll(".stay-header a");
+        const headerBadges = document.querySelectorAll(".hero-badge");
+        const ctaBtns = document.querySelectorAll(".hero-cta-btn");
 
         if (headerTitle) {
           animate(headerTitle, {
-            opacity: [0, 1],
-            translateY: [24, 0],
-            duration: 900,
+            opacity: [0.3, 1],
+            translateY: [16, 0],
+            duration: 650,
             ease: "outCubic",
           });
         }
 
-        if (headerMeta.length > 0) {
-          animate(headerMeta, {
+        if (headerBadges.length > 0) {
+          animate(headerBadges, {
             opacity: [0, 1],
-            translateY: [16, 0],
-            duration: 800,
-            delay: stagger(100, { start: 100 }),
+            translateY: [10, 0],
+            duration: 500,
+            delay: stagger(60, { start: 150 }),
             ease: "outQuad",
           });
         }
@@ -49,92 +49,50 @@ export default function PageAnimations() {
         if (ctaBtns.length > 0) {
           animate(ctaBtns, {
             opacity: [0, 1],
-            scale: [0.96, 1],
-            duration: 700,
-            delay: stagger(120, { start: 250 }),
+            scale: [0.97, 1],
+            duration: 500,
+            delay: stagger(80, { start: 250 }),
             ease: "outQuad",
           });
         }
 
-        // 2. Bento gallery tiles reveal
-        const bentoPhotos = document.querySelectorAll(".gallery-bento-item");
-        if (bentoPhotos.length > 0) {
-          animate(bentoPhotos, {
-            opacity: [0, 1],
-            translateY: [20, 0],
-            duration: 850,
-            delay: stagger(100, { start: 200 }),
-            ease: "outCubic",
+        // 2. Progressive scroll reveal for sections (only for elements below the viewport)
+        const targets = document.querySelectorAll(
+          "#calendar, #specs, #amenities, #rates, #location, #inquire"
+        );
+
+        if ("IntersectionObserver" in window) {
+          observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                const target = entry.target;
+
+                animate(target, {
+                  opacity: [0.4, 1],
+                  translateY: [18, 0],
+                  duration: 600,
+                  ease: "outCubic",
+                });
+
+                observer.unobserve(target);
+              });
+            },
+            { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
+          );
+
+          targets.forEach((el) => {
+            const rect = el.getBoundingClientRect();
+            // Only observe if element is substantially below current viewport
+            if (rect.top > window.innerHeight * 0.85) {
+              el.style.opacity = "0.4";
+              observer.observe(el);
+            }
           });
         }
-
-        // 3. Scroll reveal observer with staggered children
-        observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              const target = entry.target;
-
-              // Animate section container
-              animate(target, {
-                opacity: [0, 1],
-                translateY: [20, 0],
-                duration: 700,
-                ease: "outQuad",
-              });
-
-              // Stagger children depending on section type
-              if (target.id === "specs") {
-                const specItems = target.querySelectorAll("dl > div");
-                animate(specItems, {
-                  opacity: [0, 1],
-                  translateY: [16, 0],
-                  duration: 600,
-                  delay: stagger(80, { start: 100 }),
-                  ease: "outQuad",
-                });
-              } else if (target.id === "amenities") {
-                const cards = target.querySelectorAll(".grid > div");
-                animate(cards, {
-                  opacity: [0, 1],
-                  translateY: [20, 0],
-                  duration: 700,
-                  delay: stagger(100, { start: 100 }),
-                  ease: "outCubic",
-                });
-              } else if (target.id === "rates") {
-                const tierCards = target.querySelectorAll(".grid > div");
-                animate(tierCards, {
-                  opacity: [0, 1],
-                  translateY: [20, 0],
-                  duration: 700,
-                  delay: stagger(90, { start: 100 }),
-                  ease: "outCubic",
-                });
-              }
-              observer.unobserve(target);
-            });
-          },
-          { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
-        );
-
-        const targets = document.querySelectorAll(
-          "#calendar, #specs, #amenities, #rates, #location, #inquire"
-        );
-
-        targets.forEach((el) => {
-          el.style.opacity = "0";
-          observer.observe(el);
-        });
       })
       .catch((err) => {
-        console.warn("Animation initialization deferred:", err);
-        const targets = document.querySelectorAll(
-          "#calendar, #specs, #amenities, #rates, #location, #inquire"
-        );
-        targets.forEach((el) => {
-          el.style.opacity = "1";
-        });
+        console.warn("Animation deferred:", err);
       });
 
     return () => {
