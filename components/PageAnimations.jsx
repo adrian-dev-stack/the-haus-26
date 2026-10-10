@@ -111,17 +111,7 @@ export default function PageAnimations() {
                   delay: stagger(90, { start: 100 }),
                   ease: "outCubic",
                 });
-              } else if (target.classList.contains("photo-more")) {
-                const gridCards = target.querySelectorAll(".photo-details .photo-button");
-                animate(gridCards, {
-                  opacity: [0, 1],
-                  translateY: [24, 0],
-                  duration: 750,
-                  delay: stagger(100, { start: 100 }),
-                  ease: "outCubic",
-                });
               }
-
               observer.unobserve(target);
             });
           },
@@ -129,7 +119,7 @@ export default function PageAnimations() {
         );
 
         const targets = document.querySelectorAll(
-          ".photo-more, #calendar, #specs, #amenities, #rates, #location, #inquire"
+          "#calendar, #specs, #amenities, #rates, #location, #inquire"
         );
 
         targets.forEach((el) => {
@@ -138,7 +128,13 @@ export default function PageAnimations() {
         });
       })
       .catch((err) => {
-        console.warn("Anime.js loading deferred:", err);
+        console.warn("Animation initialization deferred:", err);
+        const targets = document.querySelectorAll(
+          "#calendar, #specs, #amenities, #rates, #location, #inquire"
+        );
+        targets.forEach((el) => {
+          el.style.opacity = "1";
+        });
       });
 
     return () => {
