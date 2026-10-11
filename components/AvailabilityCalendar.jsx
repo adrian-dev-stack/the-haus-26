@@ -1,257 +1,157 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "July", "August", "September", "October", "November", "December",
 ];
-
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+function getToday() {
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(new Date());
+  const value = (type) => parts.find((part) => part.type === type).value;
+  return `${value("year")}-${value("month")}-${value("day")}`;
+}
+
+function formatDateString(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function formatSelectedDate(value) {
+  const [year, month, day] = value.split("-").map(Number);
+  return `${MONTH_NAMES[month - 1]} ${day}, ${year}`;
+}
+
 export default function AvailabilityCalendar({
-  bookedDates = [],
-  onSelectDate,
-  selectedDate: controlledSelectedDate,
-  phone = "+639524566669",
-  messengerUrl,
+  bookedDates = [], onSelectDate, selectedDate: controlledSelectedDate, phone, messengerUrl,
 }) {
-  const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [today, setToday] = useState("");
+  const [currentMonth, setCurrentMonth] = useState(null);
+  const [currentYear, setCurrentYear] = useState(null);
+  const [todayYear, todayMonth] = today ? today.split("-").map(Number) : [null, null];
   const [internalSelectedDate, setInternalSelectedDate] = useState("");
+  const activeSelectedDate = controlledSelectedDate ?? internalSelectedDate;
+  const cleanPhone = (phone || "").replace(/[^0-9+]/g, "");
+  const hasPhone = /\d/.test(cleanPhone);
 
-  const activeSelectedDate = controlledSelectedDate !== undefined ? controlledSelectedDate : internalSelectedDate;
+  useEffect(() => {
+    const currentDate = getToday();
+    const [year, month] = currentDate.split("-").map(Number);
+    setToday(currentDate);
+    setCurrentYear(year);
+    setCurrentMonth(month - 1);
+  }, []);
 
-  // Navigation
-  function nextMonth() {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear((y) => y + 1);
-    } else {
-      setCurrentMonth((m) => m + 1);
+  useEffect(() => {
+    function synchronizeDate(event) {
+      const date = event.detail?.date;
+      if (!date) {
+        setInternalSelectedDate("");
+        return;
+      }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+      const [year, month] = date.split("-").map(Number);
+      setInternalSelectedDate(date);
+      setCurrentYear(year);
+      setCurrentMonth(month - 1);
     }
+    window.addEventListener("haus26:select-date", synchronizeDate);
+    return () => window.removeEventListener("haus26:select-date", synchronizeDate);
+  }, []);
+
+  function changeMonth(direction) {
+    const next = new Date(currentYear, currentMonth + direction, 1);
+    setCurrentMonth(next.getMonth());
+    setCurrentYear(next.getFullYear());
   }
 
-  function prevMonth() {
-    const isPast =
-      currentYear === today.getFullYear() && currentMonth <= today.getMonth();
-    if (isPast) return;
-
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear((y) => y - 1);
-    } else {
-      setCurrentMonth((m) => m - 1);
-    }
+  function handleSelectDate(date) {
+    setInternalSelectedDate(date);
+    onSelectDate?.(date);
+    window.dispatchEvent(new CustomEvent("haus26:select-date", { detail: { date } }));
   }
 
-  // Days calculation
+  if (!today || currentMonth === null || currentYear === null) {
+    return (
+      <div className="min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-6">
+        <h3 className="font-display text-2xl font-semibold tracking-tight text-ink">Choose a date to inquire</h3>
+        <p className="mt-2 text-sm leading-relaxed text-muted">Your host confirms availability before a booking is made.</p>
+        <p className="mt-6 min-h-64 text-sm text-muted" role="status">Loading the date calendar…</p>
+      </div>
+    );
+  }
+
   const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
   const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-  const calendarDays = [];
-  for (let i = 0; i < firstDayIndex; i++) {
-    calendarDays.push(null);
-  }
-  for (let d = 1; d <= totalDays; d++) {
-    calendarDays.push(d);
-  }
-
-  function formatDateString(year, month, day) {
-    const mm = String(month + 1).padStart(2, "0");
-    const dd = String(day).padStart(2, "0");
-    return `${year}-${mm}-${dd}`;
-  }
-
-  function isDatePast(year, month, day) {
-    const check = new Date(year, month, day, 23, 59, 59);
-    return check < today;
-  }
-
-  function isDateBooked(dateStr) {
-    return bookedDates.includes(dateStr);
-  }
-
-  function handleSelectDate(dateStr) {
-    setInternalSelectedDate(dateStr);
-    if (onSelectDate) {
-      onSelectDate(dateStr);
-    }
-    // Dispatch event so InquiryForm can synchronize date instantly
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("haus26:select-date", { detail: { date: dateStr } })
-      );
-    }
-  }
-
-  const isPrevDisabled =
-    currentYear === today.getFullYear() && currentMonth <= today.getMonth();
+  const calendarDays = [
+    ...Array(firstDayIndex).fill(null),
+    ...Array.from({ length: totalDays }, (_, index) => index + 1),
+  ];
+  const isPrevDisabled = currentYear < todayYear ||
+    (currentYear === todayYear && currentMonth <= todayMonth - 1);
+  const navigationStyle = "flex h-11 w-11 items-center justify-center rounded-md border border-line text-ink transition-colors hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  const linkStyle = "inline-flex min-h-11 items-center justify-center rounded-md border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
   return (
-    <div className="rounded-3xl border border-line bg-surface p-6 shadow-xs sm:p-8">
-      {/* Month Header */}
-      <div className="flex items-center justify-between border-b border-line pb-5">
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-glow">
-            Live Calendar
-          </span>
-          <h3 className="font-display text-2xl font-medium text-ink">
-            {MONTH_NAMES[currentMonth]} {currentYear}
-          </h3>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={prevMonth}
-            disabled={isPrevDisabled}
-            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-surface-elevated text-ink transition-colors hover:border-white/20 hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-accent"
-            aria-label="Previous month"
-          >
-            <span aria-hidden="true">←</span>
+    <div className="min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-6">
+      <h3 className="font-display text-2xl font-semibold tracking-tight text-ink">Choose a date to inquire</h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted">Your host confirms availability before a booking is made.</p>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
+        <p className="text-lg font-semibold text-ink" aria-live="polite">{MONTH_NAMES[currentMonth]} {currentYear}</p>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => changeMonth(-1)} disabled={isPrevDisabled} className={navigationStyle} aria-label="Previous month">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg>
           </button>
-          <button
-            type="button"
-            onClick={nextMonth}
-            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-line bg-surface-elevated text-ink transition-colors hover:border-white/20 hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-accent"
-            aria-label="Next month"
-          >
-            <span aria-hidden="true">→</span>
+          <button type="button" onClick={() => changeMonth(1)} className={navigationStyle} aria-label="Next month">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m10 6 6 6-6 6" /></svg>
           </button>
         </div>
       </div>
 
-      {/* Day of Week Headers */}
-      <div className="mt-6 grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase tracking-wider text-muted" aria-hidden="true">
-        {DAYS_OF_WEEK.map((day) => (
-          <div key={day} className="py-2">
-            {day}
+      <p className="mt-4 text-sm text-muted min-[400px]:hidden">Swipe the calendar sideways if needed.</p>
+      <div className="mt-5 overflow-x-auto rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" tabIndex={0} role="region" aria-label="Date calendar, scroll sideways on narrow screens">
+        <div className="min-w-[308px]">
+          <div className="grid grid-cols-7 text-center text-sm text-muted" aria-hidden="true">
+            {DAYS_OF_WEEK.map((day) => <div key={day} className="py-2">{day}</div>)}
           </div>
-        ))}
-      </div>
-
-      {/* Calendar Grid */}
-      <div className="mt-1 grid grid-cols-7 gap-1.5 sm:gap-2" role="grid" aria-label={`${MONTH_NAMES[currentMonth]} ${currentYear} calendar`}>
-        {calendarDays.map((day, idx) => {
-          if (!day) {
-            return <div key={`empty-${idx}`} className="h-11 sm:h-12" aria-hidden="true" />;
-          }
-
-          const dateStr = formatDateString(currentYear, currentMonth, day);
-          const isPast = isDatePast(currentYear, currentMonth, day);
-          const isBooked = isDateBooked(dateStr);
-          const isSelected = activeSelectedDate === dateStr;
-
-          let btnClass =
-            "relative flex h-11 sm:h-12 flex-col items-center justify-center rounded-xl text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-accent ";
-
-          if (isSelected) {
-            btnClass += "bg-accent text-white shadow-[0_0_16px_rgba(2,132,199,0.5)] ring-2 ring-accent-glow/50 font-semibold scale-[1.02]";
-          } else if (isBooked) {
-            btnClass +=
-              "bg-white/[0.02] text-muted/30 cursor-not-allowed line-through";
-          } else if (isPast) {
-            btnClass += "text-muted/20 cursor-not-allowed";
-          } else {
-            btnClass +=
-              "bg-surface-elevated hover:bg-surface-hover hover:border-accent-glow hover:text-accent-glow text-ink border border-line/80 active:scale-95";
-          }
-
-          const statusText = isBooked
-            ? "Reserved"
-            : isPast
-            ? "Past date"
-            : isSelected
-            ? "Selected"
-            : "Available";
-
-          return (
-            <button
-              key={dateStr}
-              type="button"
-              disabled={isPast || isBooked}
-              aria-pressed={isSelected}
-              aria-label={`${MONTH_NAMES[currentMonth]} ${day}, ${currentYear}, ${statusText}`}
-              onClick={() => handleSelectDate(dateStr)}
-              className={btnClass}
-              title={
-                isBooked
-                  ? "Already reserved"
-                  : isPast
-                  ? "Past date"
-                  : "Available for 22-hour stay"
-              }
-            >
-              <span aria-hidden="true">{day}</span>
-              {!isPast && !isBooked && !isSelected && (
-                <span className="mt-0.5 h-1 w-1 rounded-full bg-accent-glow/70" aria-hidden="true" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Legend & Summary */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-5 text-xs text-muted">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-accent shadow-[0_0_8px_rgba(2,132,199,0.6)]" />
-            <span>Available</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-white/20" />
-            <span>Reserved</span>
+          <div className="grid grid-cols-7 gap-y-1" role="group" aria-label={`${MONTH_NAMES[currentMonth]} ${currentYear} inquiry dates`}>
+            {calendarDays.map((day, index) => {
+              if (!day) return <div key={`empty-${index}`} className="h-12" aria-hidden="true" />;
+              const date = formatDateString(currentYear, currentMonth, day);
+              const isPast = date < today;
+              const isBooked = bookedDates.includes(date);
+              const isSelected = activeSelectedDate === date;
+              const status = isBooked ? "Reserved" : isPast ? "Past date" : isSelected ? "Selected" : "Select to inquire";
+              const style = isSelected ? "bg-accent font-semibold text-white" : isPast || isBooked
+                ? `cursor-not-allowed text-muted ${isBooked ? "line-through" : ""}` : "text-ink hover:bg-surface-elevated";
+              return (
+                <button key={date} type="button" disabled={isPast || isBooked} aria-pressed={isSelected} aria-label={`${MONTH_NAMES[currentMonth]} ${day}, ${currentYear}, ${status}`} onClick={() => handleSelectDate(date)} className={`flex h-12 min-w-11 items-center justify-center rounded-md text-base transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${style}`}>
+                  {day}
+                </button>
+              );
+            })}
           </div>
         </div>
-        <span className="text-[11px]">All bookings are 22-hour exclusive stays</span>
       </div>
 
-      {/* Interactive Selection Action Bar */}
-      {activeSelectedDate && (
-        <div className="mt-5 rounded-2xl border border-accent/40 bg-accent/10 p-4 sm:p-5 shadow-[0_0_20px_rgba(2,132,199,0.12)]">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-accent-glow">
-                Selected Check-in Date
-              </span>
-              <p className="font-display text-lg font-semibold text-ink">
-                {activeSelectedDate} (11:00 AM check-in)
-              </p>
-              <p className="text-xs text-muted">
-                Check-out: Next day at 1:00 PM · 22-hour exclusive access
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <a
-                href="#inquire"
-                className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-accent-hover active:scale-95"
-              >
-                Use date in inquiry form ↓
-              </a>
-              <a
-                href={`sms:${(phone || "").replace(/[^0-9+]/g, "")}?body=${encodeURIComponent(
-                  `Hi! I would like to book The HauS 26 for check-in on ${activeSelectedDate} (22-hour stay). Is this date still open?`
-                )}`}
-                className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-elevated px-4 text-xs font-medium text-ink transition-colors hover:border-white/20 hover:bg-surface-hover"
-              >
-                Inquire via SMS
-              </a>
-              {messengerUrl && (
-                <a
-                  href={messengerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-10 items-center justify-center rounded-xl border border-line bg-surface-elevated px-4 text-xs font-medium text-ink transition-colors hover:border-white/20 hover:bg-surface-hover"
-                >
-                  Facebook Messenger
-                </a>
-              )}
-            </div>
+      <div className="mt-5 border-t border-line pt-4 text-sm leading-relaxed text-muted">
+        <p>22-hour exclusive stays. Selecting a date starts an inquiry.</p>
+        {bookedDates.length > 0 && <p className="mt-1">Crossed-out dates are reserved.</p>}
+      </div>
+      {activeSelectedDate ? (
+        <div className="mt-5 border-t border-line pt-5">
+          <p className="text-sm text-muted">Your preferred check-in</p>
+          <p className="mt-1 text-lg font-semibold text-ink" aria-live="polite">{formatSelectedDate(activeSelectedDate)}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a href="#inquire" className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Complete your inquiry</a>
+            {hasPhone && <a href={`sms:${cleanPhone}?body=${encodeURIComponent(`Hi! I would like to inquire about The HauS 26 for check-in on ${activeSelectedDate}, for a 22-hour stay. Could you confirm availability?`)}`} className={linkStyle}>Ask by SMS</a>}
+            {messengerUrl && <a href={messengerUrl} target="_blank" rel="noopener noreferrer" className={linkStyle}>Open Messenger</a>}
           </div>
         </div>
-      )}
+      ) : <p className="mt-5 text-sm text-muted">Choose a date above to fill in your inquiry.</p>}
     </div>
   );
 }

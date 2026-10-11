@@ -7,8 +7,8 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
 
 export const viewport = {
-  themeColor: "#0b0e14",
-  colorScheme: "dark",
+  themeColor: "#f5f2ea",
+  colorScheme: "light",
   width: "device-width",
   initialScale: 1,
 };
@@ -74,12 +74,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${outfit.variable} ${figtree.variable} dark`} suppressHydrationWarning>
-      <body suppressHydrationWarning>
+    <html lang="en" className={`${outfit.variable} ${figtree.variable}`}>
+      <body>
         <JsonLd />
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:m-3 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-white focus:outline-none"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-3 focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-white focus:outline-2 focus:outline-offset-2 focus:outline-accent"
         >
           Skip to content
         </a>
