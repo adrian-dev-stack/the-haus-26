@@ -9,7 +9,9 @@ import {
   calculateBookingTotal, cancelBooking, confirmBooking, createBookingRequest, getAdminBooking, getBookingByPaymentReference,
   getBookingStore, getGuestBooking, getUnavailableDates, initializeBookingStore, listAdminBookings,
   refreshBookingPayment, syncBookingFromPayment, HOLD_DURATION_MS,
+  addBlockedDate, getBlockedDates, removeBlockedDate,
 } from "../lib/bookings.js";
+
 import { getPaymentConfig, readPaymentToken } from "../lib/payments.js";
 
 const env = {
@@ -326,4 +328,26 @@ test("pricing tiers calculate exact totals and auto-approval holds date for 30 m
     assert.equal(checked.status, "cancelled");
   });
 });
+
+test("host can dynamically block and unblock dates with reasons", async () => {
+  await database(async (client) => {
+    assert.deepEqual(await getBlockedDates({ client }), []);
+    await addBlockedDate("2030-05-15", { reason: "Maintenance", client, now });
+    const blocked = await getBlockedDates({ client });
+    assert.equal(blocked.length, 1);
+    assert.equal(blocked[0].date, "2030-05-15");
+    assert.equal(blocked[0].reason, "Maintenance");
+    assert.deepEqual(await getUnavailableDates({ client, config, now }), ["2030-05-15"]);
+
+    await assert.rejects(
+      createBookingRequest(input({ date: "2030-05-15" }), { client, now, config, autoApprove: true }),
+      rejectCode("date-unavailable")
+    );
+
+    await removeBlockedDate("2030-05-15", { client });
+    assert.deepEqual(await getBlockedDates({ client }), []);
+    assert.deepEqual(await getUnavailableDates({ client, config, now }), []);
+  });
+});
+
 

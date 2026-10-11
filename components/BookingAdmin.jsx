@@ -62,6 +62,141 @@ function BookingEntry({ booking, onChanged, onUnauthorized }) {
   );
 }
 
+function BlockedDatesManager({ onUnauthorized }) {
+  const [blocked, setBlocked] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const loadBlocked = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/admin/blocked-dates");
+      if (res.status === 401) { onUnauthorized(); return; }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || "Could not load blocked dates.");
+      setBlocked(data.data?.blockedDates || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [onUnauthorized]);
+
+  useEffect(() => { loadBlocked(); }, [loadBlocked]);
+
+  async function handleBlock(e) {
+    e.preventDefault();
+    setBusy(true); setError(""); setNotice("");
+    const form = new FormData(e.currentTarget);
+    const date = form.get("date");
+    const reason = form.get("reason");
+    try {
+      const res = await fetch("/api/admin/blocked-dates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "block", date, reason }),
+      });
+      if (res.status === 401) { onUnauthorized(); return; }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || "Could not block date.");
+      setBlocked(data.data?.blockedDates || []);
+      setNotice(`Date ${date} blocked successfully. Guests cannot book this date.`);
+      e.currentTarget.reset();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleUnblock(date) {
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const res = await fetch("/api/admin/blocked-dates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "unblock", date }),
+      });
+      if (res.status === 401) { onUnauthorized(); return; }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || "Could not unblock date.");
+      setBlocked(data.data?.blockedDates || []);
+      setNotice(`Date ${date} unblocked. It is now open on the calendar.`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="admin-booking" style={{ marginTop: "1.5rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+        <div>
+          <h2 style={{ fontSize: "1.125rem", margin: 0 }}>Calendar Date Blocker</h2>
+          <p style={{ margin: "0.25rem 0 0", color: "var(--color-muted)", fontSize: "0.875rem" }}>
+            {blocked.length} {blocked.length === 1 ? "date manually blocked" : "dates manually blocked"} from public bookings
+          </p>
+        </div>
+        <button type="button" className="booking-secondary" onClick={() => setOpen(!open)}>
+          {open ? "Hide date blocker" : "Manage blocked dates"}
+        </button>
+      </div>
+
+      {open && (
+        <div style={{ marginTop: "1.25rem", borderTop: "1px solid var(--color-divider)", paddingTop: "1.25rem" }}>
+          <form onSubmit={handleBlock} style={{ display: "grid", gap: "1rem", maxWidth: "30rem" }}>
+            <p style={{ margin: 0, fontSize: "0.875rem", color: "var(--color-muted)" }}>
+              Block dates for maintenance, personal stays, or off-platform reservations without code changes.
+            </p>
+            <div className="booking-field">
+              <label htmlFor="block-date-input">Stay Date</label>
+              <input id="block-date-input" name="date" type="date" required disabled={busy} min={new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())} />
+            </div>
+            <div className="booking-field">
+              <label htmlFor="block-reason-input">Reason (optional)</label>
+              <input id="block-reason-input" name="reason" type="text" maxLength={200} placeholder="e.g. Scheduled pool maintenance" disabled={busy} />
+            </div>
+            <button className="button-primary" type="submit" disabled={busy} style={{ width: "fit-content" }}>
+              {busy ? "Saving…" : "Block this date"}
+            </button>
+          </form>
+
+          {error && <p className="booking-error" role="alert" style={{ marginTop: "1rem" }}>{error}</p>}
+          {notice && <p className="admin-action-notice" role="status" style={{ marginTop: "1rem" }}>{notice}</p>}
+
+          <div style={{ marginTop: "1.5rem" }}>
+            <h3 style={{ fontSize: "0.9375rem", marginBottom: "0.75rem" }}>Currently blocked dates</h3>
+            {loading ? (
+              <p style={{ fontSize: "0.875rem", color: "var(--color-muted)" }}>Loading dates…</p>
+            ) : blocked.length === 0 ? (
+              <p style={{ fontSize: "0.875rem", color: "var(--color-muted)" }}>No dates are manually blocked. Calendar availability is active.</p>
+            ) : (
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "0.5rem" }}>
+                {blocked.map((item) => (
+                  <li key={item.date} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.625rem 0.875rem", background: "var(--color-surface-elevated)", border: "1px solid var(--color-divider)", borderRadius: "4px" }}>
+                    <div>
+                      <span style={{ fontWeight: 600 }}>{stayDate(item.date)}</span>
+                      <span style={{ marginLeft: "0.5rem", fontSize: "0.8125rem", color: "var(--color-muted)" }}>({item.date})</span>
+                      {item.reason && <span style={{ marginLeft: "0.75rem", fontSize: "0.8125rem", color: "var(--color-muted)" }}>- {item.reason}</span>}
+                    </div>
+                    <button type="button" className="booking-secondary" disabled={busy} onClick={() => handleUnblock(item.date)} style={{ minHeight: "36px", padding: "0.25rem 0.75rem", fontSize: "0.8125rem" }}>
+                      Unblock
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function BookingAdmin() {
   const router = useRouter();
   const [status, setStatus] = useState("");
@@ -97,6 +232,7 @@ export default function BookingAdmin() {
   return (
     <>
       <div className="admin-page-heading"><div><p className="section-label">Your private host workspace</p><h1>Bookings</h1><p>Review each request, confirm its quote, and track the 50% deposit.</p></div><button type="button" className="booking-secondary" onClick={logout} disabled={loggingOut}>{loggingOut ? "Signing out…" : "Sign out"}</button></div>
+      <BlockedDatesManager onUnauthorized={unauthorized} />
       <div className="admin-toolbar"><div className="booking-field"><label htmlFor="booking-filter">Show bookings</label><select id="booking-filter" value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}>{[["", "All bookings"], ...Object.entries(STATUS_LABELS)].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div><button type="button" className="booking-secondary" disabled={loading} onClick={() => load()}>{loading ? "Loading…" : "Refresh bookings"}</button><p role="status">{loading ? "Loading bookings…" : `${pagination.totalItems || 0} ${pagination.totalItems === 1 ? "booking" : "bookings"}`}</p></div>
       {error && <p className="booking-error" role="alert">{error}</p>}
       <div className="admin-booking-list" aria-busy={loading}>{!loading && !error && bookings.length === 0 && <div className="booking-panel admin-empty"><h2>No bookings here yet.</h2><p>{status ? "Try another status to see other requests." : "Guest requests will appear here when they submit the booking form."}</p></div>}{bookings.map((booking) => <BookingEntry key={booking.id} booking={booking} onChanged={updateBooking} onUnauthorized={unauthorized} />)}</div>
