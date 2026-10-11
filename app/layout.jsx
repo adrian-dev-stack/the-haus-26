@@ -77,6 +77,20 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${outfit.variable} ${figtree.variable}`}>
       <body>
         <JsonLd />
+        <script
+          type="speculationrules"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              prerender: [
+                {
+                  source: "list",
+                  urls: ["/book"],
+                  eagerness: "moderate",
+                },
+              ],
+            }),
+          }}
+        />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-3 focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-white focus:outline-2 focus:outline-offset-2 focus:outline-accent"

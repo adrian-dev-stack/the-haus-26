@@ -31,6 +31,20 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), payment=()",
           },
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://api.paymongo.com https://*.turso.io https://*.libsql.org wss://*.turso.io",
+              "frame-ancestors 'self'",
+              "form-action 'self' https://checkout.paymongo.com",
+              "base-uri 'self'",
+            ].join("; "),
+          },
         ],
       },
       ...["/pay/:path*", "/payment/:path*", "/book/:path*", "/admin/:path*", "/api/payments/:path*", "/api/bookings/:path*", "/api/admin/:path*"].map((source) => ({
