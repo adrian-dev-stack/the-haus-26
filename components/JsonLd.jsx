@@ -21,6 +21,7 @@ export default function JsonLd() {
     priceRange: "₱5,000 - ₱8,000+",
     currenciesAccepted: "PHP",
     checkinTime: "11:00",
+    checkoutTime: "09:00",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Hulo, Alangan",

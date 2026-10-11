@@ -15,6 +15,25 @@ function followingDay(value) {
   return Number.isNaN(date.valueOf()) ? "" : date.toISOString().slice(0, 10);
 }
 
+function generateSafeUUID() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    try { return crypto.randomUUID(); } catch {}
+  }
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 function estimateRate(guests) {
   const count = Number(guests);
   if (!Number.isInteger(count) || count < 1) return { total: "Choose guest count", deposit: "" };
@@ -83,7 +102,7 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
     requestLocked.current = true;
     setError("");
     try {
-      requestId.current ||= crypto.randomUUID();
+      requestId.current ||= generateSafeUUID();
       submittedPayload.current ||= { requestId: requestId.current, name: form.get("name"), email: form.get("email"), phone: form.get("phone"), date, guests: Number(guests), occasion: form.get("occasion"), notes: form.get("notes"), consent: form.get("consent") === "on" };
       const response = await fetch("/api/bookings", {
         method: "POST", headers: { "Content-Type": "application/json" },

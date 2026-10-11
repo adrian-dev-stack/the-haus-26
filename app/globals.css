@@ -243,59 +243,136 @@ body:has(.payment-shell) { padding-bottom: 0; }
 .booking-payment-action .button-primary { width: 100%; }
 .booking-payment-action p { margin-top: .75rem; color: var(--color-muted); font-size: .8125rem; line-height: 1.6; }
 .booking-notice { border-left: 3px solid var(--color-accent); padding-left: 1rem; margin-top: 1.25rem; color: var(--color-muted); font-size: .875rem; line-height: 1.6; }
-body:has(.admin-shell) { padding-bottom: 0; }
-.admin-shell { width: min(100% - 2rem, 72rem); margin-inline: auto; padding-block: 2.5rem 4rem; }
+body:has(.admin-shell), body:has(.admin-app-root) { padding-bottom: 0; }
+.admin-app-root { min-height: 100vh; background: var(--color-paper); }
+.admin-topbar { position: sticky; top: 0; z-index: 40; background: var(--color-surface); border-bottom: 1px solid var(--color-divider); backdrop-filter: blur(8px); }
+.admin-topbar-inner { width: min(100% - 2rem, 80rem); margin-inline: auto; min-height: 4.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.admin-brand { display: inline-flex; align-items: center; gap: .75rem; text-decoration: none; }
+.admin-brand-name { font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; color: var(--color-ink); letter-spacing: -.035em; }
+.admin-brand-badge { font-size: .6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: .2rem .55rem; border-radius: 9999px; background: var(--color-surface-elevated); color: var(--color-accent); border: 1px solid var(--color-divider); }
+.admin-topbar-actions { display: flex; align-items: center; gap: .625rem; flex-wrap: wrap; }
+.admin-nav-link { display: inline-flex; align-items: center; min-height: 38px; padding: .35rem .75rem; font-size: .8125rem; font-weight: 500; color: var(--color-muted); text-decoration: none; border-radius: 5px; border: 1px solid transparent; transition: all 150ms var(--ease-out); }
+.admin-nav-link:hover { color: var(--color-ink); background: var(--color-surface-elevated); border-color: var(--color-divider); }
+
+.admin-main-container { width: min(100% - 2rem, 80rem); margin-inline: auto; padding-block: 2rem 5rem; }
+.admin-shell { width: min(100% - 2rem, 80rem); margin-inline: auto; padding-block: 2rem 4rem; }
 .admin-header-label { font-size: .875rem; color: var(--color-muted); }
-.admin-page-heading { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 1.5rem; }
-.admin-page-heading > div > p:not(.section-label) { margin-top: 1rem; color: var(--color-muted); line-height: 1.7; }
-.admin-toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; margin-top: 2rem; border-block: 1px solid var(--color-divider); padding-block: 1.25rem; }
-.admin-toolbar .booking-field { width: 15rem; max-width: 100%; }
-.admin-toolbar > p { min-height: 48px; display: flex; align-items: center; font-size: .875rem; color: var(--color-muted); }
-.admin-booking-list { margin-top: 2rem; display: grid; gap: 2rem; }
-.admin-booking { min-width: 0; border: 1px solid var(--color-line); border-radius: 6px; background: var(--color-surface); padding: 1.25rem; }
-.admin-booking-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--color-divider); padding-bottom: 1.25rem; }
-.admin-booking-header h2 { margin-top: .5rem; font-size: clamp(1.5rem, 4vw, 2rem); letter-spacing: -.035em; font-weight: 500; }
-.admin-booking-header h2 + p { margin-top: .5rem; font-size: .875rem; color: var(--color-muted); }
-.admin-status-group { display: flex; flex-wrap: wrap; align-items: start; gap: .5rem; }
-.booking-status-label, .booking-mode-label { display: inline-flex; border: 1px solid var(--color-divider); background: var(--color-surface-elevated); border-radius: 3px; padding: .375rem .625rem; font-size: .8125rem; font-weight: 500; }
-.booking-mode-label { background: transparent; color: var(--color-muted); }
-.admin-booking-body { display: grid; gap: 2rem; margin-top: 1.5rem; }
-.admin-booking-body h3 { font-size: 1rem; font-weight: 500; }
-.admin-guest-details, .admin-booking-controls { min-width: 0; }
-.admin-guest-details .booking-details { margin-top: .5rem; }
-.admin-contact-link { display: inline-block; padding-block: .25rem; text-decoration: underline; text-underline-offset: 4px; overflow-wrap: anywhere; }
-.admin-notes { margin-top: 1.5rem; }
-.admin-notes p { margin-top: .625rem; color: var(--color-muted); font-size: .875rem; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
-.admin-guest-details .admin-quote { margin-top: 1.5rem; }
-.admin-confirm-form > p, .admin-retry > p, .admin-payment-controls > p, .admin-cancel form > p { margin-top: .625rem; color: var(--color-muted); font-size: .875rem; line-height: 1.7; }
-.admin-confirm-form fieldset { border: 0; padding: 0; margin: 1.25rem 0 0; min-width: 0; display: grid; gap: 1.25rem; }
-.admin-confirm-form > button, .admin-retry > button, .admin-payment-controls > button, .admin-cancel button { margin-top: 1rem; }
-.admin-payment-controls .text-link { display: flex; width: fit-content; margin-top: .5rem; }
-.admin-cancel { margin-top: 1.5rem; border-top: 1px solid var(--color-divider); }
-.admin-cancel summary { min-height: 48px; padding-block: .875rem; cursor: pointer; font-size: .875rem; text-decoration: underline; text-underline-offset: 4px; }
-.admin-cancel .booking-field { margin-top: 1rem; }
-.admin-action-notice { border-top: 1px solid var(--color-divider); margin-top: 1.5rem; padding-top: 1rem; font-size: .875rem; color: var(--color-muted); line-height: 1.6; }
-.admin-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem; margin-top: 2rem; font-size: .875rem; }
-.admin-login { max-width: 30rem; margin-inline: auto; }
-.admin-login h1 { font-size: clamp(2rem, 7vw, 3rem); }
-.admin-login > p:not(.section-label), .admin-empty > p { margin-top: 1rem; color: var(--color-muted); font-size: .9375rem; line-height: 1.7; }
-.admin-login form { margin-top: 1.5rem; }
-.admin-login form > button { width: 100%; margin-top: 1.25rem; }
-.admin-empty h2 { font-size: 1.75rem; }
+
+.admin-dash-header { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 1.25rem; }
+.admin-dash-title { margin-top: .5rem; font-family: var(--font-display); font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 500; line-height: 1.1; letter-spacing: -.04em; }
+.admin-dash-subtitle { margin-top: .5rem; color: var(--color-muted); font-size: .9375rem; line-height: 1.6; }
+.admin-dash-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+
+.admin-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-top: 2rem; }
+.admin-stat-card { background: var(--color-surface); border: 1px solid var(--color-divider); border-radius: 8px; padding: 1.25rem; text-align: left; transition: all 160ms var(--ease-out); cursor: pointer; position: relative; }
+.admin-stat-card:hover { border-color: var(--color-line); box-shadow: 0 4px 16px rgba(0, 0, 0, .04); transform: translateY(-1px); }
+.admin-stat-card.is-active { border-color: var(--color-accent); background: var(--color-surface-elevated); box-shadow: 0 0 0 2px var(--color-accent); }
+.admin-stat-label { font-size: .8125rem; font-weight: 500; color: var(--color-muted); display: flex; align-items: center; justify-content: space-between; }
+.admin-stat-badge { font-size: .6875rem; font-weight: 600; padding: .15rem .45rem; border-radius: 9999px; text-transform: uppercase; }
+.admin-stat-value { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; color: var(--color-ink); margin-top: .375rem; letter-spacing: -.03em; }
+.admin-stat-subtext { font-size: .75rem; color: var(--color-muted); margin-top: .375rem; }
+
+.admin-tabs-nav { display: flex; align-items: center; gap: .5rem; border-bottom: 1px solid var(--color-divider); margin-top: 2.25rem; overflow-x: auto; padding-bottom: 0; scrollbar-width: none; }
+.admin-tab-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .875rem 1.25rem; font-size: .9375rem; font-weight: 500; color: var(--color-muted); background: transparent; border: none; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: all 150ms var(--ease-out); }
+.admin-tab-btn:hover { color: var(--color-ink); }
+.admin-tab-btn.is-active { color: var(--color-accent); border-bottom-color: var(--color-accent); font-weight: 600; }
+.admin-tab-count { font-size: .6875rem; padding: .15rem .5rem; border-radius: 9999px; background: var(--color-surface-elevated); color: var(--color-muted); border: 1px solid var(--color-divider); }
+.admin-tab-btn.is-active .admin-tab-count { background: var(--color-accent); color: white; border-color: var(--color-accent); }
+
+.admin-filter-bar { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1.5rem; padding: 1rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-divider); border-radius: 8px; }
+.admin-search-box { position: relative; flex: 1; min-width: 260px; }
+.admin-search-input { width: 100%; height: 42px; padding: .5rem 2.25rem .5rem .875rem; font-size: .875rem; border: 1px solid var(--color-divider); border-radius: 6px; background: var(--color-paper); color: var(--color-ink); transition: border-color 150ms ease; }
+.admin-search-input:focus { border-color: var(--color-line-focus); outline: none; }
+.admin-search-clear { position: absolute; right: .5rem; top: 50%; transform: translateY(-50%); border: none; background: transparent; color: var(--color-muted); font-size: 1.1rem; cursor: pointer; padding: .25rem .5rem; }
+.admin-filter-chips { display: flex; flex-wrap: wrap; gap: .375rem; }
+.admin-chip { display: inline-flex; align-items: center; gap: .375rem; min-height: 36px; padding: .35rem .75rem; font-size: .8125rem; font-weight: 500; border-radius: 9999px; border: 1px solid var(--color-divider); background: transparent; color: var(--color-muted); cursor: pointer; transition: all 120ms ease; }
+.admin-chip:hover { border-color: var(--color-line); color: var(--color-ink); }
+.admin-chip.is-active { background: var(--color-accent); color: white; border-color: var(--color-accent); }
+.admin-chip-count { font-size: .6875rem; opacity: .85; }
+
+.admin-booking-list { margin-top: 1.5rem; display: grid; gap: 1.5rem; }
+.admin-booking-card { min-width: 0; border: 1px solid var(--color-divider); border-radius: 8px; background: var(--color-surface); padding: 1.5rem; transition: border-color 150ms ease, box-shadow 150ms ease; position: relative; }
+.admin-booking-card:hover { border-color: var(--color-line); box-shadow: 0 4px 16px rgba(0, 0, 0, .03); }
+.admin-booking-card.status-confirmed { border-left: 4px solid #2e7d32; }
+.admin-booking-card.status-awaiting_payment { border-left: 4px solid #ed6c02; }
+.admin-booking-card.status-requested { border-left: 4px solid #0288d1; }
+.admin-booking-card.status-cancelled, .admin-booking-card.status-declined { border-left: 4px solid #757575; opacity: .9; }
+
+.admin-card-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--color-divider); padding-bottom: 1.25rem; }
+.admin-stay-title { margin-top: .25rem; font-family: var(--font-display); font-size: clamp(1.35rem, 3.5vw, 1.75rem); letter-spacing: -.03em; font-weight: 500; }
+.admin-ref-tag { display: inline-flex; align-items: center; font-family: monospace; font-size: .8125rem; font-weight: 600; padding: .15rem .5rem; border-radius: 4px; background: var(--color-surface-elevated); color: var(--color-ink); border: 1px solid var(--color-divider); letter-spacing: .02em; }
+.admin-badge { display: inline-flex; align-items: center; gap: .35rem; font-size: .8125rem; font-weight: 600; padding: .3rem .75rem; border-radius: 9999px; letter-spacing: .01em; }
+.badge-confirmed { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+.badge-awaiting { background: #fff8e1; color: #b76e00; border: 1px solid #ffe082; }
+.badge-requested { background: #e1f5fe; color: #0277bd; border: 1px solid #b3e5fc; }
+.badge-cancelled { background: #f5f5f5; color: #616161; border: 1px solid #e0e0e0; }
+.badge-test { background: transparent; color: var(--color-muted); border: 1px dashed var(--color-line); font-size: .75rem; padding: .2rem .5rem; border-radius: 4px; }
+
+.admin-card-grid { display: grid; gap: 2rem; margin-top: 1.5rem; }
+.admin-profile-section h3, .admin-action-section h3 { font-size: .9375rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--color-muted); margin-bottom: .75rem; }
+.admin-guest-header { display: flex; align-items: center; gap: .875rem; margin-bottom: 1rem; }
+.admin-avatar { width: 44px; height: 44px; border-radius: 9999px; background: var(--color-surface-elevated); border: 1px solid var(--color-divider); display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--color-accent); font-size: 1rem; flex-shrink: 0; }
+.admin-guest-name { font-size: 1.125rem; font-weight: 600; color: var(--color-ink); }
+.admin-guest-quicklinks { display: flex; gap: .75rem; margin-top: .25rem; font-size: .8125rem; }
+.admin-guest-quicklinks a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; }
+
+.admin-meta-list { display: grid; gap: .625rem; font-size: .875rem; }
+.admin-meta-row { display: flex; justify-content: space-between; padding-block: .35rem; border-bottom: 1px dashed var(--color-divider); }
+.admin-meta-row dt { color: var(--color-muted); }
+.admin-meta-row dd { font-weight: 500; text-align: right; }
+
+.admin-note-bubble { margin-top: 1rem; padding: .875rem 1rem; border-radius: 6px; background: var(--color-surface-elevated); border: 1px solid var(--color-divider); font-size: .875rem; line-height: 1.6; }
+.admin-note-bubble strong { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--color-muted); margin-bottom: .25rem; }
+
+.admin-finance-box { background: var(--color-surface-elevated); border: 1px solid var(--color-divider); border-radius: 8px; padding: 1.125rem; }
+.admin-finance-box h4 { margin: 0 0 .75rem; font-size: .875rem; font-weight: 600; color: var(--color-ink); }
+.admin-finance-rows { display: grid; gap: .5rem; font-size: .875rem; }
+.admin-finance-row { display: flex; justify-content: space-between; align-items: center; }
+.admin-finance-row dt { color: var(--color-muted); }
+.admin-finance-row dd { font-weight: 600; font-family: var(--font-display); font-size: 1.05rem; }
+
+.admin-preset-btn { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .625rem; font-size: .75rem; font-weight: 500; border-radius: 4px; background: var(--color-surface); border: 1px solid var(--color-divider); color: var(--color-ink); cursor: pointer; transition: all 120ms ease; }
+.admin-preset-btn:hover { border-color: var(--color-line); background: var(--color-paper); }
+
+.admin-action-controls { margin-top: 1.25rem; display: grid; gap: 1rem; }
+.admin-confirm-form fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 1rem; }
+.admin-confirm-form label { display: block; font-size: .8125rem; font-weight: 600; margin-bottom: .35rem; }
+.admin-confirm-form input, .admin-confirm-form textarea, .admin-confirm-form select { width: 100%; border: 1px solid var(--color-line); border-radius: 5px; padding: .625rem .875rem; background: var(--color-paper); font-size: .875rem; }
+
+.admin-cancel-drawer { border-top: 1px solid var(--color-divider); margin-top: 1rem; padding-top: .75rem; }
+.admin-cancel-drawer summary { font-size: .8125rem; color: var(--color-muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; min-height: 36px; display: flex; align-items: center; }
+.admin-cancel-drawer form { margin-top: .75rem; display: grid; gap: .75rem; }
+
+.admin-pagination-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem; margin-top: 2.5rem; font-size: .875rem; }
+
+.admin-overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+.admin-overview-panel { background: var(--color-surface); border: 1px solid var(--color-divider); border-radius: 8px; padding: 1.5rem; }
+.admin-overview-panel h3 { font-size: 1.125rem; font-weight: 600; margin-top: 0; margin-bottom: .5rem; }
+
+.admin-blocked-section { margin-top: 1.5rem; background: var(--color-surface); border: 1px solid var(--color-divider); border-radius: 8px; padding: 1.5rem; }
+.admin-blocked-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .875rem; margin-top: 1.25rem; }
+.admin-blocked-card { display: flex; justify-content: space-between; align-items: center; padding: .875rem 1rem; background: var(--color-surface-elevated); border: 1px solid var(--color-divider); border-radius: 6px; }
+
+.admin-toast-feedback { border-radius: 6px; padding: .75rem 1rem; font-size: .875rem; line-height: 1.5; margin-top: 1rem; }
+.admin-toast-feedback.is-success { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+.admin-toast-feedback.is-error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+.admin-login { max-width: 30rem; margin-inline: auto; background: var(--color-surface); border: 1px solid var(--color-divider); border-radius: 8px; padding: 2rem; box-shadow: 0 4px 20px rgba(0, 0, 0, .03); }
+.admin-login h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 2.5rem); font-weight: 500; letter-spacing: -.035em; margin-top: .5rem; }
+.admin-login > p:not(.section-label), .admin-empty > p { margin-top: .75rem; color: var(--color-muted); font-size: .9375rem; line-height: 1.6; }
+.admin-login form { margin-top: 1.5rem; display: grid; gap: 1.25rem; }
+.admin-login form > button { width: 100%; margin-top: .5rem; }
+
+.admin-empty { text-align: center; padding: 3.5rem 1.5rem; border: 1px dashed var(--color-divider); border-radius: 8px; background: var(--color-surface); }
+.admin-empty h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 500; margin: 0; }
 
 @media (min-width: 640px) {
-  .booking-panel { padding: 1.75rem; }
-  .booking-fieldset { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .booking-wide { grid-column: 1 / -1; }
-  .admin-shell { width: min(100% - 3rem, 72rem); }
-  .admin-booking { padding: 1.75rem; }
-  .admin-toolbar > p { margin-left: auto; }
+  .admin-main-container { width: min(100% - 3rem, 80rem); }
+  .admin-booking-card { padding: 1.75rem; }
 }
 
 @media (min-width: 960px) {
-  .booking-page-grid { grid-template-columns: .9fr 1.1fr; gap: 2rem; }
-  .booking-status-layout { grid-template-columns: 1fr 1fr; gap: 3rem; }
-  .admin-shell { padding-top: 3.5rem; }
-  .admin-booking-body { grid-template-columns: 1fr 1fr; gap: 3rem; }
-  .admin-booking-controls { border-left: 1px solid var(--color-divider); padding-left: 2rem; }
+  .admin-card-grid { grid-template-columns: 1.1fr .9fr; gap: 2.5rem; }
+  .admin-action-section { border-left: 1px solid var(--color-divider); padding-left: 2rem; }
 }
+
