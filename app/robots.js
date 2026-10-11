@@ -3,6 +3,7 @@ export default function robots() {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: ["/pay/", "/payment/", "/book/", "/admin", "/api/"],
     },
     sitemap: "https://thehaus26.com/sitemap.xml",
   };

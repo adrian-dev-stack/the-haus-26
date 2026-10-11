@@ -26,14 +26,14 @@ export default function Navbar({ name, rate }) {
         <nav aria-label="Main navigation" className="nav-inner">
           <a href="#main" className="nav-brand" onClick={() => setOpen(false)}>{name}</a>
           <div className="desktop-links">{links.map((link) => <a href={link.href} key={link.href}>{link.label}</a>)}</div>
-          <a href="#calendar" className="nav-book button-primary">Choose your dates</a>
+          <a href="#inquire" className="nav-book button-primary">Request to book</a>
           <button type="button" className="menu-toggle" ref={menuButton} aria-expanded={open} aria-controls={menuId} onClick={() => setOpen(!open)}>{open ? "Close" : "Menu"}</button>
         </nav>
-        {open && <div id={menuId} className="mobile-menu">{[...links, { href: "#calendar", label: "Choose your dates" }].map((link) => <a key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}</div>}
+        {open && <div id={menuId} className="mobile-menu">{[...links, { href: "#inquire", label: "Request to book" }].map((link) => <a key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}</div>}
       </header>
       <div className="mobile-booking-bar" aria-label="Booking shortcut">
         <div><span>{rate || "Ask for a rate"}</span><small>22-hour private stay</small></div>
-        <a href="#calendar" className="button-primary">Choose dates</a>
+        <a href="#inquire" className="button-primary">Request to book</a>
       </div>
     </>
   );

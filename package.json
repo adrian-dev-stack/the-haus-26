@@ -6,16 +6,26 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/verify-property.js"
+    "test": "node scripts/verify-property.js && node --expose-gc --test scripts/payments.test.js scripts/booking-auth.test.js scripts/bookings.test.js scripts/booking-webhook.test.js",
+    "payment:request": "node scripts/payment-request.js",
+    "booking:setup": "node scripts/booking-setup.js",
+    "booking:retention": "node scripts/booking-retention.js"
   },
   "dependencies": {
+    "@libsql/client": "0.18.0",
     "animejs": "^4.5.0",
-    "next": "15.5.9",
+    "next": "15.5.27",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.1.13",
     "tailwindcss": "4.1.13"
+  },
+  "overrides": {
+    "postcss": "8.5.29",
+    "next": {
+      "sharp": "0.35.5"
+    }
   }
 }

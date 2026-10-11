@@ -3,7 +3,7 @@ import Navbar from "@/components/Navbar";
 import HeroPhoto from "@/components/HeroPhoto";
 import PhotoGallery from "@/components/PhotoGallery";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
-import InquiryForm from "@/components/InquiryForm";
+import BookingForm from "@/components/BookingForm";
 import TierSelectButton from "@/components/TierSelectButton";
 
 const rateTiers = [
@@ -68,7 +68,7 @@ export default function Page() {
           <div className="section-intro">
             <p className="section-label">Find a day to get away</p>
             <h2 id="calendar-heading">When would you<br />like to stay?</h2>
-            <p>Choose a preferred date to add to your inquiry. The host will confirm availability before your stay is booked.</p>
+            <p>Choose a preferred check-in for your booking request. The host reviews availability and the final rate before you pay.</p>
           </div>
           <AvailabilityCalendar bookedDates={p.bookedDates || []} phone={p.contact.phone} messengerUrl={p.contact.messengerUrl} email={p.contact.email} />
         </section>
@@ -88,12 +88,15 @@ export default function Page() {
         </section>
         <section id="reservation-section" className="reservation-section" aria-labelledby="reservation-heading">
           <div className="section-intro">
-            <p className="section-label">Start with a hello</p>
+            <p className="section-label">Request a private stay</p>
             <h2 id="reservation-heading">Let’s plan<br />your stay.</h2>
-            <p>Add your dates and group size, then send your inquiry via SMS, Messenger, Instagram, or email.</p>
-            <p>The host confirms your date, rate, and arrival details directly. Sending an inquiry does not make a reservation.</p>
+            <p>Send your preferred date, group size, and contact details here. You’ll receive a private link to track your request.</p>
+            <p>The host approves your date, final rate, and terms. You can then pay a 50% deposit through PayMongo to confirm your stay.</p>
+            <p>Have a question first? Contact the host directly.</p>
+            <a href="/payment" className="text-link">How the booking deposit works</a>
             <div className="contact-links">
               {p.contact.phone && <a className="text-link" href={`tel:${p.contact.phone}`}>Call {p.contact.phone}</a>}
+              {p.contact.messengerUrl && <a className="text-link" href={p.contact.messengerUrl} target="_blank" rel="noopener noreferrer">Message on Facebook</a>}
               {p.contact.email && <a className="text-link" href={`mailto:${p.contact.email}`}>Email {p.contact.email}</a>}
               {p.contact.instagramUrl && (
                 <a className="text-link" href={p.contact.instagramUrl} target="_blank" rel="noopener noreferrer">
@@ -103,13 +106,7 @@ export default function Page() {
             </div>
           </div>
           <div id="inquire">
-            <InquiryForm
-              name={p.name}
-              phone={p.contact.phone}
-              messengerUrl={p.contact.messengerUrl}
-              email={p.contact.email}
-              instagramUrl={p.contact.instagramUrl}
-              instagram={p.contact.instagram}
+            <BookingForm
               checkIn={p.checkIn}
               checkOut={p.checkOut}
             />

@@ -189,7 +189,7 @@ Could you confirm availability and the final rate? Thank you!`;
             {copyStatus === "success" && copiedMessage === generatedMessage && <p className="mb-2">Inquiry copied. Paste it into your conversation with the host.</p>}
             {copyStatus === "error" && <p className="mb-2 text-ink">Copying was unavailable. Select the inquiry text above and copy it manually.</p>}
             {!hasPhone && <p className="mb-2">SMS inquiries are unavailable. {messengerUrl || instagramUrl ? "Use Messenger or Instagram to contact the host." : "Copy your inquiry to share with the host."}</p>}
-            <p>{smsOpened ? "Your messaging app should open with the inquiry filled in. Your host still needs to confirm the booking." : "Your host confirms availability and the final rate. This form sends an inquiry, with no payment taken."}</p>
+            <p>{smsOpened ? "Your messaging app should open with the inquiry filled in. Your host still needs to confirm the booking." : "Your host confirms availability and the final rate. A 50% deposit follows confirmation; no payment is taken through this inquiry."}</p>
           </div>
         </div>
       </form>
