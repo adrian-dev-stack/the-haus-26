@@ -13,9 +13,7 @@ export default function JsonLd() {
     telephone: property.contact.phone,
     priceRange: "₱5,000 - ₱8,000+",
     currenciesAccepted: "PHP",
-    paymentAccepted: "Cash, GCash, Bank Transfer",
     checkinTime: "11:00",
-    checkoutTime: "13:00",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Hulo, Alangan",
@@ -36,7 +34,6 @@ export default function JsonLd() {
       value: true,
     })),
     petsAllowed: true,
-    smokingAllowed: false,
   };
 
   return (
