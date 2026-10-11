@@ -26,7 +26,7 @@ function formatSelectedDate(value) {
 }
 
 export default function AvailabilityCalendar({
-  bookedDates = [], onSelectDate, selectedDate: controlledSelectedDate, phone, messengerUrl,
+  bookedDates = [], onSelectDate, selectedDate: controlledSelectedDate, phone, messengerUrl, email,
 }) {
   const [today, setToday] = useState("");
   const [currentMonth, setCurrentMonth] = useState(null);
@@ -149,6 +149,7 @@ export default function AvailabilityCalendar({
             <a href="#inquire" className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Complete your inquiry</a>
             {hasPhone && <a href={`sms:${cleanPhone}?body=${encodeURIComponent(`Hi! I would like to inquire about The HauS 26 for check-in on ${activeSelectedDate}, for a 22-hour stay. Could you confirm availability?`)}`} className={linkStyle}>Ask by SMS</a>}
             {messengerUrl && <a href={messengerUrl} target="_blank" rel="noopener noreferrer" className={linkStyle}>Open Messenger</a>}
+            {email && <a href={`mailto:${email}?subject=${encodeURIComponent(`Inquiry for check-in on ${activeSelectedDate}`)}&body=${encodeURIComponent(`Hi! I would like to inquire about The HauS 26 for check-in on ${activeSelectedDate}, for a 22-hour stay. Could you confirm availability?`)}`} className={linkStyle}>Ask by Email</a>}
           </div>
         </div>
       ) : <p className="mt-5 text-sm text-muted">Choose a date above to fill in your inquiry.</p>}

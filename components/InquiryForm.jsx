@@ -28,7 +28,7 @@ function getToday() {
 
 const OCCASIONS = ["Family staycation", "Barkada / friends outing", "Birthday / celebration", "General inquiry"];
 
-export default function InquiryForm({ name, phone, messengerUrl, checkIn, checkOut }) {
+export default function InquiryForm({ name, phone, messengerUrl, email, instagramUrl, instagram, checkIn, checkOut }) {
   const [smsOpened, setSmsOpened] = useState(false);
   const [copyStatus, setCopyStatus] = useState("idle");
   const [copiedMessage, setCopiedMessage] = useState("");
@@ -166,10 +166,29 @@ Could you confirm availability and the final rate? Thank you!`;
         <div className="min-w-0 sm:col-span-2">
           <button type="submit" disabled={!hasPhone} className="flex min-h-12 w-full items-center justify-center rounded-md bg-accent px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Open inquiry in SMS</button>
           {messengerUrl && <a href={messengerUrl} target="_blank" rel="noopener noreferrer" onClick={copyMessageToClipboard} className={`${secondaryStyle} mt-3 w-full`}>Copy inquiry & open Messenger</a>}
+          {instagramUrl && (
+            <a
+              href={instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={copyMessageToClipboard}
+              className={`${secondaryStyle} mt-3 w-full`}
+            >
+              Copy inquiry & open Instagram (@{instagram || "thehaus.26"})
+            </a>
+          )}
+          {email && (
+            <a
+              href={`mailto:${email}?subject=${encodeURIComponent(`Inquiry for ${name}`)}&body=${encodeURIComponent(generatedMessage)}`}
+              className={`${secondaryStyle} mt-3 w-full`}
+            >
+              Email inquiry to {email}
+            </a>
+          )}
           <div className="mt-3 text-sm leading-relaxed text-muted" aria-live="polite" role="status">
             {copyStatus === "success" && copiedMessage === generatedMessage && <p className="mb-2">Inquiry copied. Paste it into your conversation with the host.</p>}
             {copyStatus === "error" && <p className="mb-2 text-ink">Copying was unavailable. Select the inquiry text above and copy it manually.</p>}
-            {!hasPhone && <p className="mb-2">SMS inquiries are unavailable. {messengerUrl ? "Use Messenger to contact the host." : "Copy your inquiry to share with the host."}</p>}
+            {!hasPhone && <p className="mb-2">SMS inquiries are unavailable. {messengerUrl || instagramUrl ? "Use Messenger or Instagram to contact the host." : "Copy your inquiry to share with the host."}</p>}
             <p>{smsOpened ? "Your messaging app should open with the inquiry filled in. Your host still needs to confirm the booking." : "Your host confirms availability and the final rate. This form sends an inquiry, with no payment taken."}</p>
           </div>
         </div>
