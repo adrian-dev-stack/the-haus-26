@@ -9,8 +9,9 @@ import {
   calculateBookingTotal, cancelBooking, confirmBooking, createBookingRequest, getAdminBooking, getBookingByPaymentReference,
   getBookingStore, getGuestBooking, getUnavailableDates, initializeBookingStore, listAdminBookings,
   refreshBookingPayment, syncBookingFromPayment, HOLD_DURATION_MS,
-  addBlockedDate, getBlockedDates, removeBlockedDate,
+  addBlockedDate, getBlockedDates, removeBlockedDate, markBalancePaid,
 } from "../lib/bookings.js";
+
 
 import { getPaymentConfig, readPaymentToken } from "../lib/payments.js";
 
@@ -349,5 +350,45 @@ test("host can dynamically block and unblock dates with reasons", async () => {
     assert.deepEqual(await getUnavailableDates({ client, config, now }), []);
   });
 });
+
+test("host can record balance paid on arrival for confirmed bookings and reset if needed", async () => {
+  await database(async (client) => {
+    const fake = provider();
+    const result = await createBookingRequest(input(), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    const bookingId = result.booking.id;
+
+    // Cannot mark balance paid while still awaiting payment
+    await assert.rejects(
+      markBalancePaid(bookingId, { method: "Cash on arrival", client }),
+      rejectCode("invalid-request")
+    );
+
+    // Simulate deposit payment confirmed via webhook / sync
+    await syncBookingFromPayment({
+      request: {
+        sessionId: fake.sessions.keys().next().value,
+        reference: result.booking.reference,
+        date: result.booking.date,
+        guests: 4,
+        totalAmount: 500000,
+        depositAmount: 250000,
+        livemode: false,
+      },
+      status: "paid",
+      paymentId: "pay_test_deposit_receipt_123",
+    }, { client });
+
+    // Now confirmed/test_paid - mark balance paid
+    const updated = await markBalancePaid(bookingId, { method: "GCash on arrival", client });
+    assert.equal(updated.balanceMethod, "GCash on arrival");
+    assert.ok(updated.balancePaidAt);
+
+    // Host can reset to unpaid if marked by mistake
+    const reset = await markBalancePaid(bookingId, { paid: false, client });
+    assert.equal(reset.balanceMethod, null);
+    assert.equal(reset.balancePaidAt, null);
+  });
+});
+
 
 

@@ -27,7 +27,15 @@ function BookingEntry({ booking, onChanged, onUnauthorized }) {
       if (response.status === 401) { onUnauthorized(); return; }
       const result = await response.json();
       if (!response.ok) throw new Error(result.error?.message || "This booking could not be updated. Please try again.");
-      setNotice(payload.action === "confirm" ? "Quote saved. Share the guest’s private booking link so they can review the terms and deposit." : payload.action === "refresh" ? "Latest payment status checked." : "Booking cancelled.");
+      setNotice(
+        payload.action === "confirm"
+          ? "Quote saved. Share the guest’s private booking link so they can review the terms and deposit."
+          : payload.action === "refresh"
+          ? "Latest payment status checked."
+          : payload.action === "mark_balance_paid"
+          ? (payload.paid === false ? "Balance status reset to unpaid." : "Remaining balance recorded as paid on arrival.")
+          : "Booking cancelled."
+      );
       onChanged(result.data.booking);
     } catch (failure) { setError(failure instanceof TypeError ? "We could not reach the booking service. Retry this action to check its result." : failure.message); }
     finally { setPending(""); }
@@ -48,11 +56,81 @@ function BookingEntry({ booking, onChanged, onUnauthorized }) {
     <article className="admin-booking" aria-busy={!!pending}>
       <div className="admin-booking-header"><div><p className="section-label">{booking.reference}</p><h2>{stayDate(booking.date)}</h2><p>{booking.guests} {booking.guests === 1 ? "guest" : "guests"} · 22-hour stay</p></div><div className="admin-status-group"><span className="booking-status-label">{STATUS_LABELS[booking.status] || "Needs review"}</span>{booking.livemode === false && <span className="booking-mode-label">Test mode</span>}</div></div>
       <div className="admin-booking-body">
-        <div className="admin-guest-details"><h3>Guest details</h3><dl className="booking-details"><div><dt>Name</dt><dd>{booking.name}</dd></div><div><dt>Email</dt><dd><a href={`mailto:${booking.email}`} className="admin-contact-link">{booking.email}</a></dd></div><div><dt>Mobile</dt><dd><a href={`tel:${booking.phone}`} className="admin-contact-link">{booking.phone}</a></dd></div>{booking.occasion && <div><dt>Occasion</dt><dd>{booking.occasion}</dd></div>}</dl>{booking.notes && <div className="admin-notes"><h3>Questions or requests</h3><p>{booking.notes}</p></div>}{hasQuote && <dl className="booking-details admin-quote"><div><dt>Confirmed total</dt><dd>{money(booking.totalAmount)}</dd></div><div><dt>50% deposit</dt><dd>{money(booking.depositAmount)}</dd></div><div><dt>Balance</dt><dd>{money(booking.totalAmount - booking.depositAmount)}</dd></div></dl>}{booking.terms && <div className="admin-notes"><h3>Confirmed terms</h3><p>{booking.terms}</p></div>}{booking.guestUrl && <div className="booking-actions"><button type="button" className="booking-secondary" onClick={copyGuestLink}>Copy guest link</button><Link href={booking.guestUrl} className="text-link" target="_blank" rel="noopener noreferrer">Open guest booking</Link></div>}{copyMessage && <p className="booking-small" role="status">{copyMessage}</p>}</div>
+        <div className="admin-guest-details">
+          <h3>Guest details</h3>
+          <dl className="booking-details">
+            <div><dt>Name</dt><dd>{booking.name}</dd></div>
+            <div><dt>Email</dt><dd><a href={`mailto:${booking.email}`} className="admin-contact-link">{booking.email}</a></dd></div>
+            <div><dt>Mobile</dt><dd><a href={`tel:${booking.phone}`} className="admin-contact-link">{booking.phone}</a></dd></div>
+            {booking.occasion && <div><dt>Occasion</dt><dd>{booking.occasion}</dd></div>}
+          </dl>
+          {booking.notes && <div className="admin-notes"><h3>Questions or requests</h3><p>{booking.notes}</p></div>}
+          {hasQuote && (
+            <dl className="booking-details admin-quote">
+              <div><dt>Confirmed total</dt><dd>{money(booking.totalAmount)}</dd></div>
+              <div><dt>50% deposit</dt><dd>{money(booking.depositAmount)}</dd></div>
+              <div>
+                <dt>Balance</dt>
+                <dd>
+                  {money(booking.totalAmount - booking.depositAmount)}
+                  {booking.balancePaidAt && (
+                    <span style={{ display: "block", color: "var(--color-accent)", fontSize: "0.8125rem", marginTop: "0.25rem" }}>
+                      Paid ({booking.balanceMethod || "Cash on arrival"})
+                    </span>
+                  )}
+                </dd>
+              </div>
+            </dl>
+          )}
+          {booking.terms && <div className="admin-notes"><h3>Confirmed terms</h3><p>{booking.terms}</p></div>}
+          {booking.guestUrl && <div className="booking-actions"><button type="button" className="booking-secondary" onClick={copyGuestLink}>Copy guest link</button><Link href={booking.guestUrl} className="text-link" target="_blank" rel="noopener noreferrer">Open guest booking</Link></div>}
+          {copyMessage && <p className="booking-small" role="status">{copyMessage}</p>}
+        </div>
         <div className="admin-booking-controls">
           {isRequested && <form onSubmit={confirm} className="admin-confirm-form"><h3>Approve date & quote</h3><p>Agree on the final rate and terms with the guest before approving. Approval holds this date while the deposit is pending.</p><fieldset disabled={!!pending}><div className="booking-field"><label htmlFor={`${prefix}-total`}>Confirmed total (PHP)</label><input id={`${prefix}-total`} name="total" type="number" inputMode="decimal" min="2" step="0.02" required placeholder="5000.00" /><p>The guest pays 50% of this amount as their deposit.</p></div><div className="booking-field"><label htmlFor={`${prefix}-terms`}>Terms agreed with the guest</label><textarea id={`${prefix}-terms`} name="terms" rows={4} minLength={10} maxLength={2000} required placeholder="Enter the agreed cancellation, rescheduling, and remaining balance terms." /></div></fieldset><button className="button-primary" type="submit" disabled={!!pending}>{pending === "confirm" ? "Preparing deposit…" : "Approve & create deposit"}</button></form>}
           {isAwaiting && !booking.paymentToken && <div className="admin-retry"><h3>Finish preparing the deposit</h3><p>The quote is saved. Retry to safely resume preparation of the same payment request.</p><button type="button" className="button-primary" disabled={!!pending} onClick={() => action({ action: "confirm", total: String(booking.totalAmount / 100), terms: booking.terms })}>{pending === "confirm" ? "Preparing deposit…" : "Retry deposit setup"}</button></div>}
           {(booking.paymentToken || booking.paymentStatus || ["confirmed", "test_paid", "payment_issue", "refunded"].includes(booking.status)) && <div className="admin-payment-controls"><h3>Payment status</h3><p>Check PayMongo for the latest deposit status before finalizing arrival details.</p><button type="button" className="booking-secondary" disabled={!!pending} onClick={() => action({ action: "refresh" })}>{pending === "refresh" ? "Checking PayMongo…" : "Refresh payment status"}</button>{booking.paymentToken && <Link href={`/pay/${encodeURIComponent(booking.paymentToken)}`} target="_blank" rel="noopener noreferrer" className="text-link">View payment request</Link>}</div>}
+          {["confirmed", "test_paid"].includes(booking.status) && (
+            <div className="admin-balance-controls" style={{ marginTop: "1.25rem", padding: "1rem", border: "1px solid var(--color-divider)", borderRadius: "4px", background: "var(--color-surface-elevated)" }}>
+              <h3 style={{ fontSize: "0.9375rem", margin: 0 }}>Remaining Balance ({money(booking.totalAmount - booking.depositAmount)})</h3>
+              {booking.balancePaidAt ? (
+                <div style={{ marginTop: "0.5rem" }}>
+                  <p style={{ margin: 0, fontSize: "0.875rem", color: "var(--color-accent)" }}>
+                    Marked paid on arrival via {booking.balanceMethod || "Cash"}.
+                  </p>
+                  <button
+                    type="button"
+                    className="booking-secondary"
+                    disabled={!!pending}
+                    onClick={() => action({ action: "mark_balance_paid", paid: false })}
+                    style={{ marginTop: "0.5rem", minHeight: "36px", padding: "0.25rem 0.75rem", fontSize: "0.8125rem" }}
+                  >
+                    {pending === "mark_balance_paid" ? "Updating…" : "Reset balance to unpaid"}
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const method = new FormData(e.currentTarget).get("method");
+                  action({ action: "mark_balance_paid", method, paid: true });
+                }} style={{ marginTop: "0.75rem", display: "grid", gap: "0.75rem" }}>
+                  <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+                    When the guest arrives and settles their remaining 50% balance, record it here:
+                  </p>
+                  <div className="booking-field" style={{ margin: 0 }}>
+                    <select name="method" defaultValue="Cash on arrival" disabled={!!pending}>
+                      <option value="Cash on arrival">Cash on arrival</option>
+                      <option value="GCash on arrival">GCash on arrival</option>
+                      <option value="Bank transfer on arrival">Bank transfer on arrival</option>
+                    </select>
+                  </div>
+                  <button className="button-primary" type="submit" disabled={!!pending} style={{ width: "fit-content", minHeight: "38px" }}>
+                    {pending === "mark_balance_paid" ? "Recording…" : "Mark Balance Paid on Arrival"}
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
           {canCancel && <details className="admin-cancel"><summary>Cancel this {isRequested ? "request" : "unpaid booking"}</summary><form onSubmit={cancel}><p>{isAwaiting ? "The checkout will be expired before the date is released. A payment already received requires a separate refund review." : "The guest will see that this request is cancelled."}</p><div className="booking-field"><label htmlFor={`${prefix}-reason`}>Reason for cancellation</label><textarea id={`${prefix}-reason`} name="reason" minLength={3} maxLength={500} rows={2} required disabled={!!pending} /></div><button type="submit" className="booking-secondary" disabled={!!pending}>{pending === "cancel" ? "Cancelling…" : "Cancel booking"}</button></form></details>}
           {["confirmed", "test_paid", "refunded", "payment_issue"].includes(booking.status) && <p className="booking-notice">For a paid booking, review any refund in PayMongo and agree on changes directly with the guest. Refresh the payment status after reviewing it.</p>}
         </div>
