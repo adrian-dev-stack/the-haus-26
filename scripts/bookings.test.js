@@ -6,9 +6,9 @@ import path from "node:path";
 import test from "node:test";
 import { createClient } from "@libsql/client";
 import {
-  cancelBooking, confirmBooking, createBookingRequest, getAdminBooking, getBookingByPaymentReference,
+  calculateBookingTotal, cancelBooking, confirmBooking, createBookingRequest, getAdminBooking, getBookingByPaymentReference,
   getBookingStore, getGuestBooking, getUnavailableDates, initializeBookingStore, listAdminBookings,
-  refreshBookingPayment, syncBookingFromPayment,
+  refreshBookingPayment, syncBookingFromPayment, HOLD_DURATION_MS,
 } from "../lib/bookings.js";
 import { getPaymentConfig, readPaymentToken } from "../lib/payments.js";
 
@@ -298,3 +298,32 @@ test("admin listings paginate and payment-reference lookup exposes no personal d
     await assert.rejects(listAdminBookings({ client, status: "made-up" }), rejectCode("invalid-request"));
   });
 });
+
+test("pricing tiers calculate exact totals and auto-approval holds date for 30 minutes", async () => {
+  assert.equal(calculateBookingTotal(1), 500000);
+  assert.equal(calculateBookingTotal(4), 500000);
+  assert.equal(calculateBookingTotal(5), 600000);
+  assert.equal(calculateBookingTotal(6), 600000);
+  assert.equal(calculateBookingTotal(7), 800000);
+  assert.equal(calculateBookingTotal(10), 800000);
+  assert.equal(calculateBookingTotal(11), 850000);
+  assert.equal(calculateBookingTotal(12), 900000);
+  assert.equal(calculateBookingTotal(15), 1050000);
+
+  await database(async (client) => {
+    const fake = provider();
+    const result = await createBookingRequest(input({ guests: 6 }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    assert.equal(result.booking.status, "awaiting_payment");
+    assert.equal(result.booking.totalAmount, 600000);
+    assert.equal(result.booking.depositAmount, 300000);
+    assert.ok(result.booking.paymentToken);
+    assert.deepEqual(await getUnavailableDates({ client, config, now }), [result.booking.date]);
+
+    // Fast-forward 31 minutes: unpaid hold expires and date opens back up
+    const future = now + HOLD_DURATION_MS + 60000;
+    assert.deepEqual(await getUnavailableDates({ client, config, now: future }), []);
+    const checked = await getAdminBooking(result.booking.id, { client });
+    assert.equal(checked.status, "cancelled");
+  });
+});
+

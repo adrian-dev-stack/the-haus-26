@@ -17,11 +17,16 @@ function followingDay(value) {
 
 function estimateRate(guests) {
   const count = Number(guests);
-  if (!Number.isInteger(count) || count < 1) return "Choose guest count";
-  if (count <= 4) return "₱5,000";
-  if (count === 6) return "₱7,000";
-  if (count >= 8 && count <= 10) return "₱8,000";
-  return "Ask for a quote";
+  if (!Number.isInteger(count) || count < 1) return { total: "Choose guest count", deposit: "" };
+  let pesos;
+  if (count <= 4) pesos = 5000;
+  else if (count <= 6) pesos = 6000;
+  else if (count <= 10) pesos = 8000;
+  else pesos = 8000 + (count - 10) * 500;
+  return {
+    total: `₱${pesos.toLocaleString()}`,
+    deposit: `₱${(pesos / 2).toLocaleString()}`,
+  };
 }
 
 export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
@@ -109,33 +114,36 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
     } catch { setCopyMessage("Open your booking below, then save its address from your browser."); }
   }
 
-  if (submitted) return (
-    <div className="booking-panel booking-success" role="status">
-      <p className="section-label">Request received · {submitted.booking.reference}</p>
-      <Heading ref={successHeading} tabIndex={-1}>Your stay is with the host.</Heading>
-      <p>Your date and final rate still need approval. No payment has been taken, and the date is not yet reserved.</p>
-      {submitted.booking.livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
-      <p>Save your private booking link. It shows the host’s quote and your deposit when they are ready.</p>
-      <div className="booking-actions">
-        <Link href={submitted.guestUrl} className="button-primary">View my booking</Link>
-        <button type="button" className="booking-secondary" onClick={copyLink}>Copy private link</button>
+  if (submitted) {
+    const isApproved = submitted.booking?.status === "awaiting_payment" && submitted.booking?.paymentToken;
+    return (
+      <div className="booking-panel booking-success" role="status">
+        <p className="section-label">Date Held · {submitted.booking.reference}</p>
+        <Heading ref={successHeading} tabIndex={-1}>{isApproved ? "Your booking is approved!" : "Your stay is with the host."}</Heading>
+        <p>{isApproved ? "Your date is held for 30 minutes. Complete your 50% deposit to lock in your reservation." : "Your date and final rate still need approval. Save your private booking link."}</p>
+        {submitted.booking.livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
+        <div className="booking-actions">
+          {isApproved && <Link href={`/pay/${encodeURIComponent(submitted.booking.paymentToken)}`} className="button-primary">Pay 50% Deposit (GCash / Card)</Link>}
+          <Link href={submitted.guestUrl} className={isApproved ? "booking-secondary" : "button-primary"}>View booking details</Link>
+          <button type="button" className="booking-secondary" onClick={copyLink}>Copy private link</button>
+        </div>
+        {copyMessage && <p aria-live="polite">{copyMessage}</p>}
       </div>
-      {copyMessage && <p aria-live="polite">{copyMessage}</p>}
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="booking-panel">
       <div className="booking-form-heading">
-        <div><Heading>Request your stay</Heading><p>The host reviews your date before you pay.</p></div>
-        <div className="booking-estimate"><span>Estimated total</span><strong aria-live="polite">{rate}</strong></div>
+        <div><Heading>Reserve your stay</Heading><p>Instant booking with 30-minute hold for deposit.</p></div>
+        <div className="booking-estimate"><span>Total (50% Deposit)</span><strong aria-live="polite">{rate.total} {rate.deposit ? `· Deposit: ${rate.deposit}` : ""}</strong></div>
       </div>
       {livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
       <form onSubmit={submit} className="booking-form" aria-busy={pending}>
         <fieldset disabled={pending || uncertain} className="booking-fieldset">
           <div className="booking-field"><label htmlFor={`${prefix}-date`}>Check-in date</label><input id={`${prefix}-date`} type="date" name="date" required min={today} value={date} onChange={(event) => changeDate(event.target.value)} /><p>{checkIn}</p></div>
           <div className="booking-field"><label htmlFor={`${prefix}-checkout`}>Check-out date</label><input id={`${prefix}-checkout`} type="date" readOnly value={followingDay(date)} /><p>{checkOut || "Following day, after your 22-hour stay"}</p></div>
-          <div className="booking-field booking-wide"><label htmlFor={`${prefix}-guests`}>Number of guests</label><div className="booking-guest-count"><input id={`${prefix}-guests`} type="number" name="guests" min="1" step="1" required value={guests} onChange={(event) => setGuests(event.target.value)} /><div role="group" aria-label="Quick guest counts">{[4, 6, 8, 10].map((count) => <button key={count} type="button" className="booking-secondary" aria-pressed={Number(guests) === count} onClick={() => setGuests(String(count))}>{count}</button>)}</div></div><p>This estimate covers one 22-hour stay. The host confirms the final rate and whether your group can be accommodated.</p></div>
+          <div className="booking-field booking-wide"><label htmlFor={`${prefix}-guests`}>Number of guests</label><div className="booking-guest-count"><input id={`${prefix}-guests`} type="number" name="guests" min="1" step="1" required value={guests} onChange={(event) => setGuests(event.target.value)} /><div role="group" aria-label="Quick guest counts">{[4, 6, 8, 10].map((count) => <button key={count} type="button" className="booking-secondary" aria-pressed={Number(guests) === count} onClick={() => setGuests(String(count))}>{count}</button>)}</div></div><p>Covers a 22-hour private stay. Dates are held for 30 minutes upon reservation for deposit payment.</p></div>
           <div className="booking-field booking-wide"><label htmlFor={`${prefix}-name`}>Your full name</label><input id={`${prefix}-name`} name="name" required minLength={2} maxLength={100} autoComplete="name" placeholder="Your full name" /></div>
           <div className="booking-field"><label htmlFor={`${prefix}-email`}>Email address</label><input id={`${prefix}-email`} name="email" type="email" required maxLength={254} autoComplete="email" placeholder="you@example.com" /></div>
           <div className="booking-field"><label htmlFor={`${prefix}-phone`}>Mobile number</label><input id={`${prefix}-phone`} name="phone" type="tel" required maxLength={30} autoComplete="tel" placeholder="09… or +63…" /></div>

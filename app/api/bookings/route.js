@@ -8,7 +8,11 @@ export async function POST(request) {
   try {
     requireBookingOrigin(request);
     await limitBookingRequest(request, "booking-create", 8);
-    const result = await createBookingRequest(await readBookingBody(request), { blockedDates: property.bookedDates });
-    return bookingResponse({ booking: result.booking, guestUrl: `${getPaymentConfig().siteUrl}/book/${result.token}` }, result.replayed ? 200 : 201);
+    const result = await createBookingRequest(await readBookingBody(request), { blockedDates: property.bookedDates, autoApprove: true });
+    return bookingResponse({
+      booking: result.booking,
+      guestUrl: `${getPaymentConfig().siteUrl}/book/${result.token}`,
+      paymentToken: result.booking.paymentToken,
+    }, result.replayed ? 200 : 201);
   } catch (error) { return bookingFailure(error); }
 }
