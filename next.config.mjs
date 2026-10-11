@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  serverExternalPackages: ["@libsql/client", "libsql"],
   images: {
     formats: ["image/avif", "image/webp"],
   },
@@ -32,6 +33,14 @@ const nextConfig = {
           },
         ],
       },
+      ...["/pay/:path*", "/payment/:path*", "/book/:path*", "/admin/:path*", "/api/payments/:path*", "/api/bookings/:path*", "/api/admin/:path*"].map((source) => ({
+        source,
+        headers: [
+          { key: "Referrer-Policy", value: "strict-origin" },
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+        ],
+      })),
     ];
   },
 };

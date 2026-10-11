@@ -1,0 +1,25 @@
+import { confirmBooking, refreshBookingPayment, cancelBooking } from "@/lib/bookings";
+import { parsePesoAmount } from "@/scripts/payment-request";
+import { property } from "@/lib/property";
+import { BookingHttpError, bookingResponse, bookingFailure, requireBookingAdmin, requireBookingOrigin, readBookingBody, limitBookingRequest } from "@/lib/booking-http";
+
+export const runtime = "nodejs";
+export async function POST(request, { params }) {
+  try {
+    requireBookingOrigin(request);
+    await requireBookingAdmin();
+    await limitBookingRequest(request, "admin-booking-actions", 60);
+    const body = await readBookingBody(request);
+    const { id } = await params;
+    let booking;
+    if (body.action === "confirm") {
+      let totalAmount;
+      try { totalAmount = parsePesoAmount(body.total); }
+      catch { throw new BookingHttpError("invalid-total", "Enter the final total in pesos, for example 5000.", 422); }
+      booking = await confirmBooking(id, { totalAmount, terms: body.terms }, { blockedDates: property.bookedDates });
+    } else if (body.action === "refresh") booking = await refreshBookingPayment(id);
+    else if (body.action === "cancel") booking = await cancelBooking(id, { reason: body.reason });
+    else throw new BookingHttpError("invalid-action", "Choose a supported booking action.", 400);
+    return bookingResponse({ booking });
+  } catch (error) { return bookingFailure(error); }
+}

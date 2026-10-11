@@ -1,3 +1,6 @@
 node_modules
 .next
 .env*
+!.env.example
+.payment-requests/
+.booking-data/

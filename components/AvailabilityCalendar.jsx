@@ -26,14 +26,18 @@ function formatSelectedDate(value) {
 }
 
 export default function AvailabilityCalendar({
-  bookedDates = [], onSelectDate, selectedDate: controlledSelectedDate, phone, messengerUrl, email,
+  bookedDates = [], onSelectDate, selectedDate: controlledSelectedDate, phone, messengerUrl, email, headingLevel = 3,
 }) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const [today, setToday] = useState("");
   const [currentMonth, setCurrentMonth] = useState(null);
   const [currentYear, setCurrentYear] = useState(null);
   const [todayYear, todayMonth] = today ? today.split("-").map(Number) : [null, null];
   const [internalSelectedDate, setInternalSelectedDate] = useState("");
+  const [savedDates, setSavedDates] = useState([]);
+  const [availabilityStatus, setAvailabilityStatus] = useState("loading");
   const activeSelectedDate = controlledSelectedDate ?? internalSelectedDate;
+  const unavailableDates = new Set([...bookedDates, ...savedDates]);
   const cleanPhone = (phone || "").replace(/[^0-9+]/g, "");
   const hasPhone = /\d/.test(cleanPhone);
 
@@ -43,6 +47,24 @@ export default function AvailabilityCalendar({
     setToday(currentDate);
     setCurrentYear(year);
     setCurrentMonth(month - 1);
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadAvailability() {
+      try {
+        const response = await fetch("/api/bookings/availability", { cache: "no-store", signal: controller.signal });
+        const result = await response.json();
+        if (!response.ok || !Array.isArray(result.data?.bookedDates)) throw new Error("Availability unavailable");
+        setSavedDates(result.data.bookedDates.filter((date) => typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)));
+        setAvailabilityStatus("ready");
+      } catch (failure) {
+        if (failure.name !== "AbortError") setAvailabilityStatus("error");
+      }
+    }
+    loadAvailability();
+    window.addEventListener("focus", loadAvailability);
+    return () => { controller.abort(); window.removeEventListener("focus", loadAvailability); };
   }, []);
 
   useEffect(() => {
@@ -77,7 +99,7 @@ export default function AvailabilityCalendar({
   if (!today || currentMonth === null || currentYear === null) {
     return (
       <div className="min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-6">
-        <h3 className="font-display text-2xl font-semibold tracking-tight text-ink">Choose a date to inquire</h3>
+        <Heading className="availability-heading">Choose your check-in</Heading>
         <p className="mt-2 text-sm leading-relaxed text-muted">Your host confirms availability before a booking is made.</p>
         <p className="mt-6 min-h-64 text-sm text-muted" role="status">Loading the date calendar…</p>
       </div>
@@ -97,8 +119,8 @@ export default function AvailabilityCalendar({
 
   return (
     <div className="min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-6">
-      <h3 className="font-display text-2xl font-semibold tracking-tight text-ink">Choose a date to inquire</h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted">Your host confirms availability before a booking is made.</p>
+      <Heading className="availability-heading">Choose your check-in</Heading>
+      <p className="mt-2 text-sm leading-relaxed text-muted">Your host confirms the date and quote before you pay.</p>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
         <p className="text-lg font-semibold text-ink" aria-live="polite">{MONTH_NAMES[currentMonth]} {currentYear}</p>
         <div className="flex gap-2">
@@ -117,14 +139,14 @@ export default function AvailabilityCalendar({
           <div className="grid grid-cols-7 text-center text-sm text-muted" aria-hidden="true">
             {DAYS_OF_WEEK.map((day) => <div key={day} className="py-2">{day}</div>)}
           </div>
-          <div className="grid grid-cols-7 gap-y-1" role="group" aria-label={`${MONTH_NAMES[currentMonth]} ${currentYear} inquiry dates`}>
+          <div className="grid grid-cols-7 gap-y-1" role="group" aria-label={`${MONTH_NAMES[currentMonth]} ${currentYear} booking dates`}>
             {calendarDays.map((day, index) => {
               if (!day) return <div key={`empty-${index}`} className="h-12" aria-hidden="true" />;
               const date = formatDateString(currentYear, currentMonth, day);
               const isPast = date < today;
-              const isBooked = bookedDates.includes(date);
+              const isBooked = unavailableDates.has(date);
               const isSelected = activeSelectedDate === date;
-              const status = isBooked ? "Reserved" : isPast ? "Past date" : isSelected ? "Selected" : "Select to inquire";
+              const status = isBooked ? "Unavailable" : isPast ? "Past date" : isSelected ? "Selected" : "Select to request a stay";
               const style = isSelected ? "bg-accent font-semibold text-white" : isPast || isBooked
                 ? `cursor-not-allowed text-muted ${isBooked ? "line-through" : ""}` : "text-ink hover:bg-surface-elevated";
               return (
@@ -138,21 +160,22 @@ export default function AvailabilityCalendar({
       </div>
 
       <div className="mt-5 border-t border-line pt-4 text-sm leading-relaxed text-muted">
-        <p>22-hour exclusive stays. Selecting a date starts an inquiry.</p>
-        {bookedDates.length > 0 && <p className="mt-1">Crossed-out dates are reserved.</p>}
+        <p>22-hour exclusive stays. Selecting a date does not reserve it.</p>
+        {unavailableDates.size > 0 && <p className="mt-1">Crossed-out dates are reserved or awaiting a deposit.</p>}
+        <p className="mt-1" role="status">{availabilityStatus === "loading" ? "Checking the latest dates…" : availabilityStatus === "error" ? "Latest availability could not be loaded. Your host will check your requested date." : "Dates checked. The host confirms each request."}</p>
       </div>
       {activeSelectedDate ? (
         <div className="mt-5 border-t border-line pt-5">
           <p className="text-sm text-muted">Your preferred check-in</p>
           <p className="mt-1 text-lg font-semibold text-ink" aria-live="polite">{formatSelectedDate(activeSelectedDate)}</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <a href="#inquire" className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Complete your inquiry</a>
+            <a href="#inquire" className="inline-flex min-h-12 items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Request this stay</a>
             {hasPhone && <a href={`sms:${cleanPhone}?body=${encodeURIComponent(`Hi! I would like to inquire about The HauS 26 for check-in on ${activeSelectedDate}, for a 22-hour stay. Could you confirm availability?`)}`} className={linkStyle}>Ask by SMS</a>}
             {messengerUrl && <a href={messengerUrl} target="_blank" rel="noopener noreferrer" className={linkStyle}>Open Messenger</a>}
             {email && <a href={`mailto:${email}?subject=${encodeURIComponent(`Inquiry for check-in on ${activeSelectedDate}`)}&body=${encodeURIComponent(`Hi! I would like to inquire about The HauS 26 for check-in on ${activeSelectedDate}, for a 22-hour stay. Could you confirm availability?`)}`} className={linkStyle}>Ask by Email</a>}
           </div>
         </div>
-      ) : <p className="mt-5 text-sm text-muted">Choose a date above to fill in your inquiry.</p>}
+      ) : <p className="mt-5 text-sm text-muted">Choose a date above to fill in your booking request.</p>}
     </div>
   );
 }
