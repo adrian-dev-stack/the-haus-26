@@ -46,7 +46,7 @@ export default function InquiryForm({ name, phone, messengerUrl, email, instagra
   const estimatedRate = getRateEstimate(guests);
 
   useEffect(() => {
-    setToday(getToday());
+    setToday(nextDate(getToday()));
   }, []);
 
   function handleCheckinChange(value, synchronize = true) {

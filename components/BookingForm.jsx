@@ -67,7 +67,7 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
   const rate = estimateRate(guests);
 
   useEffect(() => {
-    setToday(todayInManila());
+    setToday(followingDay(todayInManila()));
     function selectDate(event) { if (!requestLocked.current && typeof event.detail?.date === "string") setDate(event.detail.date); }
     function selectGuests(event) { if (!requestLocked.current && event.detail?.guests) setGuests(String(event.detail.guests)); }
     window.addEventListener("haus26:select-date", selectDate);
@@ -97,6 +97,10 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
   async function submit(event) {
     event.preventDefault();
     if (pending) return;
+    if (date <= todayInManila()) {
+      setError("Same-day bookings cannot be accommodated. Please choose tomorrow or a future date to give our housekeeper time to ready the property.");
+      return;
+    }
     const form = new FormData(event.currentTarget);
     setPending(true);
     requestLocked.current = true;

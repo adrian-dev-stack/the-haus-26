@@ -53,7 +53,7 @@ function suggestedRate(guests) {
 }
 
 const DEFAULT_TERMS =
-  "50% deposit via PayMongo holds the reservation. Remaining 50% balance payable upon check-in. Check-in 11:00 AM - 1:00 PM, 22-hour stay. Quiet hours begin at 10:00 PM.";
+  "50% deposit via PayMongo holds the reservation. Remaining 50% balance payable upon check-in. Check-in is 11:00 AM, and check-out is 9:00 AM the next day (22-hour stay). Quiet hours begin at 10:00 PM.";
 
 function BookingEntry({ booking, onChanged, onUnauthorized }) {
   const prefix = useId();

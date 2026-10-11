@@ -136,7 +136,7 @@ test("stable form IDs replay the original link and reject payload or token-secre
 
 test("Manila date, valid contact, guest count, consent, and confirmed-property blocks are enforced", async () => {
   await database(async (client) => {
-    for (const overrides of [{ date: "2030-01-01" }, { date: "2030-02-30" }, { guests: 1000 }, { guests: "4" }, { email: "invalid" }, { consent: false }, { notes: "x".repeat(1001) }]) {
+    for (const overrides of [{ date: "2030-01-01" }, { date: "2030-01-02" }, { date: "2030-02-30" }, { guests: 1000 }, { guests: "4" }, { email: "invalid" }, { consent: false }, { notes: "x".repeat(1001) }]) {
       await assert.rejects(create(client, overrides), rejectCode("invalid-request"));
     }
     await assert.rejects(create(client, {}, { blockedDates: ["2030-02-01"] }), rejectCode("date-unavailable"));

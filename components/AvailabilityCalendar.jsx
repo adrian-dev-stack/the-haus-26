@@ -143,10 +143,10 @@ export default function AvailabilityCalendar({
             {calendarDays.map((day, index) => {
               if (!day) return <div key={`empty-${index}`} className="h-12" aria-hidden="true" />;
               const date = formatDateString(currentYear, currentMonth, day);
-              const isPast = date < today;
+              const isPast = date <= today;
               const isBooked = unavailableDates.has(date);
               const isSelected = activeSelectedDate === date;
-              const status = isBooked ? "Unavailable" : isPast ? "Past date" : isSelected ? "Selected" : "Select to request a stay";
+              const status = isBooked ? "Unavailable" : isPast ? (date === today ? "Same-day booking unavailable" : "Past date") : isSelected ? "Selected" : "Select to request a stay";
               const style = isSelected ? "bg-accent font-semibold text-white" : isPast || isBooked
                 ? `cursor-not-allowed text-muted ${isBooked ? "line-through" : ""}` : "text-ink hover:bg-surface-elevated";
               return (
@@ -160,19 +160,19 @@ export default function AvailabilityCalendar({
       </div>
 
       <div className="mt-5 border-t border-line pt-4 text-sm leading-relaxed text-muted">
-        <p>22-hour exclusive stays. Selecting a date does not reserve it.</p>
+        <p>22-hour exclusive stays (11:00 AM check-in to 9:00 AM check-out next day). Same-day bookings are unavailable to allow our housekeeper to prepare the villa.</p>
         {unavailableDates.size > 0 && <p className="mt-1">Crossed-out dates are reserved or awaiting a deposit.</p>}
         <p className="mt-1" role="status">{availabilityStatus === "loading" ? "Checking the latest dates…" : availabilityStatus === "error" ? "Latest availability could not be loaded. Your host will check your requested date." : "Dates checked. The host confirms each request."}</p>
       </div>
       {activeSelectedDate ? (
         <div className="mt-5 border-t border-line pt-5">
-          <p className="text-sm text-muted">Your preferred check-in</p>
+          <p className="text-sm text-muted">Your preferred check-in (11:00 AM)</p>
           <p className="mt-1 text-lg font-semibold text-ink" aria-live="polite">{formatSelectedDate(activeSelectedDate)}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <a href="#inquire" className="inline-flex min-h-12 items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Request this stay</a>
-            {hasPhone && <a href={`sms:${cleanPhone}?body=${encodeURIComponent(`Hi! I would like to inquire about The HauS 26 for check-in on ${activeSelectedDate}, for a 22-hour stay. Could you confirm availability?`)}`} className={linkStyle}>Ask by SMS</a>}
+            {hasPhone && <a href={`sms:${cleanPhone}?body=${encodeURIComponent(`Hi! I would like to inquire about The HauS 26 for check-in on ${activeSelectedDate} (11:00 AM check-in, 9:00 AM checkout next day). Could you confirm availability?`)}`} className={linkStyle}>Ask by SMS</a>}
             {messengerUrl && <a href={messengerUrl} target="_blank" rel="noopener noreferrer" className={linkStyle}>Open Messenger</a>}
-            {email && <a href={`mailto:${email}?subject=${encodeURIComponent(`Inquiry for check-in on ${activeSelectedDate}`)}&body=${encodeURIComponent(`Hi! I would like to inquire about The HauS 26 for check-in on ${activeSelectedDate}, for a 22-hour stay. Could you confirm availability?`)}`} className={linkStyle}>Ask by Email</a>}
+            {email && <a href={`mailto:${email}?subject=${encodeURIComponent(`Inquiry for check-in on ${activeSelectedDate}`)}&body=${encodeURIComponent(`Hi! I would like to inquire about The HauS 26 for check-in on ${activeSelectedDate} (11:00 AM check-in, 9:00 AM checkout next day). Could you confirm availability?`)}`} className={linkStyle}>Ask by Email</a>}
           </div>
         </div>
       ) : <p className="mt-5 text-sm text-muted">Choose a date above to fill in your booking request.</p>}
