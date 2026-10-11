@@ -4,7 +4,8 @@ import { useCallback, useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const STATUS_LABELS = { requested: "New request", awaiting_payment: "Awaiting deposit", confirmed: "Confirmed", test_paid: "Test payment", cancelled: "Cancelled", declined: "Declined", payment_issue: "Payment review", refunded: "Refund review" };
+const STATUS_LABELS = { requested: "New request", awaiting_payment: "Awaiting deposit", confirmed: "Confirmed", test_paid: "Test payment", cancelled: "Cancelled", declined: "Declined", payment_issue: "Payment review", refunded: "Refunded" };
+
 const money = (amount) => new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount / 100);
 const stayDate = (date) => new Intl.DateTimeFormat("en-PH", { timeZone: "Asia/Manila", dateStyle: "long" }).format(new Date(`${date}T12:00:00Z`));
 
