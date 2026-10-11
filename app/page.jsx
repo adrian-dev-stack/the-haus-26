@@ -70,7 +70,7 @@ export default function Page() {
             <h2 id="calendar-heading">When would you<br />like to stay?</h2>
             <p>Choose a preferred date to add to your inquiry. The host will confirm availability before your stay is booked.</p>
           </div>
-          <AvailabilityCalendar bookedDates={p.bookedDates || []} phone={p.contact.phone} messengerUrl={p.contact.messengerUrl} />
+          <AvailabilityCalendar bookedDates={p.bookedDates || []} phone={p.contact.phone} messengerUrl={p.contact.messengerUrl} email={p.contact.email} />
         </section>
         <section id="location" className="location-section" aria-labelledby="location-heading">
           <div className="location-copy">
@@ -90,14 +90,42 @@ export default function Page() {
           <div className="section-intro">
             <p className="section-label">Start with a hello</p>
             <h2 id="reservation-heading">Let’s plan<br />your stay.</h2>
-            <p>Add your dates and group size, then open a prefilled SMS or copy your inquiry for Messenger.</p>
+            <p>Add your dates and group size, then send your inquiry via SMS, Messenger, Instagram, or email.</p>
             <p>The host confirms your date, rate, and arrival details directly. Sending an inquiry does not make a reservation.</p>
-            {p.contact.phone && <a className="text-link host-phone" href={`tel:${p.contact.phone}`}>Call {p.contact.phone}</a>}
+            <div className="contact-links">
+              {p.contact.phone && <a className="text-link" href={`tel:${p.contact.phone}`}>Call {p.contact.phone}</a>}
+              {p.contact.email && <a className="text-link" href={`mailto:${p.contact.email}`}>Email {p.contact.email}</a>}
+              {p.contact.instagramUrl && (
+                <a className="text-link" href={p.contact.instagramUrl} target="_blank" rel="noopener noreferrer">
+                  Instagram @{p.contact.instagram || "thehaus.26"}
+                </a>
+              )}
+            </div>
           </div>
-          <div id="inquire"><InquiryForm name={p.name} phone={p.contact.phone} messengerUrl={p.contact.messengerUrl} checkIn={p.checkIn} checkOut={p.checkOut} /></div>
+          <div id="inquire">
+            <InquiryForm
+              name={p.name}
+              phone={p.contact.phone}
+              messengerUrl={p.contact.messengerUrl}
+              email={p.contact.email}
+              instagramUrl={p.contact.instagramUrl}
+              instagram={p.contact.instagram}
+              checkIn={p.checkIn}
+              checkOut={p.checkOut}
+            />
+          </div>
         </section>
         <footer className="site-footer">
           <div><a href="#main" className="footer-brand">{p.name}</a><p>{p.address}</p></div>
+          <div className="footer-contact">
+            {p.contact.phone && <a className="text-link" href={`tel:${p.contact.phone}`}>Call {p.contact.phone}</a>}
+            {p.contact.email && <a className="text-link" href={`mailto:${p.contact.email}`}>{p.contact.email}</a>}
+            {p.contact.instagramUrl && (
+              <a className="text-link" href={p.contact.instagramUrl} target="_blank" rel="noopener noreferrer">
+                Instagram @{p.contact.instagram || "thehaus.26"}
+              </a>
+            )}
+          </div>
           <a href="#main" className="text-link">Back to top</a>
           <p className="footer-copyright">© {new Date().getFullYear()} {p.name}</p>
         </footer>

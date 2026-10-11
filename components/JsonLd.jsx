@@ -3,6 +3,11 @@ import { property } from "@/lib/property";
 export default function JsonLd() {
   const baseUrl = "https://thehaus26.com";
 
+  const sameAs = [
+    property.contact?.messengerUrl,
+    property.contact?.instagramUrl,
+  ].filter(Boolean);
+
   const schema = {
     "@context": "https://schema.org",
     "@type": ["VacationRental", "LodgingBusiness"],
@@ -11,6 +16,8 @@ export default function JsonLd() {
     description: property.tagline,
     url: baseUrl,
     telephone: property.contact.phone,
+    ...(property.contact?.email ? { email: property.contact.email } : {}),
+    ...(sameAs.length > 0 ? { sameAs } : {}),
     priceRange: "₱5,000 - ₱8,000+",
     currenciesAccepted: "PHP",
     checkinTime: "11:00",
