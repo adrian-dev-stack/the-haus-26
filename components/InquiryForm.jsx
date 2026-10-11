@@ -6,9 +6,9 @@ function getRateEstimate(guestCount) {
   const count = Number(guestCount);
   if (!Number.isInteger(count) || count < 1) return "Choose guest count";
   if (count <= 4) return "₱5,000";
-  if (count === 6) return "₱7,000";
-  if (count >= 8 && count <= 10) return "₱8,000";
-  return "Ask for a quote";
+  if (count <= 6) return "₱6,000";
+  if (count <= 10) return "₱8,000";
+  return `₱${(8000 + (count - 10) * 500).toLocaleString()}`;
 }
 
 function nextDate(value) {

@@ -7,10 +7,10 @@ import BookingForm from "@/components/BookingForm";
 import TierSelectButton from "@/components/TierSelectButton";
 
 const rateTiers = [
-  { guests: "Up to 4 guests", count: 4, price: "₱5,000", note: "Minimum rate, including stays for 2 guests." },
-  { guests: "6 guests", count: 6, price: "₱7,000", note: "Your group has the whole property to itself." },
-  { guests: "8 to 10 guests", count: 8, price: "₱8,000", note: "The same rate for groups of 8, 9, or 10." },
-  { guests: "11 guests or more", count: 11, price: "Ask for a quote", note: "An additional fee per guest applies." },
+  { guests: "Up to 4 guests", count: 4, price: "₱5,000", note: "Minimum rate, including stays for 2 to 4 guests." },
+  { guests: "5 to 6 guests", count: 6, price: "₱6,000", note: "Your group has the whole property to itself." },
+  { guests: "7 to 10 guests", count: 8, price: "₱8,000", note: "The same rate for groups of 7, 8, 9, or 10." },
+  { guests: "11 guests or more", count: 11, price: "From ₱8,500", note: "₱8,000 base plus ₱500 per additional guest." },
 ];
 
 export default function Page() {
@@ -59,16 +59,16 @@ export default function Page() {
             <div className="rate-row" key={tier.guests}>
               <div><h3>{tier.guests}</h3><p>{tier.note}</p></div>
               <div className="rate-price"><span>{tier.price}</span>{tier.count < 11 && <span className="rate-duration">/ 22 hours</span>}</div>
-              <TierSelectButton guests={tier.count} label={tier.count < 11 ? "Choose this group" : "Ask the host"} />
+              <TierSelectButton guests={tier.count} label="Choose this group" />
             </div>
           ))}</div>
-          <p className="rate-note">For 5 or 7 guests, ask the host to confirm the rate. Rates are subject to change without prior notice.</p>
+          <p className="rate-note">Instant booking: dates are held for 30 minutes upon reservation for your 50% deposit.</p>
         </section>
         <section id="calendar" className="calendar-section" aria-labelledby="calendar-heading">
           <div className="section-intro">
             <p className="section-label">Find a day to get away</p>
             <h2 id="calendar-heading">When would you<br />like to stay?</h2>
-            <p>Choose a preferred check-in for your booking request. The host reviews availability and the final rate before you pay.</p>
+            <p>Choose a check-in date. The calendar checks availability and holds your date for 30 minutes while you complete your deposit.</p>
           </div>
           <AvailabilityCalendar bookedDates={p.bookedDates || []} phone={p.contact.phone} messengerUrl={p.contact.messengerUrl} email={p.contact.email} />
         </section>
@@ -91,7 +91,7 @@ export default function Page() {
             <p className="section-label">Request a private stay</p>
             <h2 id="reservation-heading">Let’s plan<br />your stay.</h2>
             <p>Send your preferred date, group size, and contact details here. You’ll receive a private link to track your request.</p>
-            <p>The host approves your date, final rate, and terms. You can then pay a 50% deposit through PayMongo to confirm your stay.</p>
+            <p>Your date is held automatically for 30 minutes while you complete your 50% deposit through PayMongo to confirm your stay.</p>
             <p>Have a question first? Contact the host directly.</p>
             <a href="/payment" className="text-link">How the booking deposit works</a>
             <div className="contact-links">
