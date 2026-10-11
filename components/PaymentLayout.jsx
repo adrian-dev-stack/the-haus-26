@@ -11,7 +11,10 @@ export default function PaymentLayout({ children }) {
       <main id="main" className="payment-shell">{children}</main>
       <footer className="payment-footer">
         <p>{property.name} · Limay, Bataan</p>
-        <Link href="/" className="text-link">Back to the house</Link>
+        <div style={{ display: "flex", gap: "1.25rem", alignItems: "center", flexWrap: "wrap" }}>
+          <Link href="/privacy" className="text-link">Privacy & Cookies</Link>
+          <Link href="/" className="text-link">Back to the house</Link>
+        </div>
       </footer>
     </>
   );

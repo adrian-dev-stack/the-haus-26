@@ -2,6 +2,7 @@ import { Outfit, Figtree } from "next/font/google";
 import "./globals.css";
 import { property } from "@/lib/property";
 import JsonLd from "@/components/JsonLd";
+import CookieBanner from "@/components/CookieBanner";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
@@ -98,6 +99,7 @@ export default function RootLayout({ children }) {
           Skip to content
         </a>
         {children}
+        <CookieBanner />
       </body>
     </html>
   );

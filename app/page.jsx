@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { property as p } from "@/lib/property";
 import Navbar from "@/components/Navbar";
 import HeroPhoto from "@/components/HeroPhoto";
@@ -122,6 +123,9 @@ export default function Page() {
                 Instagram @{p.contact.instagram || "thehaus.26"}
               </a>
             )}
+            <Link className="text-link" href="/privacy">
+              Privacy & Cookie Policy
+            </Link>
           </div>
           <a href="#main" className="text-link">Back to top</a>
           <p className="footer-copyright">© {new Date().getFullYear()} {p.name}</p>
