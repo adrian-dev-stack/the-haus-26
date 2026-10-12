@@ -63,7 +63,7 @@ export default function Page() {
               <TierSelectButton guests={tier.count} label="Choose this group" />
             </div>
           ))}</div>
-          <p className="rate-note">Instant booking: dates are held for 30 minutes upon reservation for your 50% deposit.</p>
+          <p className="rate-note">Instant booking: dates are held for 30 minutes upon reservation for your 50% deposit. Multiple days available: select your stay duration in the booking form and prices multiply per day.</p>
         </section>
         <section id="calendar" className="calendar-section" aria-labelledby="calendar-heading">
           <div className="section-intro">

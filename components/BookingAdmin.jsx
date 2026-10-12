@@ -44,16 +44,19 @@ const stayDate = (date) => {
   }
 };
 
-function suggestedRate(guests) {
+function suggestedRate(guests, days = 1) {
   const g = Number(guests) || 1;
-  if (g <= 4) return 5000;
-  if (g <= 6) return 6000;
-  if (g <= 10) return 8000;
-  return 8000 + (g - 10) * 500;
+  const d = Math.max(1, Number(days) || 1);
+  let daily;
+  if (g <= 4) daily = 5000;
+  else if (g <= 6) daily = 6000;
+  else if (g <= 10) daily = 8000;
+  else daily = 8000 + (g - 10) * 500;
+  return daily * d;
 }
 
 const DEFAULT_TERMS =
-  "50% deposit via PayMongo holds the reservation. Remaining 50% balance payable upon check-in. Check-in is 11:00 AM, and check-out is 9:00 AM the next day (22-hour stay). Quiet hours begin at 10:00 PM.";
+  "50% deposit via PayMongo holds the reservation. Remaining 50% balance payable upon check-in. Check-in is 11:00 AM, and check-out is 9:00 AM (22-hour stay per day). Quiet hours begin at 10:00 PM.";
 
 function BookingEntry({ booking, onChanged, onUnauthorized }) {
   const prefix = useId();
@@ -62,7 +65,7 @@ function BookingEntry({ booking, onChanged, onUnauthorized }) {
   const [notice, setNotice] = useState("");
   const [copyMessage, setCopyMessage] = useState("");
   const [quoteTotal, setQuoteTotal] = useState(
-    booking.totalAmount ? String(booking.totalAmount / 100) : String(suggestedRate(booking.guests))
+    booking.totalAmount ? String(booking.totalAmount / 100) : String(suggestedRate(booking.guests, booking.days))
   );
   const [quoteTerms, setQuoteTerms] = useState(booking.terms || DEFAULT_TERMS);
 
@@ -160,9 +163,12 @@ function BookingEntry({ booking, onChanged, onUnauthorized }) {
             </span>
             {booking.livemode === false && <span className="admin-badge badge-test">Test Mode</span>}
           </div>
-          <h2 className="admin-stay-title">{stayDate(booking.date)}</h2>
+          <h2 className="admin-stay-title">
+            {stayDate(booking.date)}
+            {booking.endDate ? ` to ${stayDate(booking.endDate)}` : ""}
+          </h2>
           <p style={{ margin: "0.25rem 0 0", fontSize: "0.875rem", color: "var(--color-muted)" }}>
-            {booking.guests} {booking.guests === 1 ? "guest" : "guests"} · 22-hour private rental
+            {booking.guests} {booking.guests === 1 ? "guest" : "guests"} · {booking.days > 1 ? `${booking.days} days private stay` : "22-hour private rental"}
           </p>
         </div>
 

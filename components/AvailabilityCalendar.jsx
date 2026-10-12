@@ -160,7 +160,7 @@ export default function AvailabilityCalendar({
       </div>
 
       <div className="mt-5 border-t border-line pt-4 text-sm leading-relaxed text-muted">
-        <p>22-hour exclusive stays (11:00 AM check-in to 9:00 AM check-out next day). Same-day bookings are unavailable to allow our housekeeper to prepare the villa.</p>
+        <p>Private exclusive stays (11:00 AM check-in to 9:00 AM check-out). Single or multiple days available: choose your check-in date above, then select your stay duration in the form to calculate the rate automatically. Same-day bookings cannot be accommodated to allow our housekeeper time to prepare the property.</p>
         {unavailableDates.size > 0 && <p className="mt-1">Crossed-out dates are reserved or awaiting a deposit.</p>}
         <p className="mt-1" role="status">{availabilityStatus === "loading" ? "Checking the latest dates…" : availabilityStatus === "error" ? "Latest availability could not be loaded. Your host will check your requested date." : "Dates checked. The host confirms each request."}</p>
       </div>

@@ -10,6 +10,7 @@ import {
   getBookingStore, getGuestBooking, getUnavailableDates, initializeBookingStore, listAdminBookings,
   refreshBookingPayment, syncBookingFromPayment, HOLD_DURATION_MS,
   addBlockedDate, getBlockedDates, removeBlockedDate, markBalancePaid,
+  getStayDates, getCheckOutDate,
 } from "../lib/bookings.js";
 
 
@@ -387,6 +388,52 @@ test("host can record balance paid on arrival for confirmed bookings and reset i
     const reset = await markBalancePaid(bookingId, { paid: false, client });
     assert.equal(reset.balanceMethod, null);
     assert.equal(reset.balancePaidAt, null);
+  });
+});
+
+test("multi-day bookings multiply rate by days and hold all consecutive dates", async () => {
+  // Rate multipliers
+  assert.equal(calculateBookingTotal(4, 1), 500000);
+  assert.equal(calculateBookingTotal(4, 2), 1000000);
+  assert.equal(calculateBookingTotal(4, 3), 1500000);
+  assert.equal(calculateBookingTotal(6, 2), 1200000);
+  assert.equal(calculateBookingTotal(10, 3), 2400000);
+  assert.equal(calculateBookingTotal(12, 2), 1800000);
+
+  // Helper date generators
+  assert.deepEqual(getStayDates("2030-05-10", 1), ["2030-05-10"]);
+  assert.deepEqual(getStayDates("2030-05-10", 3), ["2030-05-10", "2030-05-11", "2030-05-12"]);
+  assert.equal(getCheckOutDate("2030-05-10", 3), "2030-05-13");
+
+  await database(async (client) => {
+    const fake = provider();
+    // Book 3 days: 2030-05-10, 2030-05-11, 2030-05-12
+    const result = await createBookingRequest(
+      input({ date: "2030-05-10", days: 3, guests: 4 }),
+      { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl }
+    );
+    assert.equal(result.booking.days, 3);
+    assert.equal(result.booking.endDate, "2030-05-13");
+    assert.equal(result.booking.totalAmount, 1500000); // ₱5,000 * 3 = ₱15,000
+    assert.equal(result.booking.depositAmount, 750000); // 50% = ₱7,500
+    assert.ok(result.booking.terms.includes("3-day private stay"));
+
+    // Verify all 3 dates are held in unavailable dates
+    const held = await getUnavailableDates({ client, config, now });
+    assert.deepEqual(held, ["2030-05-10", "2030-05-11", "2030-05-12"]);
+
+    // Attempting to book overlapping date in the middle should fail
+    await assert.rejects(
+      createBookingRequest(
+        input({ requestId: randomUUID(), date: "2030-05-11", days: 1, guests: 4 }),
+        { client, now, config }
+      ),
+      rejectCode("date-unavailable")
+    );
+
+    // Fast-forward 31 minutes: all held dates expire
+    const future = now + HOLD_DURATION_MS + 60000;
+    assert.deepEqual(await getUnavailableDates({ client, config, now: future }), []);
   });
 });
 

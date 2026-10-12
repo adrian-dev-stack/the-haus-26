@@ -8,10 +8,10 @@ function todayInManila() {
   return ["year", "month", "day"].map((type) => parts.find((part) => part.type === type).value).join("-");
 }
 
-function followingDay(value) {
+function calculateCheckoutDate(value, days = 1) {
   if (!value) return "";
   const date = new Date(`${value}T12:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + 1);
+  date.setUTCDate(date.getUTCDate() + Math.max(1, Number(days) || 1));
   return Number.isNaN(date.valueOf()) ? "" : date.toISOString().slice(0, 10);
 }
 
@@ -34,17 +34,21 @@ function generateSafeUUID() {
   });
 }
 
-function estimateRate(guests) {
+function estimateRate(guests, days = 1) {
   const count = Number(guests);
-  if (!Number.isInteger(count) || count < 1) return { total: "Choose guest count", deposit: "" };
-  let pesos;
-  if (count <= 4) pesos = 5000;
-  else if (count <= 6) pesos = 6000;
-  else if (count <= 10) pesos = 8000;
-  else pesos = 8000 + (count - 10) * 500;
+  const stayDays = Math.max(1, Number(days) || 1);
+  if (!Number.isInteger(count) || count < 1) return { total: "Choose guest count", deposit: "", daily: "" };
+  let dailyPesos;
+  if (count <= 4) dailyPesos = 5000;
+  else if (count <= 6) dailyPesos = 6000;
+  else if (count <= 10) dailyPesos = 8000;
+  else dailyPesos = 8000 + (count - 10) * 500;
+  const totalPesos = dailyPesos * stayDays;
   return {
-    total: `₱${pesos.toLocaleString()}`,
-    deposit: `₱${(pesos / 2).toLocaleString()}`,
+    daily: `₱${dailyPesos.toLocaleString()}/day`,
+    total: `₱${totalPesos.toLocaleString()}`,
+    deposit: `₱${(totalPesos / 2).toLocaleString()}`,
+    days: stayDays,
   };
 }
 
@@ -56,6 +60,7 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
   const requestLocked = useRef(false);
   const successHeading = useRef(null);
   const [date, setDate] = useState("");
+  const [days, setDays] = useState("1");
   const [guests, setGuests] = useState("4");
   const [today, setToday] = useState("");
   const [pending, setPending] = useState(false);
@@ -64,10 +69,10 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
   const [submitted, setSubmitted] = useState(null);
   const [copyMessage, setCopyMessage] = useState("");
   const [livemode, setLivemode] = useState(null);
-  const rate = estimateRate(guests);
+  const rate = estimateRate(guests, days);
 
   useEffect(() => {
-    setToday(followingDay(todayInManila()));
+    setToday(calculateCheckoutDate(todayInManila(), 1));
     function selectDate(event) { if (!requestLocked.current && typeof event.detail?.date === "string") setDate(event.detail.date); }
     function selectGuests(event) { if (!requestLocked.current && event.detail?.guests) setGuests(String(event.detail.guests)); }
     window.addEventListener("haus26:select-date", selectDate);
@@ -107,7 +112,18 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
     setError("");
     try {
       requestId.current ||= generateSafeUUID();
-      submittedPayload.current ||= { requestId: requestId.current, name: form.get("name"), email: form.get("email"), phone: form.get("phone"), date, guests: Number(guests), occasion: form.get("occasion"), notes: form.get("notes"), consent: form.get("consent") === "on" };
+      submittedPayload.current ||= {
+        requestId: requestId.current,
+        name: form.get("name"),
+        email: form.get("email"),
+        phone: form.get("phone"),
+        date,
+        days: Math.max(1, Number(days) || 1),
+        guests: Number(guests),
+        occasion: form.get("occasion"),
+        notes: form.get("notes"),
+        consent: form.get("consent") === "on",
+      };
       const response = await fetch("/api/bookings", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submittedPayload.current),
@@ -139,11 +155,16 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
 
   if (submitted) {
     const isApproved = submitted.booking?.status === "awaiting_payment" && submitted.booking?.paymentToken;
+    const stayDays = submitted.booking?.days || 1;
     return (
       <div className="booking-panel booking-success" role="status">
         <p className="section-label">Date Held · {submitted.booking.reference}</p>
         <Heading ref={successHeading} tabIndex={-1}>{isApproved ? "Your booking is approved!" : "Your stay is with the host."}</Heading>
-        <p>{isApproved ? "Your date is held for 30 minutes. Complete your 50% deposit to lock in your reservation." : "Your date and final rate still need approval. Save your private booking link."}</p>
+        <p>
+          {isApproved
+            ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Complete your 50% deposit to lock in your reservation.`
+            : `Your request for ${stayDays} day${stayDays > 1 ? "s" : ""} (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) still needs approval. Save your private booking link.`}
+        </p>
         {submitted.booking.livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
         <div className="booking-actions">
           {isApproved && <Link href={`/pay/${encodeURIComponent(submitted.booking.paymentToken)}`} className="button-primary">Pay 50% Deposit (GCash / Card)</Link>}
@@ -159,14 +180,62 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
     <div className="booking-panel">
       <div className="booking-form-heading">
         <div><Heading>Reserve your stay</Heading><p>Instant booking with 30-minute hold for deposit.</p></div>
-        <div className="booking-estimate"><span>Total (50% Deposit)</span><strong aria-live="polite">{rate.total} {rate.deposit ? `· Deposit: ${rate.deposit}` : ""}</strong></div>
+        <div className="booking-estimate">
+          <span>Total (50% Deposit)</span>
+          <strong aria-live="polite">
+            {rate.total} {rate.deposit ? `· Deposit: ${rate.deposit}` : ""}
+            {Number(days) > 1 ? ` (${rate.daily} × ${days} days)` : ""}
+          </strong>
+        </div>
       </div>
       {livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
       <form onSubmit={submit} className="booking-form" aria-busy={pending}>
         <fieldset disabled={pending || uncertain} className="booking-fieldset">
-          <div className="booking-field"><label htmlFor={`${prefix}-date`}>Check-in date</label><input id={`${prefix}-date`} type="date" name="date" required min={today} value={date} onChange={(event) => changeDate(event.target.value)} /><p>{checkIn}</p></div>
-          <div className="booking-field"><label htmlFor={`${prefix}-checkout`}>Check-out date</label><input id={`${prefix}-checkout`} type="date" readOnly value={followingDay(date)} /><p>{checkOut || "Following day, after your 22-hour stay"}</p></div>
-          <div className="booking-field booking-wide"><label htmlFor={`${prefix}-guests`}>Number of guests</label><div className="booking-guest-count"><input id={`${prefix}-guests`} type="number" name="guests" min="1" step="1" required value={guests} onChange={(event) => setGuests(event.target.value)} /><div role="group" aria-label="Quick guest counts">{[4, 6, 8, 10].map((count) => <button key={count} type="button" className="booking-secondary" aria-pressed={Number(guests) === count} onClick={() => setGuests(String(count))}>{count}</button>)}</div></div><p>Covers a 22-hour private stay. Dates are held for 30 minutes upon reservation for deposit payment.</p></div>
+          <div className="booking-field"><label htmlFor={`${prefix}-date`}>Check-in date</label><input id={`${prefix}-date`} type="date" name="date" required min={today} value={date} onChange={(event) => changeDate(event.target.value)} /><p>{checkIn || "11:00 AM check-in"}</p></div>
+          <div className="booking-field"><label htmlFor={`${prefix}-checkout`}>Check-out date</label><input id={`${prefix}-checkout`} type="date" readOnly value={calculateCheckoutDate(date, days)} /><p>{Number(days) > 1 ? `9:00 AM check-out (${Number(days) * 24 - 2}-hour stay)` : (checkOut || "Following day at 9:00 AM (22-hour stay)")}</p></div>
+          
+          <div className="booking-field booking-wide">
+            <label htmlFor={`${prefix}-days`}>Stay duration (days)</label>
+            <div className="booking-guest-count">
+              <input
+                id={`${prefix}-days`}
+                type="number"
+                name="days"
+                min="1"
+                max="30"
+                step="1"
+                required
+                value={days}
+                onChange={(event) => setDays(event.target.value)}
+              />
+              <div role="group" aria-label="Quick stay duration options">
+                {[
+                  { count: 1, label: "1 day (22h)" },
+                  { count: 2, label: "2 days (46h)" },
+                  { count: 3, label: "3 days" },
+                  { count: 4, label: "4 days" },
+                  { count: 5, label: "5 days" },
+                ].map((option) => (
+                  <button
+                    key={option.count}
+                    type="button"
+                    className="booking-secondary"
+                    aria-pressed={Number(days) === option.count}
+                    onClick={() => setDays(String(option.count))}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p>
+              {Number(days) > 1
+                ? `${days} days private stay (${Number(days) * 24 - 2} hours total). Daily rate of ${rate.daily} multiplies across ${days} days.`
+                : "Standard 22-hour private stay (11:00 AM check-in to 9:00 AM checkout next day)."}
+            </p>
+          </div>
+
+          <div className="booking-field booking-wide"><label htmlFor={`${prefix}-guests`}>Number of guests</label><div className="booking-guest-count"><input id={`${prefix}-guests`} type="number" name="guests" min="1" step="1" required value={guests} onChange={(event) => setGuests(event.target.value)} /><div role="group" aria-label="Quick guest counts">{[4, 6, 8, 10].map((count) => <button key={count} type="button" className="booking-secondary" aria-pressed={Number(guests) === count} onClick={() => setGuests(String(count))}>{count}</button>)}</div></div><p>Covers private stay for your group. Dates are held for 30 minutes upon reservation for deposit payment.</p></div>
           <div className="booking-field booking-wide"><label htmlFor={`${prefix}-name`}>Your full name</label><input id={`${prefix}-name`} name="name" required minLength={2} maxLength={100} autoComplete="name" placeholder="Your full name" /></div>
           <div className="booking-field"><label htmlFor={`${prefix}-email`}>Email address</label><input id={`${prefix}-email`} name="email" type="email" required maxLength={254} autoComplete="email" placeholder="you@example.com" /></div>
           <div className="booking-field"><label htmlFor={`${prefix}-phone`}>Mobile number</label><input id={`${prefix}-phone`} name="phone" type="tel" required maxLength={30} autoComplete="tel" placeholder="09… or +63…" /></div>
@@ -177,7 +246,7 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
         {error && <p className="booking-error" role="alert">{error}</p>}
         {uncertain && <p className="booking-form-note">Your original details are kept on this page for a safe retry. Please keep the page open until your request is checked.</p>}
         <button className="button-primary booking-submit" type="submit" disabled={pending}>{pending ? "Sending your request…" : uncertain ? "Retry my original request" : "Request to book"}</button>
-        <p className="booking-form-note">A request does not reserve the date. After the host approves your stay and terms, you can pay the 50% deposit through PayMongo.</p>
+        <p className="booking-form-note">A request holds your date for 30 minutes. Complete the 50% deposit via PayMongo (GCash / Card) to lock in your reservation.</p>
       </form>
     </div>
   );
