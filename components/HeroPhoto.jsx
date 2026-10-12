@@ -8,10 +8,30 @@ export default function HeroPhoto({ photo }) {
   return (
     <figure className="hero-photo">
       <a href="#gallery" className="hero-photo-frame" aria-label="See the house photo gallery">
-        {status !== "error" && <Image src={photo.src} alt={photo.alt} fill priority sizes="(min-width: 960px) 48vw, (min-width: 640px) 60vw, 100vw" className="hero-image" style={{ objectPosition: photo.position || "center" }} onLoad={() => setStatus("ready")} onError={() => setStatus("error")} />}
-        {status !== "ready" && <span className="hero-photo-status" role="status">{status === "error" ? "This photo could not load. See the gallery for more views." : "Loading the pool view…"}</span>}
+        {status !== "error" && (
+          <Image
+            src={photo.src}
+            alt={photo.alt}
+            fill
+            priority
+            sizes="(min-width: 960px) 48vw, (min-width: 640px) 60vw, 100vw"
+            className="hero-image"
+            style={{ objectPosition: photo.position || "center" }}
+            onLoad={() => setStatus("ready")}
+            onError={() => setStatus("error")}
+          />
+        )}
+        <span className="hero-photo-overlay-tag">Exclusive 22-Hour Stay</span>
+        {status !== "ready" && (
+          <span className="hero-photo-status" role="status">
+            {status === "error" ? "This photo could not load. See the gallery for more views." : "Loading the pool view..."}
+          </span>
+        )}
       </a>
-      <figcaption><span>{photo.title}</span><span>Exclusively yours for 22 hours</span></figcaption>
+      <figcaption>
+        <span>{photo.title}</span>
+        <span>Exclusively yours for 22 hours</span>
+      </figcaption>
     </figure>
   );
 }

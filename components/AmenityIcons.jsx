@@ -85,3 +85,16 @@ export function PawIcon({ className = "w-5 h-5" }) {
     </svg>
   );
 }
+
+export function getAmenityIcon(name) {
+  const lower = (name || "").toLowerCase();
+  if (lower.includes("pool") || lower.includes("swim")) return PoolIcon;
+  if (lower.includes("billiard")) return BilliardsIcon;
+  if (lower.includes("grill") || lower.includes("bbq")) return GrillIcon;
+  if (lower.includes("bed") || lower.includes("room") || lower.includes("air-condition")) return BedIcon;
+  if (lower.includes("kitchen") || lower.includes("stove") || lower.includes("refrigerator")) return KitchenIcon;
+  if (lower.includes("wi-fi") || lower.includes("wifi") || lower.includes("internet")) return WifiIcon;
+  if (lower.includes("park") || lower.includes("car") || lower.includes("sedan")) return CarIcon;
+  if (lower.includes("pet")) return PawIcon;
+  return PoolIcon;
+}

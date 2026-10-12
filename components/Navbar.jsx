@@ -4,12 +4,12 @@ import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 
 const links = [
-  { href: "/#gallery", label: "The house" },
+  { href: "/#gallery", label: "The Villa" },
   { href: "/#amenities", label: "Amenities" },
   { href: "/#rates", label: "Rates" },
-  { href: "/#location", label: "Getting here" },
+  { href: "/#location", label: "Location" },
+  { href: "/#faq", label: "FAQ" },
   { href: "/payment", label: "Deposit guide" },
-  { href: "/privacy", label: "Privacy & Policy" },
 ];
 
 export default function Navbar({ name, rate }) {
@@ -34,7 +34,8 @@ export default function Navbar({ name, rate }) {
       <header className="site-nav">
         <nav aria-label="Main navigation" className="nav-inner">
           <Link href="/" className="nav-brand" onClick={() => setOpen(false)}>
-            {name}
+            <span className="nav-brand-badge">26</span>
+            <span>{name}</span>
           </Link>
           <div className="desktop-links">
             {links.map((link) => (
