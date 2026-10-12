@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const links = [
   { href: "/#gallery", label: "The Villa" },
@@ -34,7 +35,16 @@ export default function Navbar({ name, rate }) {
       <header className="site-nav">
         <nav aria-label="Main navigation" className="nav-inner">
           <Link href="/" className="nav-brand" onClick={() => setOpen(false)}>
-            <span className="nav-brand-badge">26</span>
+            <div className="nav-brand-logo-frame">
+              <Image
+                src="/logo.png"
+                alt="The HauS 26 Logo"
+                width={38}
+                height={38}
+                className="nav-brand-logo-img"
+                priority
+              />
+            </div>
             <span>{name}</span>
           </Link>
           <div className="desktop-links">

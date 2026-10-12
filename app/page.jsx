@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { property as p } from "@/lib/property";
 import Navbar from "@/components/Navbar";
 import HeroPhoto from "@/components/HeroPhoto";
@@ -390,10 +391,21 @@ export default function Page() {
         <footer className="site-footer">
           <div className="footer-main-grid">
             {/* Column 1: Brand & Identity */}
-            <div className="footer-col">
-              <a href="#main" className="footer-brand">
-                <span className="nav-brand-badge">26</span>
-                <span>{p.name}</span>
+            <div className="footer-col footer-col-brand">
+              <a href="#main" className="footer-brand" aria-label="The HauS 26 home">
+                <div className="footer-brand-logo-frame">
+                  <Image
+                    src="/logo.png"
+                    alt="The HauS 26 Logo"
+                    width={48}
+                    height={48}
+                    className="footer-brand-logo-img"
+                  />
+                </div>
+                <div className="footer-brand-title-wrap">
+                  <span className="footer-brand-title">{p.name}</span>
+                  <span className="footer-brand-subtitle">Private Pool Staycation · Bataan</span>
+                </div>
               </a>
               <p className="footer-brand-desc">
                 Exclusive 22-hour private pool staycation in Limay, Bataan. A relaxing retreat for family getaways, barkada gatherings, and intimate celebrations.

@@ -94,10 +94,10 @@ section, #inquire { scroll-margin-top: 6.5rem; }
   gap: 1.5rem;
 }
 
-.nav-brand, .footer-brand {
+.nav-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.75rem;
   min-height: 44px;
   font-family: var(--font-display);
   font-size: 1.45rem;
@@ -105,6 +105,40 @@ section, #inquire { scroll-margin-top: 6.5rem; }
   letter-spacing: -.035em;
   color: var(--color-ink);
   text-decoration: none;
+  transition: opacity 150ms ease;
+}
+
+.nav-brand:hover {
+  opacity: 0.92;
+}
+
+.nav-brand-logo-frame {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid var(--color-divider);
+  padding: 3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 160ms var(--ease-out), border-color 160ms ease;
+}
+
+.nav-brand:hover .nav-brand-logo-frame {
+  transform: scale(1.05);
+  border-color: var(--color-accent);
+}
+
+.nav-brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  display: block;
 }
 
 .nav-brand-badge {
@@ -1112,6 +1146,72 @@ h2 {
     grid-template-columns: 1.3fr 1fr 1fr 1.1fr;
     gap: 3rem;
   }
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 48px;
+  text-decoration: none;
+  color: var(--color-ink);
+  transition: opacity 150ms ease;
+}
+
+.footer-brand:hover {
+  opacity: 0.92;
+}
+
+.footer-brand-logo-frame {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid var(--color-divider);
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 180ms var(--ease-out), border-color 180ms ease;
+}
+
+.footer-brand:hover .footer-brand-logo-frame {
+  transform: translateY(-2px) scale(1.04);
+  border-color: var(--color-accent);
+}
+
+.footer-brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  display: block;
+}
+
+.footer-brand-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.footer-brand-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--color-ink);
+  line-height: 1.15;
+}
+
+.footer-brand-subtitle {
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .footer-col h4 {
