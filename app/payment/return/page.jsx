@@ -21,6 +21,7 @@ export default async function PaymentReturnPage({ searchParams }) {
   let payment;
   let failure;
   let bookingUrl;
+  let booking;
   if (token) {
     try {
       await limitPaymentRead();
@@ -29,10 +30,10 @@ export default async function PaymentReturnPage({ searchParams }) {
     }
     catch (error) { failure = error.code || "provider-unavailable"; }
   }
-  if (payment) { try { bookingUrl = (await syncBookingFromPayment(payment))?.guestUrl; } catch {} }
+  if (payment) { try { const synced = await syncBookingFromPayment(payment); bookingUrl = synced?.guestUrl; if (synced) booking = { days: synced.days, endDate: synced.endDate }; } catch {} }
   return (
     <PaymentLayout>
-      {payment ? <PaymentRequestView payment={payment} token={token} returned />
+      {payment ? <PaymentRequestView payment={payment} token={token} booking={booking} returned />
         : token ? <PaymentUnavailable invalid={["invalid-link", "invalid-request", "request-mismatch"].includes(failure)} temporary={failure === "provider-unavailable"} />
           : <div className="payment-message">
             <p className="section-label">Booking deposit</p>

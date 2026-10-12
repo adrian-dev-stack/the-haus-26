@@ -39,11 +39,7 @@ function generateSafeUUID() {
     const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   }
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  throw new Error("Secure booking is unavailable in this browser. Please use the HTTPS website in a current browser or contact the host.");
 }
 
 function estimateRate(guests, days = 1) {
@@ -192,12 +188,13 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
     return (
       <div className="booking-panel booking-success" role="status">
         <p className="section-label">Date Held · {submitted.booking.reference}</p>
-        <Heading ref={successHeading} tabIndex={-1}>{isApproved ? "Your booking is approved!" : "Your stay is with the host."}</Heading>
+        <Heading ref={successHeading} tabIndex={-1}>{submitted.booking.status === "awaiting_payment" ? "Your dates are held." : "Your booking request is saved."}</Heading>
         <p>
-          {isApproved
+          {submitted.booking.status === "awaiting_payment"
             ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Complete your 50% deposit to lock in your reservation.`
-            : `Your request for ${stayDays} day${stayDays > 1 ? "s" : ""} (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) still needs approval. Save your private booking link.`}
+            : `Open your private booking link to check the latest status for your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}).`}
         </p>
+        {submitted.booking.status === "awaiting_payment" && !isApproved && <p className="booking-notice">Your quote is saved, but checkout is not ready. Open your booking details and contact the host before starting another request.</p>}
         {submitted.booking.livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
         <div className="booking-actions">
           {isApproved && <Link href={`/pay/${encodeURIComponent(submitted.booking.paymentToken)}`} className="button-primary">Pay 50% Deposit (GCash / Card)</Link>}

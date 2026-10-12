@@ -10,7 +10,7 @@ import {
   getBookingStore, getGuestBooking, getUnavailableDates, initializeBookingStore, listAdminBookings,
   refreshBookingPayment, syncBookingFromPayment, HOLD_DURATION_MS,
   addBlockedDate, getBlockedDates, removeBlockedDate, markBalancePaid,
-  getStayDates, getCheckOutDate,
+  getStayDates, getCheckOutDate, runBookingMaintenance,
 } from "../lib/bookings.js";
 
 
@@ -323,9 +323,15 @@ test("pricing tiers calculate exact totals and auto-approval holds date for 30 m
     assert.ok(result.booking.paymentToken);
     assert.deepEqual(await getUnavailableDates({ client, config, now }), [result.booking.date]);
 
-    // Fast-forward 31 minutes: unpaid hold expires and date opens back up
+    // The deadline releases a date only after its provider checkout is expired.
     const future = now + HOLD_DURATION_MS + 60000;
-    assert.deepEqual(await getUnavailableDates({ client, config, now: future }), []);
+    const providerCalls = fake.calls.length;
+    assert.deepEqual(await getUnavailableDates({ client, config, now: future, fetchImpl: fake.fetchImpl }), [result.booking.date]);
+    assert.equal(fake.calls.length, providerCalls, "Public availability never invokes provider maintenance");
+    assert.deepEqual(await runBookingMaintenance({ client, config, now: future, fetchImpl: fake.fetchImpl }), { checked: 1, released: 1, retained: 0, skipped: 0 });
+    assert.deepEqual(await getUnavailableDates({ client, config }), []);
+    assert.equal(fake.expirations, 1);
+    assert.equal(fake.sessions.values().next().value.attributes.status, "expired");
     const checked = await getAdminBooking(result.booking.id, { client });
     assert.equal(checked.status, "cancelled");
   });
@@ -349,6 +355,12 @@ test("host can dynamically block and unblock dates with reasons", async () => {
     await removeBlockedDate("2030-05-15", { client });
     assert.deepEqual(await getBlockedDates({ client }), []);
     assert.deepEqual(await getUnavailableDates({ client, config, now }), []);
+    const requested = await create(client, { date: "2030-05-15", days: 2 });
+    await addBlockedDate("2030-05-16", { reason: "Maintenance", client, now });
+    const fake = provider();
+    await assert.rejects(confirmBooking(requested.booking.id, approved, { client, config, now, fetchImpl: fake.fetchImpl }), rejectCode("date-unavailable"));
+    assert.equal(fake.creationCalls, 0);
+    assert.equal((await client.execute({ sql: "SELECT COUNT(*) AS count FROM booking_holds WHERE booking_id=?", args: [requested.booking.id] })).rows[0].count, 0, "A blocked later night rolls back every proposed hold");
   });
 });
 
@@ -431,9 +443,158 @@ test("multi-day bookings multiply rate by days and hold all consecutive dates", 
       rejectCode("date-unavailable")
     );
 
-    // Fast-forward 31 minutes: all held dates expire
+    // One verified checkout expiration releases every night of the same booking.
     const future = now + HOLD_DURATION_MS + 60000;
-    assert.deepEqual(await getUnavailableDates({ client, config, now: future }), []);
+    await runBookingMaintenance({ client, config, now: future, fetchImpl: fake.fetchImpl });
+    assert.deepEqual(await getUnavailableDates({ client, config }), []);
+    assert.equal(fake.expirations, 1);
+  });
+});
+
+test("timeout keeps dates when checkout creation or provider expiration is unresolved", async () => {
+  await database(async (client) => {
+    const fake = provider();
+    fake.failCreateOnce = true;
+    const unknown = await createBookingRequest(input({ date: "2030-05-20" }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    const pending = await createBookingRequest(input({ date: "2030-05-21" }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    fake.failExpire = true;
+    const future = now + HOLD_DURATION_MS + 60000;
+    await runBookingMaintenance({ client, config, now: future, fetchImpl: fake.fetchImpl });
+    await runBookingMaintenance({ client, config, now: future, fetchImpl: fake.fetchImpl });
+    assert.deepEqual(await getUnavailableDates({ client, config, now: future, fetchImpl: fake.fetchImpl }), ["2030-05-20", "2030-05-21"]);
+    const unknownRow = (await client.execute({ sql: "SELECT status,idempotency_key,session_id,payment_error_code FROM bookings WHERE id=?", args: [unknown.booking.id] })).rows[0];
+    assert.equal(unknownRow.status, "awaiting_payment");
+    assert.equal(unknownRow.session_id, null);
+    assert.ok(unknownRow.idempotency_key);
+    assert.equal(unknownRow.payment_error_code, "payment-review-required");
+    assert.equal((await getAdminBooking(pending.booking.id, { client })).status, "awaiting_payment");
+    await assert.rejects(createBookingRequest(input({ date: "2030-05-21" }), { client, now: future, config, fetchImpl: fake.fetchImpl }), rejectCode("date-unavailable"));
+  });
+});
+
+test("timeout discovers paid or refunded deposits and never releases their dates", async () => {
+  await database(async (client) => {
+    const fake = provider();
+    const paid = await createBookingRequest(input({ date: "2030-05-25", days: 2 }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    const refunded = await createBookingRequest(input({ date: "2030-05-27" }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    fake.pay(readPaymentToken(paid.booking.paymentToken, config).sessionId);
+    fake.pay(readPaymentToken(refunded.booking.paymentToken, config).sessionId, { refunds: [{ attributes: { amount: 100, status: "pending" } }] });
+    const future = now + HOLD_DURATION_MS + 60000;
+    await runBookingMaintenance({ client, config, now: future, fetchImpl: fake.fetchImpl });
+    await runBookingMaintenance({ client, config, now: future, fetchImpl: fake.fetchImpl });
+    assert.deepEqual(await getUnavailableDates({ client, config, now: future, fetchImpl: fake.fetchImpl }), ["2030-05-25", "2030-05-26", "2030-05-27"]);
+    assert.equal(fake.expirations, 0);
+    assert.equal((await getAdminBooking(paid.booking.id, { client })).status, "test_paid");
+    assert.equal((await getAdminBooking(refunded.booking.id, { client })).status, "refunded");
+  });
+});
+
+test("paid multi-night date collisions record the receipt for review without stealing any date", async () => {
+  await database(async (client) => {
+    const fake = provider();
+    const older = await createBookingRequest(input({ date: "2030-06-01", days: 3 }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    const olderPayment = readPaymentToken(older.booking.paymentToken, config);
+    // Reproduce a historical unsafe release before applying the fixed reconciliation.
+    await client.execute({ sql: "DELETE FROM booking_holds WHERE booking_id=?", args: [older.booking.id] });
+    const newer = await createBookingRequest(input({ date: "2030-06-02" }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    fake.pay(olderPayment.sessionId);
+    await assert.rejects(refreshBookingPayment(older.booking.id, { client, config, fetchImpl: fake.fetchImpl }), rejectCode("date-hold-conflict"));
+    const checked = await getAdminBooking(older.booking.id, { client });
+    assert.equal(checked.status, "payment_issue");
+    assert.equal(checked.paymentStatus, "paid");
+    assert.equal(checked.paymentIssue, "date-hold-conflict");
+    assert.equal(checked.paymentToken, null);
+    const receipt = (await client.execute({ sql: "SELECT payment_id FROM bookings WHERE id=?", args: [older.booking.id] })).rows[0];
+    assert.ok(receipt.payment_id.startsWith("pay_"));
+    const holds = (await client.execute("SELECT stay_date,booking_id FROM booking_holds ORDER BY stay_date")).rows;
+    assert.deepEqual(holds.map((row) => [row.stay_date, row.booking_id]), [
+      ["2030-06-01", older.booking.id], ["2030-06-02", newer.booking.id], ["2030-06-03", older.booking.id],
+    ]);
+    await assert.rejects(refreshBookingPayment(older.booking.id, { client, config, fetchImpl: fake.fetchImpl }), rejectCode("date-hold-conflict"));
+    assert.equal((await getAdminBooking(newer.booking.id, { client })).status, "awaiting_payment");
+    assert.deepEqual(await getUnavailableDates({ client, config, now, fetchImpl: fake.fetchImpl }), ["2030-06-01", "2030-06-02", "2030-06-03"]);
+  });
+});
+
+test("admin revenue and collected money exclude all test payments", async () => {
+  await database(async (client) => {
+    const testProvider = provider();
+    const testBooking = await createBookingRequest(input(), { client, now, config, autoApprove: true, fetchImpl: testProvider.fetchImpl });
+    testProvider.pay(readPaymentToken(testBooking.booking.paymentToken, config).sessionId);
+    await refreshBookingPayment(testBooking.booking.id, { client, config, fetchImpl: testProvider.fetchImpl });
+    await markBalancePaid(testBooking.booking.id, { method: "Cash on arrival", client });
+    assert.equal((await listAdminBookings({ client })).summary.collectedDeposits, 0);
+    const liveProvider = provider(true);
+    const liveBooking = await createBookingRequest(input(), { client, now, config: live, autoApprove: true, fetchImpl: liveProvider.fetchImpl });
+    liveProvider.pay(readPaymentToken(liveBooking.booking.paymentToken, live).sessionId);
+    await refreshBookingPayment(liveBooking.booking.id, { client, config: live, fetchImpl: liveProvider.fetchImpl });
+    await markBalancePaid(liveBooking.booking.id, { method: "Cash on arrival", client });
+    const { summary } = await listAdminBookings({ client });
+    assert.equal(summary.confirmed, 1);
+    assert.equal(summary.confirmedRevenue, 500000);
+    assert.equal(summary.collectedDeposits, 250000);
+    assert.equal(summary.collectedBalances, 250000);
+  });
+});
+
+test("overlapping maintenance shares a durable lease and outages have a retry backoff", async () => {
+  await database(async (client, url) => {
+    const fake = provider();
+    const booking = await createBookingRequest(input(), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    const other = createClient({ url });
+    await initializeBookingStore(other);
+    let releaseFetch;
+    let markStarted;
+    const started = new Promise((resolve) => { markStarted = resolve; });
+    const gate = new Promise((resolve) => { releaseFetch = resolve; });
+    const future = now + HOLD_DURATION_MS + 60000;
+    let calls = 0;
+    const delayedProvider = async (...args) => { calls++; if (calls === 1) { markStarted(); await gate; } return fake.fetchImpl(...args); };
+    const first = runBookingMaintenance({ client, config, now: future, fetchImpl: delayedProvider });
+    await started;
+    try {
+      const competing = await runBookingMaintenance({ client: other, config, now: future, fetchImpl: delayedProvider });
+      assert.equal(competing.checked, 0);
+      assert.equal(calls, 1, "Only the lease owner contacts PayMongo");
+      assert.deepEqual(await getUnavailableDates({ client: other, config }), [booking.booking.date]);
+      releaseFetch();
+      assert.equal((await first).released, 1);
+      const failed = await createBookingRequest(input({ date: "2030-07-01" }), { client, now: future, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+      fake.failExpire = true;
+      const expired = future + HOLD_DURATION_MS + 60000;
+      assert.equal((await runBookingMaintenance({ client, config, now: expired, fetchImpl: fake.fetchImpl })).retained, 1);
+      const count = fake.calls.length;
+      assert.equal((await runBookingMaintenance({ client: other, config, now: expired + 1000, fetchImpl: fake.fetchImpl })).checked, 0);
+      assert.equal(fake.calls.length, count, "An outage cannot trigger immediate repeated provider work");
+      assert.deepEqual(await getUnavailableDates({ client, config }), [failed.booking.date]);
+    } finally { releaseFetch(); await first; other.close(); }
+  });
+});
+
+test("guest timeout maintenance touches only its validated private booking", async () => {
+  await database(async (client) => {
+    const fake = provider();
+    const first = await createBookingRequest(input({ date: "2030-08-01" }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    const second = await createBookingRequest(input({ date: "2030-08-02" }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl });
+    const future = now + HOLD_DURATION_MS + 60000;
+    const calls = fake.calls.length;
+    await assert.rejects(getGuestBooking("invalid", { client, refreshPayment: true, config, now: future, fetchImpl: fake.fetchImpl }), rejectCode("not-found"));
+    assert.equal(fake.calls.length, calls);
+    const checked = await getGuestBooking(second.token, { client, refreshPayment: true, config, now: future, fetchImpl: fake.fetchImpl });
+    assert.equal(checked.status, "cancelled");
+    assert.equal(fake.expirations, 1);
+    assert.equal((await getAdminBooking(first.booking.id, { client })).status, "awaiting_payment");
+    assert.deepEqual(await getUnavailableDates({ client, config }), [first.booking.date]);
+  });
+});
+
+test("unpayable instant totals fail before persistence or provider work", async () => {
+  await database(async (client) => {
+    const fake = provider();
+    await assert.rejects(createBookingRequest(input({ guests: 999, days: 30 }), { client, now, config, autoApprove: true, fetchImpl: fake.fetchImpl }), rejectCode("invalid-request"));
+    assert.equal(fake.calls.length, 0);
+    assert.equal((await client.execute("SELECT COUNT(*) AS count FROM bookings")).rows[0].count, 0);
+    assert.equal((await client.execute("SELECT COUNT(*) AS count FROM booking_holds")).rows[0].count, 0);
   });
 });
 

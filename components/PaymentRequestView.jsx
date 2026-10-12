@@ -27,7 +27,7 @@ export function PaymentUnavailable({ invalid = false, temporary = false }) {
   );
 }
 
-export default function PaymentRequestView({ payment, token, returned = false }) {
+export default function PaymentRequestView({ payment, token, returned = false, booking = null }) {
   const { request, status } = payment;
   const paid = status === "paid";
   const pending = status === "pending";
@@ -45,12 +45,14 @@ export default function PaymentRequestView({ payment, token, returned = false })
         <h1>{title}</h1>
         <p>{paid
           ? test ? "PayMongo recorded a successful test payment. No real deposit was collected."
-            : "PayMongo has confirmed your payment. The host will finalize your reservation and confirm arrangements for the remaining balance."
+            : booking ? "Your deposit is verified and your booking status has been updated. Contact the host to arrange your arrival and remaining balance."
+              : "PayMongo has confirmed your payment. The host will finalize your reservation and confirm arrangements for the remaining balance."
           : status === "expired"
             ? "Please ask the host to confirm the date again and send a new payment request."
             : status === "refunded"
               ? "A refund is recorded for this payment. Ask the host to confirm your booking status and any remaining balance."
-              : "The host has prepared this request after confirming your date and final rate. Review your stay before paying the 50% deposit."}</p>
+              : booking ? "Your dates are held while you complete this deposit. Review your stay and booking terms before continuing to PayMongo."
+                : "The host has prepared this request after confirming your date and final rate. Review your stay before paying the 50% deposit."}</p>
         {test && <p className="payment-notice" role="note">Test checkout. No real money is collected.</p>}
         {returned && pending && <p className="payment-notice" role="status">A completed payment has not been verified yet. If you just paid, check again or contact the host before making another payment.</p>}
         <Link href="/#inquire" className="text-link">Contact the host</Link>
@@ -61,7 +63,8 @@ export default function PaymentRequestView({ payment, token, returned = false })
           <div><dt>Reference</dt><dd>{request.reference}</dd></div>
           <div><dt>Check-in date</dt><dd>{dateLabel(request.date)}</dd></div>
           <div><dt>Guests</dt><dd>{request.guests}</dd></div>
-          <div><dt>Private stay</dt><dd>22 hours</dd></div>
+          {booking?.endDate && <div><dt>Check-out date</dt><dd>{dateLabel(booking.endDate)}</dd></div>}
+          <div><dt>Private stay</dt><dd>{booking?.days > 1 ? `${booking.days} days (${booking.days * 24 - 2} hours)` : "22 hours"}</dd></div>
           <div><dt>Confirmed total</dt><dd>{pesos(request.totalAmount)}</dd></div>
           <div className="payment-total"><dt>50% deposit{paid ? " paid" : ""}</dt><dd>{pesos(request.depositAmount)}</dd></div>
           <div><dt>Remaining balance{status === "refunded" ? " before adjustments" : ""}</dt><dd>{pesos(request.totalAmount - request.depositAmount)}</dd></div>

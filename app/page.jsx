@@ -6,6 +6,8 @@ import PhotoGallery from "@/components/PhotoGallery";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import BookingForm from "@/components/BookingForm";
 import TierSelectButton from "@/components/TierSelectButton";
+import FadeContent from "@/components/react-bits/FadeContent";
+import SpotlightCard from "@/components/react-bits/SpotlightCard";
 
 const rateTiers = [
   { guests: "Up to 4 guests", count: 4, price: "₱5,000", note: "Minimum rate, including stays for 2 to 4 guests." },
@@ -41,28 +43,28 @@ export default function Page() {
         </section>
         <div className="gallery-spread"><PhotoGallery photos={p.photos} /></div>
         <section id="amenities" className="amenities-section" aria-labelledby="amenities-heading">
-          <div className="section-intro">
+          <FadeContent className="section-intro">
             <p className="section-label">Make yourself at home</p>
             <h2 id="amenities-heading">Your own space,<br />inside and out.</h2>
             <p>The property and its amenities are exclusive to your group throughout your 22-hour stay.</p>
-          </div>
+          </FadeContent>
           <div className="amenities-details">
             <ul className="amenities-list">{p.amenities.map((amenity) => <li key={amenity}>{amenity}</li>)}</ul>
             <div className="house-rules"><h3>A few house rules</h3><ul>{p.rules.map((rule) => <li key={rule}>{rule}</li>)}</ul></div>
           </div>
         </section>
         <section id="rates" className="rates-section" aria-labelledby="rates-heading">
-          <div className="section-heading">
+          <FadeContent className="section-heading">
             <div><p className="section-label">Bring your people</p><h2 id="rates-heading">A stay for your group.</h2></div>
             <p>Rates cover a 22-hour stay with private use of the property.</p>
-          </div>
-          <div className="rates-list">{rateTiers.map((tier) => (
+          </FadeContent>
+          <SpotlightCard className="rates-list rates-spotlight" theme="haus" intensity={0.2} spotlightSize={320} borderGlow={0} proximity={0} ambient={false} flare={false} grain={0}>{rateTiers.map((tier) => (
             <div className="rate-row" key={tier.guests}>
               <div><h3>{tier.guests}</h3><p>{tier.note}</p></div>
               <div className="rate-price"><span>{tier.price}</span>{tier.count < 11 && <span className="rate-duration">/ 22 hours</span>}</div>
               <TierSelectButton guests={tier.count} label="Choose this group" />
             </div>
-          ))}</div>
+          ))}</SpotlightCard>
           <p className="rate-note">Instant booking: dates are held for 30 minutes upon reservation for your 50% deposit. Multiple days available: select your stay duration in the booking form and prices multiply per day.</p>
         </section>
         <section id="calendar" className="calendar-section" aria-labelledby="calendar-heading">
@@ -74,7 +76,7 @@ export default function Page() {
           <AvailabilityCalendar bookedDates={p.bookedDates || []} phone={p.contact.phone} messengerUrl={p.contact.messengerUrl} email={p.contact.email} />
         </section>
         <section id="location" className="location-section" aria-labelledby="location-heading">
-          <div className="location-copy">
+          <FadeContent className="location-copy">
             <p className="section-label">Meet us in Bataan</p>
             <h2 id="location-heading">A place in Limay.</h2>
             <p className="location-address">{p.address}</p>
@@ -84,7 +86,7 @@ export default function Page() {
               <div><dt>Parking</dt><dd>Space for two sedans</dd></div>
             </dl>
             <a href={p.mapsLink} target="_blank" rel="noopener noreferrer" className="text-link">Get directions on Google Maps</a>
-          </div>
+          </FadeContent>
           <div className="location-map"><iframe title={`Map showing ${p.name}`} loading="lazy" src={`https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`} /></div>
         </section>
         <section id="reservation-section" className="reservation-section" aria-labelledby="reservation-heading">

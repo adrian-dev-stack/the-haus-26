@@ -1,8 +1,8 @@
 # Booking deposits
 
-HauS 26 collects a 50% deposit only after the host has confirmed the date, guest count, final price, and payment terms. Guests receive an individual `/pay/...` link that shows the approved total, deposit, and balance before opening PayMongo hosted checkout.
+HauS 26 website bookings use the listed rates and a 50% deposit, with a 30-minute payment hold. The booking module creates an individual checkout after the guest chooses available dates and reviews the quote. The separate host CLI described below still creates custom, host-confirmed payment requests.
 
-Payment requests are created from the host's computer. The public website can retrieve an existing checkout and send a guest to it; it cannot create a checkout or choose an amount. PayMongo stores the transaction. The host verifies receipt in the PayMongo dashboard and finalizes the reservation manually.
+The booking module calculates prices on the server; guests cannot supply their own payable amount. PayMongo stores the transaction, and the booking database records verified payment and calendar holds. Standalone CLI requests are created from the host's computer and must be reconciled separately. See [BOOKINGS.md](BOOKINGS.md) for the website flow and Vercel database setup.
 
 ## Configure test mode
 
@@ -37,7 +37,7 @@ npm run payment:request -- expire --reference H26-20261120-001
 
 Expire an unpaid request in PayMongo before releasing the date or replacing the quote. Deleting a local link or navigating away from checkout does not cancel it. A paid request must be handled through the provider's refund process; do not create another request for the same deposit.
 
-## Guest flow
+## Standalone host request flow
 
 1. The guest inquires through the existing form.
 2. The host confirms the date, final rate, and cancellation/rescheduling terms, then creates and shares the payment request.

@@ -460,3 +460,16 @@ body:has(.admin-shell), body:has(.admin-app-root) { padding-bottom: 0; }
   .admin-action-section { border-left: 1px solid var(--color-divider); padding-left: 2rem; }
 }
 
+.bits-fade { min-width: 0; }
+.rates-spotlight.spotlight-card {
+  padding: 0;
+  border-radius: 0;
+}
+.rates-spotlight .spotlight-card__border,
+.rates-spotlight .spotlight-card__edge { display: none; }
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .spotlight-card__light, .spotlight-card__grain, .spotlight-card__edge { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bits-fade { opacity: 1 !important; }
+}

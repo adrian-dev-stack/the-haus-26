@@ -43,6 +43,7 @@ export default function AdminLogin() {
       <h1>Host Command Center</h1>
       <p>Sign in with your private host password to review guest inquiries, manage quotes, and track deposits.</p>
       <form onSubmit={submit} aria-busy={pending}>
+        <input type="hidden" name="username" autoComplete="username" value="host" />
         <div className="booking-field">
           <label htmlFor="host-password">Host Password</label>
           <div style={{ position: "relative" }}>

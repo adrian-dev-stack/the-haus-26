@@ -16,17 +16,17 @@ export default function PaymentPage() {
     <PaymentLayout>
       <div className="payment-content">
         <div className="payment-intro">
-          <p className="section-label">Plan first, then pay</p>
+          <p className="section-label">Choose dates, then pay</p>
           <h1>A deposit for your stay.</h1>
-          <p>Your booking deposit is 50% of the final rate agreed with the host. Start with an inquiry so your date, group size, and price are confirmed first.</p>
-          <Link href="/#inquire" className="button-primary">Inquire about a stay</Link>
+          <p>Choose your dates and group size to see the listed rate. Your dates are held for 30 minutes while you complete the 50% deposit.</p>
+          <Link href="/book" className="button-primary">Choose your stay</Link>
         </div>
         <section className="payment-summary" aria-labelledby="deposit-heading">
           <h2 id="deposit-heading">How your deposit works</h2>
           <ol className="deposit-steps">
-            <li><h3>Confirm your stay</h3><p>Agree your date, guest count, final price, and cancellation or rescheduling terms with the host.</p></li>
-            <li><h3>Pay the 50% deposit</h3><p>{enabled ? "Open the individual payment link the host sends you. Review your booking details, then continue to PayMongo checkout." : "Online checkout is being set up. After confirming your stay, the host will provide payment instructions."}</p></li>
-            <li><h3>Receive your confirmation</h3><p>The host confirms receipt and finalizes your reservation. Arrange the remaining 50% directly with them.</p></li>
+            <li><h3>Review your booking</h3><p>Select available dates, enter your group size, and review the total and booking terms.</p></li>
+            <li><h3>Pay the 50% deposit</h3><p>{enabled ? "Open the checkout from your private booking page and complete your deposit through PayMongo." : "Online checkout is unavailable. Contact the host for booking help."}</p></li>
+            <li><h3>Check your confirmation</h3><p>A verified live payment confirms your reservation. Test payments are labeled and do not create a real reservation. Arrange the remaining balance with the host.</p></li>
           </ol>
           <p className="payment-notice">Already speaking with the host? Use the payment link they send for your specific stay.</p>
         </section>

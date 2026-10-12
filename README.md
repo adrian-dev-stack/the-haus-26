@@ -8,8 +8,10 @@ Use Node.js 20.9 or newer.
    - Set `position` (for example, `"center 60%"`) to adjust a preview crop. The full-size viewer always shows the entire image.
 3. Deploy: configure the remote booking database and private environment variables in [BOOKINGS.md](BOOKINGS.md), then import the project into Vercel.
 
-Booking deposits: see [PAYMENTS.md](./PAYMENTS.md) for the PayMongo setup and host commands. Guests pay a 50% deposit only after the host confirms their date and final quote. Online checkout remains unavailable until server-side payment configuration is supplied.
+Booking deposits: see [PAYMENTS.md](./PAYMENTS.md) for PayMongo setup and standalone host commands. Website bookings use the listed rates and a 50% deposit. Online checkout remains unavailable until server-side configuration is supplied.
 
 ## Booking module
 
 Guest requests and the private host dashboard are documented in [BOOKINGS.md](BOOKINGS.md). Run `npm run booking:setup` for local host access; Vercel requires a remote libSQL database.
+
+The home page uses adapted React Bits FadeContent and SpotlightCard components. Source and license notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

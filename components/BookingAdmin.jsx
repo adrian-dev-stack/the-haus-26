@@ -12,7 +12,7 @@ const STATUS_LABELS = {
   cancelled: "Cancelled",
   declined: "Declined",
   payment_issue: "Payment Review",
-  refunded: "Refunded",
+  refunded: "Refund Review",
 };
 
 const STATUS_CLASSES = {
@@ -72,7 +72,7 @@ function BookingEntry({ booking, onChanged, onUnauthorized }) {
   const isRequested = booking.status === "requested";
   const isAwaiting = booking.status === "awaiting_payment";
   const isConfirmed = booking.status === "confirmed" || booking.status === "test_paid";
-  const canCancel = isRequested || isAwaiting;
+  const canCancel = isRequested || isAwaiting || (booking.status === "payment_issue" && booking.paymentStatus === "expired");
   const hasQuote = Number.isSafeInteger(booking.totalAmount) && booking.totalAmount > 0;
 
   async function action(payload) {
