@@ -388,44 +388,135 @@ export default function Page() {
 
         {/* Site Footer */}
         <footer className="site-footer">
-          <div>
-            <a href="#main" className="footer-brand">
-              <span className="nav-brand-badge">26</span>
-              <span>{p.name}</span>
+          <div className="footer-main-grid">
+            {/* Column 1: Brand & Identity */}
+            <div className="footer-col">
+              <a href="#main" className="footer-brand">
+                <span className="nav-brand-badge">26</span>
+                <span>{p.name}</span>
+              </a>
+              <p className="footer-brand-desc">
+                Exclusive 22-hour private pool staycation in Limay, Bataan. A relaxing retreat for family getaways, barkada gatherings, and intimate celebrations.
+              </p>
+              <div className="footer-social-chips">
+                {p.contact.messengerUrl && (
+                  <a
+                    href={p.contact.messengerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="footer-social-chip"
+                  >
+                    <span>💬</span>
+                    <span>Facebook Messenger</span>
+                  </a>
+                )}
+                {p.contact.instagramUrl && (
+                  <a
+                    href={p.contact.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="footer-social-chip"
+                  >
+                    <span>📸</span>
+                    <span>Instagram</span>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Column 2: Explore Villa */}
+            <div className="footer-col">
+              <h4>Explore Villa</h4>
+              <nav className="footer-col-links" aria-label="Footer quick links">
+                <a href="#gallery">The House & Pool Photos</a>
+                <a href="#amenities">Amenities & Billiards</a>
+                <a href="#rates">Group Rates (From ₱5,000)</a>
+                <a href="#calendar">Availability Calendar</a>
+                <a href="#location">Location & Directions</a>
+                <a href="#faq">Staycation FAQ</a>
+              </nav>
+            </div>
+
+            {/* Column 3: Stay Details */}
+            <div className="footer-col">
+              <h4>Stay Guidelines</h4>
+              <ul className="footer-details-list">
+                <li>
+                  <span>Check-in</span>
+                  <span>{p.checkIn}</span>
+                </li>
+                <li>
+                  <span>Check-out</span>
+                  <span>{p.checkOut}</span>
+                </li>
+                <li>
+                  <span>Stay Duration</span>
+                  <span>22 Hours</span>
+                </li>
+                <li>
+                  <span>Corkage Fee</span>
+                  <span>Free (Bring Food)</span>
+                </li>
+                <li>
+                  <span>Pet Policy</span>
+                  <span>Pets Welcome</span>
+                </li>
+                <li>
+                  <span>Parking</span>
+                  <span>Fits 2 Sedans</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: Contact & Directions */}
+            <div className="footer-col">
+              <h4>Get in Touch</h4>
+              <div className="footer-contact-info">
+                {p.contact.phone && (
+                  <a href={`tel:${p.contact.phone}`}>
+                    <span>📞</span>
+                    <span>{p.contact.phone}</span>
+                  </a>
+                )}
+                {p.contact.email && (
+                  <a href={`mailto:${p.contact.email}`}>
+                    <span>✉️</span>
+                    <span>{p.contact.email}</span>
+                  </a>
+                )}
+                <p className="mt-2 text-xs leading-relaxed text-muted">
+                  📍 {p.address}
+                </p>
+                <a
+                  href={p.mapsLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-link mt-1 text-xs"
+                >
+                  Open in Google Maps →
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="footer-bottom-bar">
+            <p>
+              © {new Date().getFullYear()} {p.name}. All rights reserved.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link className="text-muted hover:text-accent transition-colors" href="/privacy">
+                Privacy & Cookie Policy
+              </Link>
+              <span>·</span>
+              <Link className="text-muted hover:text-accent transition-colors" href="/payment">
+                Deposit & Booking Guide
+              </Link>
+            </div>
+            <a href="#main" className="back-to-top-btn">
+              Back to top ↑
             </a>
-            <p className="mt-2">{p.address}</p>
           </div>
-          <div className="footer-contact">
-            {p.contact.phone && (
-              <a className="text-link" href={`tel:${p.contact.phone}`}>
-                Call {p.contact.phone}
-              </a>
-            )}
-            {p.contact.email && (
-              <a className="text-link" href={`mailto:${p.contact.email}`}>
-                {p.contact.email}
-              </a>
-            )}
-            {p.contact.instagramUrl && (
-              <a
-                className="text-link"
-                href={p.contact.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Instagram @{p.contact.instagram || "thehaus.26"}
-              </a>
-            )}
-            <Link className="text-link" href="/privacy">
-              Privacy & Cookie Policy
-            </Link>
-          </div>
-          <a href="#main" className="text-link">
-            Back to top ↑
-          </a>
-          <p className="footer-copyright">
-            © {new Date().getFullYear()} {p.name}. All rights reserved.
-          </p>
         </footer>
       </main>
     </>
