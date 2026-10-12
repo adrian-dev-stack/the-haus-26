@@ -4,51 +4,88 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function CookieBanner() {
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     try {
       const consent = localStorage.getItem("haus26_cookie_consent");
       if (!consent) {
-        const timer = setTimeout(() => setVisible(true), 700);
+        // Pop up automatically for visitors who have not chosen yet
+        const timer = setTimeout(() => setOpen(true), 350);
         return () => clearTimeout(timer);
       }
-    } catch {}
+    } catch {
+      setOpen(true);
+    }
   }, []);
 
-  function handleAccept() {
+  useEffect(() => {
+    function reopen() {
+      setOpen(true);
+    }
+    window.addEventListener("haus26:open-cookie-preferences", reopen);
+    return () => window.removeEventListener("haus26:open-cookie-preferences", reopen);
+  }, []);
+
+  function handleChoice(preference) {
     try {
-      localStorage.setItem("haus26_cookie_consent", "accepted");
+      localStorage.setItem("haus26_cookie_consent", preference);
     } catch {}
-    setVisible(false);
+    setOpen(false);
   }
 
-  if (!visible) return null;
+  if (!mounted || !open) return null;
 
   return (
-    <aside
-      className="cookie-banner"
-      role="region"
-      aria-label="Cookie and Privacy Notice"
+    <div
+      className="cookie-modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cookie-popup-title"
     >
-      <div className="cookie-banner-text">
-        <p style={{ margin: 0 }}>
-          We use essential cookies and local storage to manage reservations and secure PayMongo checkouts. We do not use third-party advertising trackers. Learn more in our{" "}
-          <Link href="/privacy" style={{ color: "var(--color-accent)", textDecoration: "underline", textUnderlineOffset: "3px" }}>
-            Privacy & Cookie Policy
-          </Link>.
+      <div className="cookie-popup-card">
+        <div className="cookie-popup-header">
+          <span className="section-label">Privacy & Transparency</span>
+          <h2 id="cookie-popup-title" className="cookie-popup-title">
+            Cookie & Privacy Preferences
+          </h2>
+        </div>
+        <p className="cookie-popup-desc">
+          We use cookies and browser storage to process reservation requests, hold dates, and provide secure PayMongo payments. We do not use third-party advertising or cross-site tracking cookies.
         </p>
+        <p className="cookie-popup-desc" style={{ marginTop: "0.35rem", fontSize: "0.8125rem" }}>
+          Please choose whether to allow cookies during your visit or restrict storage to strictly essential features.
+        </p>
+        <div className="cookie-popup-actions">
+          <button
+            type="button"
+            onClick={() => handleChoice("allowed")}
+            className="button-primary"
+            style={{ flex: "1", minWidth: "140px" }}
+          >
+            Allow Cookies
+          </button>
+          <button
+            type="button"
+            onClick={() => handleChoice("essential_only")}
+            className="booking-secondary"
+            style={{ flex: "1", minWidth: "140px" }}
+          >
+            Don't Use Cookies
+          </button>
+        </div>
+        <div className="cookie-popup-footer">
+          <Link
+            href="/privacy"
+            onClick={() => setOpen(false)}
+            style={{ color: "var(--color-accent)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+          >
+            Read our full Privacy & Cookie Policy →
+          </Link>
+        </div>
       </div>
-      <div className="cookie-banner-actions">
-        <button
-          type="button"
-          onClick={handleAccept}
-          className="button-primary"
-          style={{ minHeight: "38px", padding: "0.4rem 1.1rem", fontSize: "0.8125rem" }}
-        >
-          Got it
-        </button>
-      </div>
-    </aside>
+    </div>
   );
 }

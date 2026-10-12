@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { property } from "@/lib/property";
+import Navbar from "@/components/Navbar";
+import CookiePreferenceButton from "@/components/CookiePreferenceButton";
 
 export const metadata = {
   title: "Privacy & Cookie Policy | The HauS 26",
@@ -13,21 +15,7 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <>
-      <header className="site-nav">
-        <div className="nav-inner">
-          <Link href="/" className="nav-brand">
-            {property.name}
-          </Link>
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            <Link href="/" className="text-link">
-              Back to Home
-            </Link>
-            <Link href="/book" className="button-primary" style={{ minHeight: "40px", padding: "0.4rem 1rem", fontSize: "0.875rem" }}>
-              Book a Stay
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Navbar name={property.name} rate={property.rate} />
 
       <main id="main" className="policy-shell">
         <div className="policy-header">
@@ -109,8 +97,9 @@ export default function PrivacyPage() {
               </li>
             </ul>
             <p>
-              You have the right to accept or decline cookies. You can manage or disable cookies at any time through your browser settings. However, disabling essential cookies may impact specific session features.
+              You have the right to accept or decline cookies. You can manage or update your choice below at any time:
             </p>
+            <CookiePreferenceButton />
           </section>
 
           <section className="policy-section">
