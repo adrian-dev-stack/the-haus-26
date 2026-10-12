@@ -69,7 +69,7 @@ export default function Page() {
           <div className="section-intro">
             <p className="section-label">Find a day to get away</p>
             <h2 id="calendar-heading">When would you<br />like to stay?</h2>
-            <p>Choose your check-in date. The calendar checks availability and holds your dates for 30 minutes while you complete your deposit.</p>
+            <p>Choose your check-in and check-out dates. The calendar checks availability and holds your dates for 30 minutes while you complete your deposit.</p>
           </div>
           <AvailabilityCalendar bookedDates={p.bookedDates || []} phone={p.contact.phone} messengerUrl={p.contact.messengerUrl} email={p.contact.email} />
         </section>

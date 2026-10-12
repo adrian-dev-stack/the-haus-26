@@ -15,6 +15,18 @@ function calculateCheckoutDate(value, days = 1) {
   return Number.isNaN(date.valueOf()) ? "" : date.toISOString().slice(0, 10);
 }
 
+function formatDisplayDate(value) {
+  if (!value) return "";
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
+
 function generateSafeUUID() {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     try { return crypto.randomUUID(); } catch {}
@@ -61,6 +73,8 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
   const successHeading = useRef(null);
   const [date, setDate] = useState("");
   const [days, setDays] = useState("1");
+  const [checkoutDate, setCheckoutDate] = useState("");
+  const [pendingCheckout, setPendingCheckout] = useState(false);
   const [guests, setGuests] = useState("4");
   const [today, setToday] = useState("");
   const [pending, setPending] = useState(false);
@@ -76,6 +90,16 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
     function selectDate(event) {
       if (requestLocked.current) return;
       if (typeof event.detail?.date === "string") setDate(event.detail.date);
+      if (typeof event.detail?.checkoutDate === "string") {
+        setCheckoutDate(event.detail.checkoutDate);
+      } else if (!event.detail?.date) {
+        setCheckoutDate("");
+      }
+      if (typeof event.detail?.pendingCheckout === "boolean") {
+        setPendingCheckout(event.detail.pendingCheckout);
+      } else {
+        setPendingCheckout(false);
+      }
       if (event.detail?.days && Number(event.detail.days) >= 1) {
         setDays(String(event.detail.days));
       }
@@ -102,38 +126,15 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
     return () => controller.abort();
   }, []);
 
-  function changeDate(value) {
-    setDate(value);
-    const validDays = Math.max(1, Number(days) || 1);
-    const checkoutVal = calculateCheckoutDate(value, validDays);
-    window.dispatchEvent(new CustomEvent("haus26:select-dates", {
-      detail: { date: value, checkoutDate: checkoutVal, days: validDays }
-    }));
-    window.dispatchEvent(new CustomEvent("haus26:select-date", {
-      detail: { date: value, checkoutDate: checkoutVal, days: validDays }
-    }));
-  }
-
-  function changeCheckoutDate(newCheckout) {
-    if (!newCheckout || !date) return;
-    const dIn = new Date(`${date}T12:00:00Z`);
-    const dOut = new Date(`${newCheckout}T12:00:00Z`);
-    const diff = Math.round((dOut - dIn) / (24 * 60 * 60 * 1000));
-    if (diff >= 1) {
-      setDays(String(diff));
-      window.dispatchEvent(new CustomEvent("haus26:select-dates", {
-        detail: { date, checkoutDate: newCheckout, days: diff }
-      }));
-      window.dispatchEvent(new CustomEvent("haus26:select-date", {
-        detail: { date, checkoutDate: newCheckout, days: diff }
-      }));
-    }
-  }
-
-
   async function submit(event) {
     event.preventDefault();
     if (pending) return;
+    if (!date) {
+      setError("Please select your stay dates on the availability calendar above first.");
+      const calendarEl = document.getElementById("calendar") || document.getElementById("availability");
+      if (calendarEl) calendarEl.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
     if (date <= todayInManila()) {
       setError("Same-day bookings cannot be accommodated. Please choose tomorrow or a future date to give our housekeeper time to ready the property.");
       return;
@@ -223,19 +224,52 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
       {livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
       <form onSubmit={submit} className="booking-form" aria-busy={pending}>
         <fieldset disabled={pending || uncertain} className="booking-fieldset">
-          <div className="booking-field"><label htmlFor={`${prefix}-date`}>Check-in date</label><input id={`${prefix}-date`} type="date" name="date" required min={today} value={date} onChange={(event) => changeDate(event.target.value)} /><p>{checkIn || "11:00 AM check-in"}</p></div>
-          <div className="booking-field">
-            <label htmlFor={`${prefix}-checkout`}>Check-out date</label>
-            <input
-              id={`${prefix}-checkout`}
-              type="date"
-              name="checkout"
-              required
-              min={calculateCheckoutDate(date, 1)}
-              value={calculateCheckoutDate(date, days)}
-              onChange={(event) => changeCheckoutDate(event.target.value)}
-            />
-            <p>{Number(days) > 1 ? `9:00 AM check-out (${days} days / ${Number(days) * 24 - 2}-hour stay)` : (checkOut || "Following day at 9:00 AM (22-hour stay)")}</p>
+          <input type="hidden" name="date" value={date} />
+          <input type="hidden" name="days" value={days} />
+          <input type="hidden" name="checkout" value={checkoutDate || calculateCheckoutDate(date, days)} />
+
+          <div className="booking-field booking-wide">
+            <label>Selected stay dates</label>
+            {date ? (
+              <div className="mt-2 rounded-lg border border-line bg-surface-elevated p-3 sm:p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2 mb-3">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+                    {pendingCheckout
+                      ? "Check-in selected · Choose check-out on calendar"
+                      : Number(days) === 1
+                      ? "1 day (22-hour stay)"
+                      : `${days} days (${Number(days) * 24 - 2}-hour stay)`}
+                  </span>
+                  <a href="#calendar" className="text-xs text-accent hover:underline font-medium">
+                    Change dates on calendar
+                  </a>
+                </div>
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 text-sm">
+                  <div className="rounded-md border border-line bg-surface p-2.5">
+                    <span className="text-xs text-muted block uppercase tracking-wider font-medium">Check-in</span>
+                    <strong className="text-ink font-semibold text-base block mt-0.5">{formatDisplayDate(date)}</strong>
+                    <span className="text-xs text-muted block mt-0.5">{checkIn || "11:00 AM"}</span>
+                  </div>
+                  <div className="rounded-md border border-line bg-surface p-2.5">
+                    <span className="text-xs text-muted block uppercase tracking-wider font-medium">Check-out</span>
+                    <strong className="text-ink font-semibold text-base block mt-0.5">
+                      {formatDisplayDate(checkoutDate || calculateCheckoutDate(date, days))}
+                    </strong>
+                    <span className="text-xs text-muted block mt-0.5">
+                      {pendingCheckout ? "Select 2nd date on calendar (or 9:00 AM next day)" : (checkOut || "9:00 AM")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-2 rounded-lg border border-dashed border-line bg-surface-elevated/60 p-4 text-center">
+                <p className="text-sm font-semibold text-ink">Choose your stay dates on the calendar</p>
+                <p className="mt-1 text-xs text-muted">Click your check-in date and your check-out date on the availability calendar above.</p>
+                <a href="#calendar" className="inline-flex items-center gap-1 mt-3 rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface transition-colors">
+                  Select dates on calendar ↑
+                </a>
+              </div>
+            )}
           </div>
 
           <div className="booking-field booking-wide"><label htmlFor={`${prefix}-guests`}>Number of guests</label><div className="booking-guest-count"><input id={`${prefix}-guests`} type="number" name="guests" min="1" step="1" required value={guests} onChange={(event) => setGuests(event.target.value)} /><div role="group" aria-label="Quick guest counts">{[4, 6, 8, 10].map((count) => <button key={count} type="button" className="booking-secondary" aria-pressed={Number(guests) === count} onClick={() => setGuests(String(count))}>{count}</button>)}</div></div><p>Covers private stay for your group. Dates are held for 30 minutes upon reservation for deposit payment.</p></div>

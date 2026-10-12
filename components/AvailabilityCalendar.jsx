@@ -33,6 +33,25 @@ function addDays(dateStr, numDays = 1) {
   return Number.isNaN(date.valueOf()) ? "" : date.toISOString().slice(0, 10);
 }
 
+function countDays(startDate, endDate) {
+  if (!startDate || !endDate) return 1;
+  const d1 = new Date(`${startDate}T12:00:00Z`);
+  const d2 = new Date(`${endDate}T12:00:00Z`);
+  const diff = Math.round((d2 - d1) / (24 * 60 * 60 * 1000));
+  return Math.max(1, diff);
+}
+
+function getStayNights(startDate, endDate) {
+  if (!startDate || !endDate || startDate >= endDate) return [];
+  const nights = [];
+  let curr = startDate;
+  while (curr < endDate) {
+    nights.push(curr);
+    curr = addDays(curr, 1);
+  }
+  return nights;
+}
+
 export default function AvailabilityCalendar({
   bookedDates = [],
   onSelectDate,
@@ -56,7 +75,9 @@ export default function AvailabilityCalendar({
   const [todayYear, todayMonth] = today ? today.split("-").map(Number) : [null, null];
 
   const [checkInDate, setCheckInDate] = useState("");
-  const [stayDays, setStayDays] = useState(1);
+  const [checkOutDate, setCheckOutDate] = useState("");
+  const [hoverDate, setHoverDate] = useState(null);
+  const [rangeNotice, setRangeNotice] = useState("");
   const [savedDates, setSavedDates] = useState([]);
   const [availabilityStatus, setAvailabilityStatus] = useState("loading");
 
@@ -65,6 +86,8 @@ export default function AvailabilityCalendar({
   const hasPhone = /\d/.test(cleanPhone);
 
   const activeCheckIn = controlledSelectedDate ?? checkInDate;
+  const effectiveCheckOut = checkOutDate || (activeCheckIn ? addDays(activeCheckIn, 1) : "");
+  const stayDays = countDays(activeCheckIn, effectiveCheckOut);
 
   useEffect(() => {
     const currentDate = getToday();
@@ -91,18 +114,25 @@ export default function AvailabilityCalendar({
 
   useEffect(() => {
     function synchronizeDates(event) {
+      if (event.detail?.source === "calendar") return;
       const inDate = event.detail?.date || event.detail?.checkin;
+      const outDate = event.detail?.checkoutDate || event.detail?.checkout;
       const daysCount = event.detail?.days;
 
       if (!inDate) {
         setCheckInDate("");
+        setCheckOutDate("");
         return;
       }
       if (!/^\d{4}-\d{2}-\d{2}$/.test(inDate)) return;
 
       setCheckInDate(inDate);
-      if (daysCount && Number(daysCount) >= 1) {
-        setStayDays(Number(daysCount));
+      if (outDate && /^\d{4}-\d{2}-\d{2}$/.test(outDate)) {
+        setCheckOutDate(outDate);
+      } else if (daysCount && Number(daysCount) >= 1) {
+        setCheckOutDate(addDays(inDate, Number(daysCount)));
+      } else {
+        setCheckOutDate("");
       }
 
       const [year, month] = inDate.split("-").map(Number);
@@ -124,34 +154,115 @@ export default function AvailabilityCalendar({
     setCurrentYear(next.getFullYear());
   }
 
-  function handleSelectDate(date) {
-    if (unavailableDates.has(date)) return;
-    setCheckInDate(date);
-    onSelectDate?.(date);
-    const checkoutDate = addDays(date, stayDays);
-    onSelectDates?.({ checkIn: date, checkOut: checkoutDate, days: stayDays });
-    window.dispatchEvent(new CustomEvent("haus26:select-dates", {
-      detail: { date, checkin: date, checkoutDate, checkout: checkoutDate, days: stayDays }
-    }));
-    window.dispatchEvent(new CustomEvent("haus26:select-date", {
-      detail: { date, checkoutDate, days: stayDays }
-    }));
+  function isDateBlockedForCheckout(date) {
+    if (!activeCheckIn || date <= activeCheckIn) return false;
+    const nights = getStayNights(activeCheckIn, date);
+    return nights.some((n) => unavailableDates.has(n));
   }
 
-  function resetDate() {
+  function handleSelectDate(date) {
+    setRangeNotice("");
+
+    // Step 1: No check-in selected yet, or already completed a full range
+    if (!activeCheckIn || (activeCheckIn && checkOutDate)) {
+      if (unavailableDates.has(date)) return;
+      setCheckInDate(date);
+      setCheckOutDate("");
+      setHoverDate(null);
+      window.dispatchEvent(new CustomEvent("haus26:select-dates", {
+        detail: { date, checkin: date, checkoutDate: "", days: 1, pendingCheckout: true, source: "calendar" }
+      }));
+      window.dispatchEvent(new CustomEvent("haus26:select-date", {
+        detail: { date, checkoutDate: "", days: 1, pendingCheckout: true, source: "calendar" }
+      }));
+      return;
+    }
+
+    // Step 2: Check-in was chosen, now selecting check-out (the 2nd date)
+    if (activeCheckIn && !checkOutDate) {
+      if (date === activeCheckIn) {
+        // Clicked same date again -> 1 day stay
+        const singleOut = addDays(date, 1);
+        setCheckOutDate(singleOut);
+        setHoverDate(null);
+        onSelectDate?.(date);
+        onSelectDates?.({ checkIn: date, checkOut: singleOut, days: 1 });
+        window.dispatchEvent(new CustomEvent("haus26:select-dates", {
+          detail: { date, checkin: date, checkoutDate: singleOut, checkout: singleOut, days: 1, source: "calendar" }
+        }));
+        window.dispatchEvent(new CustomEvent("haus26:select-date", {
+          detail: { date, checkoutDate: singleOut, days: 1, source: "calendar" }
+        }));
+        return;
+      }
+
+      if (date < activeCheckIn) {
+        // Clicked an earlier date -> switch check-in to this earlier date
+        if (unavailableDates.has(date)) return;
+        setCheckInDate(date);
+        setCheckOutDate("");
+        setHoverDate(null);
+        window.dispatchEvent(new CustomEvent("haus26:select-dates", {
+          detail: { date, checkin: date, checkoutDate: "", days: 1, pendingCheckout: true, source: "calendar" }
+        }));
+        window.dispatchEvent(new CustomEvent("haus26:select-date", {
+          detail: { date, checkoutDate: "", days: 1, pendingCheckout: true, source: "calendar" }
+        }));
+        return;
+      }
+
+      // Selected a later date -> check-out day!
+      const nights = getStayNights(activeCheckIn, date);
+      const blocked = nights.find((n) => unavailableDates.has(n));
+      if (blocked) {
+        setRangeNotice(`The night of ${formatSelectedDate(blocked)} is already reserved. Please select continuous available dates.`);
+        return;
+      }
+
+      const days = countDays(activeCheckIn, date);
+      setCheckOutDate(date);
+      setHoverDate(null);
+      onSelectDate?.(activeCheckIn);
+      onSelectDates?.({ checkIn: activeCheckIn, checkOut: date, days });
+      window.dispatchEvent(new CustomEvent("haus26:select-dates", {
+        detail: { date: activeCheckIn, checkin: activeCheckIn, checkoutDate: date, checkout: date, days, source: "calendar" }
+      }));
+      window.dispatchEvent(new CustomEvent("haus26:select-date", {
+        detail: { date: activeCheckIn, checkoutDate: date, days, source: "calendar" }
+      }));
+    }
+  }
+
+  function handleRequestStayClick() {
+    if (activeCheckIn && !checkOutDate) {
+      const defaultOut = addDays(activeCheckIn, 1);
+      setCheckOutDate(defaultOut);
+      window.dispatchEvent(new CustomEvent("haus26:select-dates", {
+        detail: { date: activeCheckIn, checkin: activeCheckIn, checkoutDate: defaultOut, checkout: defaultOut, days: 1, source: "calendar" }
+      }));
+      window.dispatchEvent(new CustomEvent("haus26:select-date", {
+        detail: { date: activeCheckIn, checkoutDate: defaultOut, days: 1, source: "calendar" }
+      }));
+    }
+  }
+
+  function resetDates() {
     setCheckInDate("");
+    setCheckOutDate("");
+    setHoverDate(null);
+    setRangeNotice("");
     window.dispatchEvent(new CustomEvent("haus26:select-dates", {
-      detail: { date: "", checkoutDate: "", days: stayDays }
+      detail: { date: "", checkoutDate: "", days: 1 }
     }));
     window.dispatchEvent(new CustomEvent("haus26:select-date", {
-      detail: { date: "", checkoutDate: "", days: stayDays }
+      detail: { date: "", checkoutDate: "", days: 1 }
     }));
   }
 
   if (!today || currentMonth === null || currentYear === null) {
     return (
       <div className="min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-6">
-        <Heading className="availability-heading">Choose your check-in</Heading>
+        <Heading className="availability-heading">Choose your stay dates</Heading>
         <p className="mt-2 text-sm leading-relaxed text-muted">Your host confirms availability before a booking is made.</p>
         <p className="mt-6 min-h-64 text-sm text-muted" role="status">Loading the date calendar…</p>
       </div>
@@ -169,32 +280,42 @@ export default function AvailabilityCalendar({
   const navigationStyle = "flex h-11 w-11 items-center justify-center rounded-md border border-line text-ink transition-colors hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
   const linkStyle = "inline-flex min-h-11 items-center justify-center rounded-md border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
-  const checkoutDateStr = activeCheckIn ? addDays(activeCheckIn, stayDays) : "";
-
   return (
     <div className="min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Heading className="availability-heading">Choose your check-in</Heading>
+          <Heading className="availability-heading">Choose your stay dates</Heading>
           <p className="mt-1 text-sm leading-relaxed text-muted">
-            Select your check-in date (11:00 AM). Stays are 22 hours per day (check-out 9:00 AM next day).
+            Click your check-in date (11:00 AM) and then click your check-out date (9:00 AM) based on how many days you want to stay.
           </p>
         </div>
         {activeCheckIn && (
           <button
             type="button"
-            onClick={resetDate}
+            onClick={resetDates}
             className="text-xs font-medium text-muted hover:text-ink underline self-center"
           >
-            Clear date
+            Clear dates
           </button>
         )}
       </div>
 
+      {rangeNotice && (
+        <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900" role="alert">
+          {rangeNotice}
+        </div>
+      )}
+
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
         <div>
           <p className="text-lg font-semibold text-ink" aria-live="polite">{MONTH_NAMES[currentMonth]} {currentYear}</p>
-          <p className="text-xs text-muted">Click an available date to set check-in</p>
+          <p className="text-xs text-muted">
+            {!activeCheckIn
+              ? "Click an available date to set check-in"
+              : !checkOutDate
+              ? `Check-in: ${formatSelectedDate(activeCheckIn)}. Now click your check-out date (e.g. following day or later).`
+              : `Selected stay: ${stayDays} day${stayDays > 1 ? "s" : ""} (${formatSelectedDate(activeCheckIn)} to ${formatSelectedDate(effectiveCheckOut)}). Click any date to start over.`}
+          </p>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={() => changeMonth(-1)} disabled={isPrevDisabled} className={navigationStyle} aria-label="Previous month">
@@ -215,6 +336,7 @@ export default function AvailabilityCalendar({
             className="grid grid-cols-7 gap-y-1"
             role="group"
             aria-label={`${MONTH_NAMES[currentMonth]} ${currentYear} booking dates`}
+            onMouseLeave={() => setHoverDate(null)}
           >
             {calendarDays.map((day, index) => {
               if (!day) return <div key={`empty-${index}`} className="h-12" aria-hidden="true" />;
@@ -222,27 +344,72 @@ export default function AvailabilityCalendar({
               const isPast = date <= today;
               const isBooked = unavailableDates.has(date);
               const isCheckIn = activeCheckIn === date;
-              const isInStayRange = Boolean(
+              const isCheckOut = checkOutDate === date;
+              const isInRange = Boolean(
                 activeCheckIn &&
-                stayDays > 1 &&
-                date >= activeCheckIn &&
-                date < checkoutDateStr
+                checkOutDate &&
+                date > activeCheckIn &&
+                date < checkOutDate
+              );
+              const isHoverRange = Boolean(
+                activeCheckIn &&
+                !checkOutDate &&
+                hoverDate &&
+                hoverDate > activeCheckIn &&
+                date > activeCheckIn &&
+                date < hoverDate
+              );
+              const isHoverEnd = Boolean(
+                activeCheckIn &&
+                !checkOutDate &&
+                hoverDate &&
+                date === hoverDate &&
+                hoverDate > activeCheckIn
               );
 
-              const isDisabled = isPast || isBooked;
+              const checkoutBlocked = Boolean(
+                activeCheckIn &&
+                !checkOutDate &&
+                date > activeCheckIn &&
+                isDateBlockedForCheckout(date)
+              );
+
+              const isSelectingCheckIn = !activeCheckIn || Boolean(checkOutDate);
+
+              let isDisabled = false;
+              if (isPast) {
+                isDisabled = true;
+              } else if (isSelectingCheckIn) {
+                isDisabled = isBooked;
+              } else {
+                if (date < activeCheckIn) {
+                  isDisabled = isBooked;
+                } else if (date > activeCheckIn) {
+                  isDisabled = checkoutBlocked;
+                }
+              }
 
               let style = "";
               let rounded = "rounded-md";
 
-              if (isCheckIn && stayDays === 1) {
+              if (isCheckIn && isCheckOut) {
                 style = "bg-accent font-semibold text-white";
                 rounded = "rounded-md";
               } else if (isCheckIn) {
                 style = "bg-accent font-semibold text-white";
-                rounded = "rounded-l-md rounded-r-none";
-              } else if (isInStayRange) {
+                rounded = (checkOutDate || (hoverDate && hoverDate > activeCheckIn)) ? "rounded-l-md rounded-r-none" : "rounded-md";
+              } else if (isCheckOut) {
+                style = "bg-accent font-semibold text-white";
+                rounded = "rounded-r-md rounded-l-none";
+              } else if (isInRange) {
                 style = "bg-accent/20 text-accent font-semibold";
                 rounded = "rounded-none";
+              } else if (isHoverRange) {
+                style = "bg-accent/15 text-ink";
+                rounded = "rounded-none";
+              } else if (isHoverEnd) {
+                style = "bg-accent/30 font-semibold text-ink";
+                rounded = "rounded-r-md rounded-l-none";
               } else if (isDisabled) {
                 style = `cursor-not-allowed text-muted ${isBooked ? "line-through opacity-60" : "opacity-40"}`;
               } else {
@@ -251,7 +418,9 @@ export default function AvailabilityCalendar({
 
               const statusDesc = isCheckIn
                 ? "Selected Check-in (11:00 AM)"
-                : isInStayRange
+                : isCheckOut
+                ? "Selected Check-out (9:00 AM)"
+                : isInRange
                 ? "Stay day"
                 : isBooked
                 ? "Unavailable"
@@ -264,9 +433,14 @@ export default function AvailabilityCalendar({
                   key={date}
                   type="button"
                   disabled={isDisabled}
-                  aria-pressed={isCheckIn || isInStayRange}
+                  aria-pressed={isCheckIn || isCheckOut || isInRange}
                   aria-label={`${MONTH_NAMES[currentMonth]} ${day}, ${currentYear}, ${statusDesc}`}
                   onClick={() => handleSelectDate(date)}
+                  onMouseEnter={() => {
+                    if (activeCheckIn && !checkOutDate && date > activeCheckIn && !checkoutBlocked) {
+                      setHoverDate(date);
+                    }
+                  }}
                   className={`flex h-12 min-w-11 items-center justify-center text-base transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${rounded} ${style}`}
                 >
                   {day}
@@ -278,7 +452,7 @@ export default function AvailabilityCalendar({
       </div>
 
       <div className="mt-5 border-t border-line pt-4 text-sm leading-relaxed text-muted">
-        <p>Private exclusive stays (11:00 AM check-in to 9:00 AM check-out). Choose your check-in date above, then select your stay duration in the booking form below to calculate rates automatically.</p>
+        <p>Private exclusive stays (11:00 AM check-in to 9:00 AM check-out). Choose your check-in and check-out dates above. Rates and duration calculate automatically.</p>
         {unavailableDates.size > 0 && <p className="mt-1">Crossed-out dates are reserved or awaiting a deposit.</p>}
         <p className="mt-1" role="status">
           {availabilityStatus === "loading"
@@ -301,23 +475,35 @@ export default function AvailabilityCalendar({
             <div className="rounded-lg border border-line bg-surface-elevated p-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted">Check-out (9:00 AM)</p>
               <p className="mt-1 text-base font-semibold text-ink sm:text-lg" aria-live="polite">
-                {formatSelectedDate(checkoutDateStr)}
+                {checkOutDate
+                  ? formatSelectedDate(checkOutDate)
+                  : hoverDate && hoverDate > activeCheckIn
+                  ? `${formatSelectedDate(hoverDate)} (click to confirm)`
+                  : "Click date above"}
               </p>
             </div>
           </div>
 
           <p className="mt-3 text-sm text-muted">
-            Stay duration: <strong className="text-ink">{stayDays} {stayDays === 1 ? "day (22-hour stay)" : `days (${stayDays * 24 - 2}-hour stay)`}</strong>
+            {checkOutDate ? (
+              <>Stay duration: <strong className="text-ink">{stayDays} {stayDays === 1 ? "day (22-hour stay)" : `days (${stayDays * 24 - 2}-hour stay)`}</strong></>
+            ) : (
+              <>Click your check-out date above {hoverDate && hoverDate > activeCheckIn ? `(${countDays(activeCheckIn, hoverDate)} days)` : ""}.</>
+            )}
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <a href="#inquire" className="inline-flex min-h-12 items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+            <a
+              href="#inquire"
+              onClick={handleRequestStayClick}
+              className="inline-flex min-h-12 items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
               Request this stay
             </a>
             {hasPhone && (
               <a
                 href={`sms:${cleanPhone}?body=${encodeURIComponent(
-                  `Hi! I would like to inquire about The HauS 26 for check-in on ${formatSelectedDate(activeCheckIn)} (11:00 AM) to check-out on ${formatSelectedDate(checkoutDateStr)} (9:00 AM) - ${stayDays} day${stayDays > 1 ? "s" : ""} stay. Could you confirm availability?`
+                  `Hi! I would like to inquire about The HauS 26 for check-in on ${formatSelectedDate(activeCheckIn)} (11:00 AM) to check-out on ${formatSelectedDate(effectiveCheckOut)} (9:00 AM) - ${stayDays} day${stayDays > 1 ? "s" : ""} stay. Could you confirm availability?`
                 )}`}
                 className={linkStyle}
               >
@@ -328,9 +514,9 @@ export default function AvailabilityCalendar({
             {email && (
               <a
                 href={`mailto:${email}?subject=${encodeURIComponent(
-                  `Inquiry for stay: ${formatSelectedDate(activeCheckIn)} to ${formatSelectedDate(checkoutDateStr)}`
+                  `Inquiry for stay: ${formatSelectedDate(activeCheckIn)} to ${formatSelectedDate(effectiveCheckOut)}`
                 )}&body=${encodeURIComponent(
-                  `Hi! I would like to inquire about The HauS 26 for check-in on ${formatSelectedDate(activeCheckIn)} (11:00 AM) to check-out on ${formatSelectedDate(checkoutDateStr)} (9:00 AM) - ${stayDays} day${stayDays > 1 ? "s" : ""} stay. Could you confirm availability?`
+                  `Hi! I would like to inquire about The HauS 26 for check-in on ${formatSelectedDate(activeCheckIn)} (11:00 AM) to check-out on ${formatSelectedDate(effectiveCheckOut)} (9:00 AM) - ${stayDays} day${stayDays > 1 ? "s" : ""} stay. Could you confirm availability?`
                 )}`}
                 className={linkStyle}
               >
@@ -340,7 +526,7 @@ export default function AvailabilityCalendar({
           </div>
         </div>
       ) : (
-        <p className="mt-5 text-sm text-muted">Choose an available check-in date above to request your stay.</p>
+        <p className="mt-5 text-sm text-muted">Choose your check-in date above to begin planning your stay.</p>
       )}
     </div>
   );
