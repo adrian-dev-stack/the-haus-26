@@ -130,19 +130,6 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
     }
   }
 
-  function changeDays(newDays) {
-    const validDays = Math.max(1, Number(newDays) || 1);
-    setDays(String(validDays));
-    if (date) {
-      const checkoutVal = calculateCheckoutDate(date, validDays);
-      window.dispatchEvent(new CustomEvent("haus26:select-dates", {
-        detail: { date, checkoutDate: checkoutVal, days: validDays }
-      }));
-      window.dispatchEvent(new CustomEvent("haus26:select-date", {
-        detail: { date, checkoutDate: checkoutVal, days: validDays }
-      }));
-    }
-  }
 
   async function submit(event) {
     event.preventDefault();
@@ -243,51 +230,12 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
               id={`${prefix}-checkout`}
               type="date"
               name="checkout"
-              readOnly
+              required
+              min={calculateCheckoutDate(date, 1)}
               value={calculateCheckoutDate(date, days)}
+              onChange={(event) => changeCheckoutDate(event.target.value)}
             />
-            <p>{Number(days) > 1 ? `9:00 AM check-out (${Number(days) * 24 - 2}-hour stay)` : (checkOut || "Following day at 9:00 AM (22-hour stay)")}</p>
-          </div>
-          
-          <div className="booking-field booking-wide">
-            <label htmlFor={`${prefix}-days`}>Stay duration (days)</label>
-            <div className="booking-guest-count">
-              <input
-                id={`${prefix}-days`}
-                type="number"
-                name="days"
-                min="1"
-                max="30"
-                step="1"
-                required
-                value={days}
-                onChange={(event) => changeDays(event.target.value)}
-              />
-              <div role="group" aria-label="Quick stay duration options">
-                {[
-                  { count: 1, label: "1 day (22h)" },
-                  { count: 2, label: "2 days (46h)" },
-                  { count: 3, label: "3 days" },
-                  { count: 4, label: "4 days" },
-                  { count: 5, label: "5 days" },
-                ].map((option) => (
-                  <button
-                    key={option.count}
-                    type="button"
-                    className="booking-secondary"
-                    aria-pressed={Number(days) === option.count}
-                    onClick={() => changeDays(String(option.count))}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <p>
-              {Number(days) > 1
-                ? `${days} days private stay (${Number(days) * 24 - 2} hours total). Daily rate of ${rate.daily} multiplies across ${days} days.`
-                : "Standard 22-hour private stay (11:00 AM check-in to 9:00 AM checkout next day)."}
-            </p>
+            <p>{Number(days) > 1 ? `9:00 AM check-out (${days} days / ${Number(days) * 24 - 2}-hour stay)` : (checkOut || "Following day at 9:00 AM (22-hour stay)")}</p>
           </div>
 
           <div className="booking-field booking-wide"><label htmlFor={`${prefix}-guests`}>Number of guests</label><div className="booking-guest-count"><input id={`${prefix}-guests`} type="number" name="guests" min="1" step="1" required value={guests} onChange={(event) => setGuests(event.target.value)} /><div role="group" aria-label="Quick guest counts">{[4, 6, 8, 10].map((count) => <button key={count} type="button" className="booking-secondary" aria-pressed={Number(guests) === count} onClick={() => setGuests(String(count))}>{count}</button>)}</div></div><p>Covers private stay for your group. Dates are held for 30 minutes upon reservation for deposit payment.</p></div>
