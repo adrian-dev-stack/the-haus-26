@@ -492,10 +492,11 @@ function BlockedDatesManager({ onUnauthorized, onCountChange }) {
 
   async function handleBlock(e) {
     e.preventDefault();
+    const formElement = e.currentTarget;
     setBusy(true);
     setError("");
     setNotice("");
-    const form = new FormData(e.currentTarget);
+    const form = new FormData(formElement);
     const date = form.get("date");
     const reason = form.get("reason");
     try {
@@ -514,7 +515,7 @@ function BlockedDatesManager({ onUnauthorized, onCountChange }) {
       setBlocked(list);
       if (onCountChange) onCountChange(list.length);
       setNotice(`Date ${date} blocked successfully. Guests can no longer book this date.`);
-      e.currentTarget.reset();
+      formElement?.reset?.();
     } catch (err) {
       setError(err.message);
     } finally {
