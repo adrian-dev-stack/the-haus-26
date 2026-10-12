@@ -28,11 +28,11 @@ test("generateIcalFeed redacts guest information for public channel feeds", () =
   ];
 
   const feed = generateIcalFeed({ bookings: sampleBookings, isHost: false });
-  assert.match(feed, /SUMMARY:The HauS 26 - Reserved/);
+  assert.match(feed, /SUMMARY:The HauS 26 - Reserved \(11:00 AM Check-in\)/);
   assert.doesNotMatch(feed, /Juan Dela Cruz/);
   assert.doesNotMatch(feed, /\+639171234567/);
-  assert.match(feed, /DTSTART:20261120T030000Z/);
-  assert.match(feed, /DTEND:20261121T010000Z/);
+  assert.match(feed, /DTSTART;TZID=Asia\/Manila:20261120T110000/);
+  assert.match(feed, /DTEND;TZID=Asia\/Manila:20261121T090000/);
 });
 
 test("generateIcalFeed includes full details and financial breakdown for host feed", () => {
@@ -57,14 +57,14 @@ test("generateIcalFeed includes full details and financial breakdown for host fe
 
   const feed = generateIcalFeed({ bookings: sampleBookings, isHost: true });
   assert.match(feed, /The HauS 26 \(Host Bookings\)/);
-  assert.match(feed, /SUMMARY:The HauS 26: Maria Clara \(8 pax\)/);
+  assert.match(feed, /SUMMARY:The HauS 26: Maria Clara \(8 pax · 11AM Check-in\)/);
   assert.match(feed, /Guest: Maria Clara/);
   assert.match(feed, /\+639189876543/);
   assert.match(feed, /Duration: 2 day\(s\) \/ 22 hours/);
   assert.match(feed, /Family Christmas Reunion/);
   assert.match(feed, /Bringing 2 small dogs/);
-  assert.match(feed, /DTSTART:20261224T030000Z/);
-  assert.match(feed, /DTEND:20261226T010000Z/);
+  assert.match(feed, /DTSTART;TZID=Asia\/Manila:20261224T110000/);
+  assert.match(feed, /DTEND;TZID=Asia\/Manila:20261226T090000/);
 });
 
 test("generateIcalFeed includes blocked dates", () => {
@@ -77,6 +77,6 @@ test("generateIcalFeed includes blocked dates", () => {
 
   const hostFeed = generateIcalFeed({ blockedDates, isHost: true });
   assert.match(hostFeed, /SUMMARY:The HauS 26 - Blocked \(Host New Year Private Party\)/);
-  assert.match(hostFeed, /DTSTART:20261231T030000Z/);
-  assert.match(hostFeed, /DTEND:20270101T010000Z/);
+  assert.match(hostFeed, /DTSTART;TZID=Asia\/Manila:20261231T110000/);
+  assert.match(hostFeed, /DTEND;TZID=Asia\/Manila:20270101T090000/);
 });
