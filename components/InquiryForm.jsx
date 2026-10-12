@@ -186,10 +186,8 @@ Could you confirm availability and the final rate? Thank you!`;
             id={`${prefix}-checkout`}
             name="checkout"
             type="date"
-            required
-            min={checkin ? nextDate(checkin, 1) : today}
+            readOnly
             value={checkout}
-            onChange={(event) => handleCheckoutChange(event.target.value)}
             className={fieldStyle}
           />
           <p className="mt-2 text-sm text-muted">{Number(stayDays) > 1 ? `9:00 AM check-out (${stayDays * 24 - 2}-hour stay)` : (checkOut || "Following day, after your 22-hour stay")}</p>

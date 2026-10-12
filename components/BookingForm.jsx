@@ -243,10 +243,8 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
               id={`${prefix}-checkout`}
               type="date"
               name="checkout"
-              required
-              min={calculateCheckoutDate(date, 1)}
+              readOnly
               value={calculateCheckoutDate(date, days)}
-              onChange={(event) => changeCheckoutDate(event.target.value)}
             />
             <p>{Number(days) > 1 ? `9:00 AM check-out (${Number(days) * 24 - 2}-hour stay)` : (checkOut || "Following day at 9:00 AM (22-hour stay)")}</p>
           </div>
