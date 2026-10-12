@@ -15,7 +15,7 @@ function GalleryImage({ photo, fullSize = false }) {
         >
           {status === "error"
             ? "This photo could not load. Try reloading the page."
-            : "Loading photo…"}
+            : "Loading photo..."}
         </span>
       )}
       {status !== "error" && (
@@ -24,7 +24,7 @@ function GalleryImage({ photo, fullSize = false }) {
           alt={photo.alt || photo.title || "Haus 26 property photo"}
           fill
           sizes={fullSize ? "(max-width: 1024px) 94vw, 1100px" : "(max-width: 767px) 45vw, (max-width: 1280px) 30vw, 410px"}
-          className={`${fullSize ? "object-contain" : "object-cover"} ${status === "loaded" ? "opacity-100" : "opacity-0"}`}
+          className={`${fullSize ? "object-contain" : "object-cover transition-transform duration-500 group-hover:scale-105"} ${status === "loaded" ? "opacity-100" : "opacity-0"}`}
           style={fullSize ? undefined : { objectPosition: photo.position || "center" }}
           onLoad={() => setStatus("loaded")}
           onError={() => setStatus("error")}
@@ -97,7 +97,6 @@ export default function PhotoGallery({ photos = [] }) {
       event.preventDefault();
       stepPhoto(event.key === "ArrowRight" ? 1 : -1);
     }
-
     if (event.key === "Tab") {
       const controls = dialogRef.current?.querySelectorAll("button:not(:disabled)");
       if (!controls?.length) return;
@@ -115,38 +114,44 @@ export default function PhotoGallery({ photos = [] }) {
 
   return (
     <section id="gallery" className="scroll-mt-24" aria-labelledby="gallery-title">
-      <div className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-        <h2 id="gallery-title" className="font-display text-3xl font-medium tracking-tight text-ink sm:text-4xl">
-          Around the house
-        </h2>
+      <div className="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        <div>
+          <p className="section-label">Villa Tour</p>
+          <h2 id="gallery-title" className="mt-2 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            Around The HauS 26
+          </h2>
+        </div>
         {photoCount > 0 && (
           <p className="max-w-xs text-sm leading-relaxed text-muted">
-            {photoCount === 1 ? "Select the photo for a full view." : `${photoCount} views of Haus 26. Select a photo for a full view.`}
+            {photoCount === 1 ? "Click the photo for a full high-resolution view." : `${photoCount} curated views of the villa. Click any photo to expand.`}
           </p>
         )}
       </div>
 
       {photoCount === 0 ? (
-        <p className="border-y border-line py-8 text-base text-muted">
+        <p className="rounded-2xl border border-divider bg-surface p-8 text-base text-muted shadow-sm">
           House photos are not available here yet. Please contact Haus 26 to ask for recent photos.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:gap-x-6 sm:gap-y-9 md:grid-cols-3">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3">
           {galleryPhotos.map((photo, index) => (
             <button
               key={`${photo.src}-${index}`}
               type="button"
               onClick={(event) => openPhoto(index, event)}
-              className="group min-w-0 cursor-pointer text-left focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+              className="group min-w-0 cursor-pointer text-left focus-visible:rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
               aria-label={`View photo ${index + 1} of ${photoCount}: ${photo.title || photo.alt || "Haus 26"}`}
               aria-haspopup="dialog"
             >
-              <span className="relative block aspect-[4/5] overflow-hidden rounded-sm bg-surface">
+              <span className="relative block aspect-[4/5] overflow-hidden rounded-2xl border border-divider/60 bg-surface shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1">
                 <GalleryImage photo={photo} />
+                <span className="absolute bottom-3 right-3 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-medium text-white opacity-0 backdrop-blur-md transition-opacity duration-200 group-hover:opacity-100">
+                  Expand
+                </span>
               </span>
-              <span className="mt-3 flex min-h-11 items-start justify-between gap-2 text-sm font-medium leading-relaxed text-ink transition-colors duration-150 group-hover:text-accent sm:text-base">
+              <span className="mt-3 flex min-h-11 items-start justify-between gap-2 text-sm font-semibold leading-relaxed text-ink transition-colors duration-150 group-hover:text-accent sm:text-base">
                 <span>{photo.title || photo.alt || `House photo ${index + 1}`}</span>
-                <svg aria-hidden="true" className="mt-1 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+                <svg aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />
                 </svg>
               </span>
@@ -157,7 +162,7 @@ export default function PhotoGallery({ photos = [] }) {
 
       <dialog
         ref={dialogRef}
-        className="fixed inset-0 m-auto h-[92dvh] max-h-[960px] w-[94vw] max-w-6xl overflow-y-auto rounded-sm border border-line bg-paper p-0 text-ink backdrop:bg-ink/70"
+        className="fixed inset-0 m-auto h-[92dvh] max-h-[960px] w-[94vw] max-w-6xl overflow-y-auto rounded-2xl border border-divider bg-paper p-0 text-ink shadow-2xl backdrop:bg-ink/75"
         aria-labelledby="photo-dialog-title"
         onClose={closeDialog}
         onCancel={(event) => {
@@ -170,10 +175,10 @@ export default function PhotoGallery({ photos = [] }) {
         onKeyDown={handleKeyDown}
       >
         <div className="flex h-full min-h-[340px] flex-col px-4 py-4 sm:px-6 sm:py-5">
-          <div className="flex shrink-0 items-center justify-between gap-4 border-b border-line pb-3">
+          <div className="flex shrink-0 items-center justify-between gap-4 border-b border-divider pb-3">
             <div className="min-w-0" aria-live="polite" aria-atomic="true">
-              <p className="text-sm text-muted">Photo {activeIndex !== null ? activeIndex + 1 : 1} of {photoCount}</p>
-              <h2 id="photo-dialog-title" className="mt-1 font-display text-lg font-medium text-ink sm:text-xl">
+              <p className="text-xs font-semibold uppercase tracking-wider text-accent">Photo {activeIndex !== null ? activeIndex + 1 : 1} of {photoCount}</p>
+              <h2 id="photo-dialog-title" className="mt-1 font-display text-lg font-semibold text-ink sm:text-xl">
                 {activePhoto?.title || "Haus 26 photo"}
               </h2>
             </div>
@@ -181,7 +186,7 @@ export default function PhotoGallery({ photos = [] }) {
               ref={closeButtonRef}
               type="button"
               onClick={closeDialog}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-sm px-3 text-sm font-medium text-ink transition-colors hover:bg-surface-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-divider bg-surface px-4 text-sm font-semibold text-ink shadow-sm transition-colors hover:bg-surface-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               aria-label="Close photo viewer"
             >
               <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
@@ -211,14 +216,14 @@ export default function PhotoGallery({ photos = [] }) {
             {activePhoto && <GalleryImage key={`${activePhoto.src}-${activeIndex}`} photo={activePhoto} fullSize />}
           </div>
 
-          <div className="shrink-0 border-t border-line pt-3">
+          <div className="shrink-0 border-t border-divider pt-3">
             <p className="text-sm leading-relaxed text-muted">{activePhoto?.alt}</p>
             {photoCount > 1 && (
               <div className="mt-3 flex items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() => stepPhoto(-1)}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-3 text-sm font-medium text-ink transition-colors hover:bg-surface-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-divider bg-surface px-4 text-sm font-semibold text-ink shadow-sm transition-colors hover:bg-surface-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                   aria-label="Previous photo"
                 >
                   <DirectionIcon />
@@ -227,7 +232,7 @@ export default function PhotoGallery({ photos = [] }) {
                 <button
                   type="button"
                   onClick={() => stepPhoto(1)}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-3 text-sm font-medium text-ink transition-colors hover:bg-surface-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-divider bg-surface px-4 text-sm font-semibold text-ink shadow-sm transition-colors hover:bg-surface-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                   aria-label="Next photo"
                 >
                   Next
