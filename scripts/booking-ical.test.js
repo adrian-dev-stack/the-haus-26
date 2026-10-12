@@ -31,8 +31,8 @@ test("generateIcalFeed redacts guest information for public channel feeds", () =
   assert.match(feed, /SUMMARY:The HauS 26 - Reserved/);
   assert.doesNotMatch(feed, /Juan Dela Cruz/);
   assert.doesNotMatch(feed, /\+639171234567/);
-  assert.match(feed, /DTSTART;TZID=Asia\/Manila:20261120T110000/);
-  assert.match(feed, /DTEND;TZID=Asia\/Manila:20261121T090000/);
+  assert.match(feed, /DTSTART:20261120T030000Z/);
+  assert.match(feed, /DTEND:20261121T010000Z/);
 });
 
 test("generateIcalFeed includes full details and financial breakdown for host feed", () => {
@@ -63,8 +63,8 @@ test("generateIcalFeed includes full details and financial breakdown for host fe
   assert.match(feed, /Duration: 2 day\(s\) \/ 22 hours/);
   assert.match(feed, /Family Christmas Reunion/);
   assert.match(feed, /Bringing 2 small dogs/);
-  assert.match(feed, /DTSTART;TZID=Asia\/Manila:20261224T110000/);
-  assert.match(feed, /DTEND;TZID=Asia\/Manila:20261226T090000/);
+  assert.match(feed, /DTSTART:20261224T030000Z/);
+  assert.match(feed, /DTEND:20261226T010000Z/);
 });
 
 test("generateIcalFeed includes blocked dates", () => {
@@ -77,6 +77,6 @@ test("generateIcalFeed includes blocked dates", () => {
 
   const hostFeed = generateIcalFeed({ blockedDates, isHost: true });
   assert.match(hostFeed, /SUMMARY:The HauS 26 - Blocked \(Host New Year Private Party\)/);
-  assert.match(hostFeed, /DTSTART;TZID=Asia\/Manila:20261231T110000/);
-  assert.match(hostFeed, /DTEND;TZID=Asia\/Manila:20270101T090000/);
+  assert.match(hostFeed, /DTSTART:20261231T030000Z/);
+  assert.match(hostFeed, /DTEND:20270101T010000Z/);
 });
