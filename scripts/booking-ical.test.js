@@ -57,7 +57,7 @@ test("generateIcalFeed includes full details and financial breakdown for host fe
 
   const feed = generateIcalFeed({ bookings: sampleBookings, isHost: true });
   assert.match(feed, /The HauS 26 \(Host Bookings\)/);
-  assert.match(feed, /SUMMARY:The HauS 26: Maria Clara \(8 pax · 11AM Check-in\)/);
+  assert.match(feed, /SUMMARY:The HauS 26: Maria Clara \(8 pax - 11AM Check-in\)/);
   assert.match(feed, /Guest: Maria Clara/);
   assert.match(feed, /\+639189876543/);
   assert.match(feed, /Duration: 2 day\(s\) \/ 22 hours/);
