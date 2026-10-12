@@ -18,6 +18,7 @@ export default function FadeContent({ children, className = "", duration = 400, 
       trigger?.kill();
       context?.revert();
       element.style.removeProperty("opacity");
+      element.style.removeProperty("transform");
     }
     const onPreference = (event) => { if (event.matches) revealImmediately(); };
     preference.addEventListener("change", onPreference);
@@ -29,9 +30,9 @@ export default function FadeContent({ children, className = "", duration = 400, 
       if (bounds.top < window.innerHeight) return;
       gsap.registerPlugin(ScrollTrigger);
       context = gsap.context(() => {
-        gsap.set(element, { opacity: 0.55 });
+        gsap.set(element, { opacity: 0.55, y: 8 });
         const timeline = gsap.timeline({ paused: true }).to(element, {
-          opacity: 1, duration: duration / 1000, ease: "power2.out", clearProps: "opacity",
+          opacity: 1, y: 0, duration: duration / 1000, ease: "power2.out", clearProps: "opacity,transform",
         });
         trigger = ScrollTrigger.create({ trigger: element, start: `top ${(1 - threshold) * 100}%`, once: true,
           onEnter: () => timeline.play() });
