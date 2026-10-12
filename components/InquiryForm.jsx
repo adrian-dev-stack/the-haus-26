@@ -31,18 +31,33 @@ function calcStayDays(start, end) {
 
 function getToday() {
   const parts = new Intl.DateTimeFormat("en", {
-    timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit",
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   }).formatToParts(new Date());
   const value = (type) => parts.find((part) => part.type === type).value;
   return `${value("year")}-${value("month")}-${value("day")}`;
 }
 
-const OCCASIONS = ["Family staycation", "Barkada / friends outing", "Birthday / celebration", "General inquiry"];
+const OCCASIONS = [
+  "Family staycation",
+  "Barkada / friends outing",
+  "Birthday / celebration",
+  "General inquiry & custom arrangements",
+];
 
-export default function InquiryForm({ name, phone, messengerUrl, email, instagramUrl, instagram, checkIn, checkOut }) {
-  const [smsOpened, setSmsOpened] = useState(false);
+export default function InquiryForm({
+  name = "The HauS 26",
+  phone,
+  messengerUrl,
+  email,
+  instagramUrl,
+  instagram,
+  checkIn = "11:00 AM",
+  checkOut = "9:00 AM next day",
+}) {
   const [copyStatus, setCopyStatus] = useState("idle");
-  const [copiedMessage, setCopiedMessage] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [fullName, setFullName] = useState("");
   const [checkin, setCheckin] = useState("");
@@ -52,6 +67,7 @@ export default function InquiryForm({ name, phone, messengerUrl, email, instagra
   const [note, setNote] = useState("");
   const [today, setToday] = useState("");
   const prefix = useId();
+
   const cleanPhone = (phone || "").replace(/[^0-9+]/g, "");
   const hasPhone = /\d/.test(cleanPhone);
   const stayDays = calcStayDays(checkin, checkout);
@@ -67,8 +83,16 @@ export default function InquiryForm({ name, phone, messengerUrl, email, instagra
     setCheckout(updatedCheckout);
     const days = calcStayDays(value, updatedCheckout);
     if (synchronize) {
-      window.dispatchEvent(new CustomEvent("haus26:select-dates", { detail: { date: value, checkoutDate: updatedCheckout, days } }));
-      window.dispatchEvent(new CustomEvent("haus26:select-date", { detail: { date: value, checkoutDate: updatedCheckout, days } }));
+      window.dispatchEvent(
+        new CustomEvent("haus26:select-dates", {
+          detail: { date: value, checkoutDate: updatedCheckout, days },
+        })
+      );
+      window.dispatchEvent(
+        new CustomEvent("haus26:select-date", {
+          detail: { date: value, checkoutDate: updatedCheckout, days },
+        })
+      );
     }
   }
 
@@ -77,8 +101,16 @@ export default function InquiryForm({ name, phone, messengerUrl, email, instagra
     if (checkin && value > checkin) {
       const days = calcStayDays(checkin, value);
       if (synchronize) {
-        window.dispatchEvent(new CustomEvent("haus26:select-dates", { detail: { date: checkin, checkoutDate: value, days } }));
-        window.dispatchEvent(new CustomEvent("haus26:select-date", { detail: { date: checkin, checkoutDate: value, days } }));
+        window.dispatchEvent(
+          new CustomEvent("haus26:select-dates", {
+            detail: { date: checkin, checkoutDate: value, days },
+          })
+        );
+        window.dispatchEvent(
+          new CustomEvent("haus26:select-date", {
+            detail: { date: checkin, checkoutDate: value, days },
+          })
+        );
       }
     }
   }
@@ -98,13 +130,16 @@ export default function InquiryForm({ name, phone, messengerUrl, email, instagra
         }
       }
     }
+
     function handleSelectGuests(event) {
       const count = event.detail?.guests;
       if (count) setGuests(String(count));
     }
+
     window.addEventListener("haus26:select-date", handleSelectDate);
     window.addEventListener("haus26:select-dates", handleSelectDate);
     window.addEventListener("haus26:select-guests", handleSelectGuests);
+
     return () => {
       window.removeEventListener("haus26:select-date", handleSelectDate);
       window.removeEventListener("haus26:select-dates", handleSelectDate);
@@ -113,75 +148,135 @@ export default function InquiryForm({ name, phone, messengerUrl, email, instagra
   }, []);
 
   const generatedMessage = `Hi! I would like to inquire about booking ${name}.
-Guest name: ${fullName.trim() || "[Your name]"}
-Purpose: ${occasion}
-Check-in: ${checkin || "[Choose a date]"}${checkIn ? ` (${checkIn})` : ""}
-Check-out: ${checkout || "[Choose a date]"}${checkOut ? ` (${checkOut})` : ""}
-Stay: ${stayDays > 1 ? `${stayDays} days (${stayDays * 24 - 2}-hour stay)` : "22-hour exclusive rental"}
-Guests: ${guests || "[Guest count]"}
-Rate: ${estimatedRate}${note.trim() ? `\nNotes: ${note.trim()}` : ""}
-Could you confirm availability and the final rate? Thank you!`;
-Guests: ${guests || "[Guest count]"}
-Rate: ${estimatedRate}${note.trim() ? `\nNotes: ${note.trim()}` : ""}
-Could you confirm availability and the final rate? Thank you!`;
+- Guest name: ${fullName.trim() || "[Guest name]"}
+- Group size: ${guests || "4"} guests
+- Purpose: ${occasion}
+- Check-in: ${checkin || "[Choose date]"} (${checkIn})
+- Check-out: ${checkout || "[Choose date]"} (${checkOut})
+- Stay: ${stayDays > 1 ? `${stayDays} days` : "22-hour private rental"}
+- Estimated rate: ${estimatedRate}${note.trim() ? `\n- Notes / Questions: ${note.trim()}` : ""}
+
+Could you confirm availability and help us arrange our stay? Thank you!`;
 
   async function copyMessageToClipboard() {
-    const messageToCopy = generatedMessage;
     setCopyStatus("copying");
     try {
       if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
-      await navigator.clipboard.writeText(messageToCopy);
-      setCopiedMessage(messageToCopy);
+      await navigator.clipboard.writeText(generatedMessage);
       setCopyStatus("success");
+      setTimeout(() => setCopyStatus("idle"), 4000);
+      return true;
     } catch {
       setCopyStatus("error");
       setPreviewOpen(true);
+      return false;
     }
   }
 
-  function onSubmit(event) {
-    event.preventDefault();
+  async function handleMessengerClick() {
+    await copyMessageToClipboard();
+    if (messengerUrl) {
+      window.open(messengerUrl, "_blank", "noopener,noreferrer");
+    }
+  }
+
+  async function handleInstagramClick() {
+    await copyMessageToClipboard();
+    if (instagramUrl) {
+      window.open(instagramUrl, "_blank", "noopener,noreferrer");
+    }
+  }
+
+  function handleSmsClick() {
     if (!hasPhone) return;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const separator = isIOS ? "&" : "?";
     window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(generatedMessage)}`;
-    setSmsOpened(true);
   }
 
-  const fieldStyle = "mt-2 min-h-12 w-full min-w-0 rounded-md border border-line bg-paper px-3 py-2.5 text-base text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-2 focus:outline-offset-2 focus:outline-accent";
-  const labelStyle = "text-sm font-medium text-ink";
-  const secondaryStyle = "inline-flex min-h-11 items-center justify-center rounded-md border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
-
   return (
-    <div className="min-w-0 rounded-xl border border-line bg-surface p-5 sm:p-7">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-5">
+    <div className="min-w-0 rounded-2xl border border-divider bg-surface p-6 shadow-md sm:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-divider pb-5">
         <div>
-          <h3 className="font-display text-2xl font-semibold tracking-tight text-ink">Plan your stay</h3>
-          <p className="mt-2 text-sm text-muted">Send your preferred dates directly to the host.</p>
+          <span className="text-xs font-semibold uppercase tracking-wider text-accent">
+            Direct Host Inquiry
+          </span>
+          <h3 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+            Ask the Host a Question
+          </h3>
+          <p className="mt-1 text-sm text-muted">
+            Have questions before booking? Send your details directly to the host on Messenger.
+          </p>
         </div>
-        <div>
-          <p className="text-sm text-muted">{stayDays > 1 ? `${stayDays} days stay` : "22-hour stay"}</p>
-          <p className="mt-1 text-xl font-semibold text-ink" aria-live="polite">{estimatedRate}</p>
+        <div className="rounded-xl border border-divider bg-paper px-4 py-2.5 text-right">
+          <p className="text-xs font-medium text-muted">
+            {stayDays > 1 ? `${stayDays} Days Stay` : "22-Hour Private Stay"}
+          </p>
+          <p className="mt-0.5 text-lg font-bold text-accent" aria-live="polite">
+            {estimatedRate}
+          </p>
         </div>
       </div>
-      <form onSubmit={onSubmit} className="mt-5 grid min-w-0 gap-x-4 gap-y-5 sm:grid-cols-2">
+
+      <form onSubmit={(e) => { e.preventDefault(); handleMessengerClick(); }} className="mt-6 grid min-w-0 gap-x-5 gap-y-5 sm:grid-cols-2">
         <div className="min-w-0">
-          <label htmlFor={`${prefix}-name`} className={labelStyle}>Your full name</label>
-          <input id={`${prefix}-name`} name="name" required pattern=".*\S.*" title="Enter your full name" autoComplete="name" placeholder="Your full name" value={fullName} onChange={(event) => setFullName(event.target.value)} className={fieldStyle} />
+          <label htmlFor={`${prefix}-name`} className="block text-sm font-semibold text-ink">
+            Your Full Name
+          </label>
+          <input
+            id={`${prefix}-name`}
+            name="name"
+            required
+            pattern=".*\\S.*"
+            title="Enter your full name"
+            autoComplete="name"
+            placeholder="e.g. Maria Santos"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="mt-1.5 min-h-12 w-full rounded-xl border border-divider bg-paper px-3.5 py-2.5 text-base text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          />
         </div>
+
         <div className="min-w-0">
-          <label htmlFor={`${prefix}-occasion`} className={labelStyle}>Occasion</label>
-          <select id={`${prefix}-occasion`} name="occasion" value={occasion} onChange={(event) => setOccasion(event.target.value)} className={fieldStyle}>
-            {OCCASIONS.map((value) => <option key={value} value={value}>{value}</option>)}
+          <label htmlFor={`${prefix}-occasion`} className="block text-sm font-semibold text-ink">
+            Occasion / Purpose
+          </label>
+          <select
+            id={`${prefix}-occasion`}
+            name="occasion"
+            value={occasion}
+            onChange={(e) => setOccasion(e.target.value)}
+            className="mt-1.5 min-h-12 w-full rounded-xl border border-divider bg-paper px-3.5 py-2.5 text-base text-ink transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          >
+            {OCCASIONS.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
           </select>
         </div>
+
         <div className="min-w-0">
-          <label htmlFor={`${prefix}-checkin`} className={labelStyle}>Check-in date</label>
-          <input id={`${prefix}-checkin`} name="checkin" type="date" required min={today} value={checkin} onChange={(event) => handleCheckinChange(event.target.value)} className={fieldStyle} />
-          {checkIn && <p className="mt-2 text-sm text-muted">{checkIn}</p>}
+          <label htmlFor={`${prefix}-checkin`} className="block text-sm font-semibold text-ink">
+            Check-in Date
+          </label>
+          <input
+            id={`${prefix}-checkin`}
+            name="checkin"
+            type="date"
+            required
+            min={today}
+            value={checkin}
+            onChange={(e) => handleCheckinChange(e.target.value)}
+            className="mt-1.5 min-h-12 w-full rounded-xl border border-divider bg-paper px-3.5 py-2.5 text-base text-ink transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          />
+          {checkIn && <p className="mt-1.5 text-xs text-muted">Arrival from {checkIn}</p>}
         </div>
+
         <div className="min-w-0">
-          <label htmlFor={`${prefix}-checkout`} className={labelStyle}>Check-out date</label>
+          <label htmlFor={`${prefix}-checkout`} className="block text-sm font-semibold text-ink">
+            Check-out Date
+          </label>
           <input
             id={`${prefix}-checkout`}
             name="checkout"
@@ -189,59 +284,148 @@ Could you confirm availability and the final rate? Thank you!`;
             required
             min={checkin ? nextDate(checkin, 1) : today}
             value={checkout}
-            onChange={(event) => handleCheckoutChange(event.target.value)}
-            className={fieldStyle}
+            onChange={(e) => handleCheckoutChange(e.target.value)}
+            className="mt-1.5 min-h-12 w-full rounded-xl border border-divider bg-paper px-3.5 py-2.5 text-base text-ink transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
-          <p className="mt-2 text-sm text-muted">{Number(stayDays) > 1 ? `9:00 AM check-out (${stayDays * 24 - 2}-hour stay)` : (checkOut || "Following day, after your 22-hour stay")}</p>
+          <p className="mt-1.5 text-xs text-muted">
+            {Number(stayDays) > 1
+              ? `Check-out at 9:00 AM (${stayDays * 24 - 2}-hour stay)`
+              : `Check-out at ${checkOut || "9:00 AM next day"}`}
+          </p>
         </div>
+
         <div className="min-w-0 sm:col-span-2">
-          <label htmlFor={`${prefix}-guests`} className={labelStyle}>Number of guests</label>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <input id={`${prefix}-guests`} name="guests" type="number" min="1" step="1" required value={guests} onChange={(event) => setGuests(event.target.value)} className={`${fieldStyle} mt-0 max-w-28`} />
+          <label htmlFor={`${prefix}-guests`} className="block text-sm font-semibold text-ink">
+            Number of Guests
+          </label>
+          <div className="mt-1.5 flex flex-wrap items-center gap-3">
+            <input
+              id={`${prefix}-guests`}
+              name="guests"
+              type="number"
+              min="1"
+              step="1"
+              required
+              value={guests}
+              onChange={(e) => setGuests(e.target.value)}
+              className="min-h-12 w-28 rounded-xl border border-divider bg-paper px-3.5 py-2.5 text-base font-semibold text-ink focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+            />
             <div className="flex flex-wrap gap-2" role="group" aria-label="Quick guest counts">
-              {[4, 6, 8, 10].map((count) => <button key={count} type="button" aria-pressed={Number(guests) === count} aria-label={`${count} guests`} onClick={() => setGuests(String(count))} className={`flex h-11 min-w-11 items-center justify-center rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${Number(guests) === count ? "border-accent bg-accent text-white" : "border-line text-ink hover:bg-surface-elevated"}`}>{count}</button>)}
+              {[4, 6, 8, 10].map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  aria-pressed={Number(guests) === count}
+                  aria-label={`${count} guests`}
+                  onClick={() => setGuests(String(count))}
+                  className={`flex h-11 min-w-11 items-center justify-center rounded-xl border px-3 text-sm font-semibold transition-all ${
+                    Number(guests) === count
+                      ? "border-accent bg-accent text-white shadow-sm"
+                      : "border-divider bg-surface text-ink hover:bg-surface-elevated"
+                  }`}
+                >
+                  {count}
+                </button>
+              ))}
             </div>
           </div>
-          <p className="mt-2 text-sm leading-relaxed text-muted">{estimatedRate === "Ask for a quote" ? "Ask the host for the rate for your group size." : "Rates are subject to change. Your host confirms the final quote."}</p>
+          <p className="mt-2 text-xs text-muted">
+            Rates: ₱5,000 (up to 4 guests), ₱6,000 (5-6), ₱8,000 (7-10), ₱8,000 + ₱500/extra guest (11+).
+          </p>
         </div>
+
         <div className="min-w-0 sm:col-span-2">
-          <label htmlFor={`${prefix}-note`} className={labelStyle}>Special requests <span className="font-normal text-muted">(optional)</span></label>
-          <textarea id={`${prefix}-note`} name="note" rows={2} placeholder="Arrival questions, parking needs, or other requests" value={note} onChange={(event) => setNote(event.target.value)} className={fieldStyle} />
+          <label htmlFor={`${prefix}-note`} className="block text-sm font-semibold text-ink">
+            Special Requests or Questions <span className="font-normal text-muted">(Optional)</span>
+          </label>
+          <textarea
+            id={`${prefix}-note`}
+            name="note"
+            rows={2}
+            placeholder="Early check-in inquiry, parking for extra vehicle, pet details, or custom requests"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="mt-1.5 w-full rounded-xl border border-divider bg-paper px-3.5 py-2.5 text-base text-ink placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          />
         </div>
-        <details className="min-w-0 border-y border-line sm:col-span-2" open={previewOpen} onToggle={(event) => setPreviewOpen(event.currentTarget.open)}>
-          <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Review your inquiry message</summary>
-          <div className="pb-4">
-            <textarea id={`${prefix}-message`} name="inquiry-message" aria-label="Inquiry message" autoComplete="off" readOnly rows={9} value={generatedMessage} className={`${fieldStyle} resize-y text-sm leading-relaxed`} />
-            <button type="button" onClick={copyMessageToClipboard} disabled={copyStatus === "copying"} className={`${secondaryStyle} mt-3 disabled:cursor-wait disabled:opacity-60`}>{copyStatus === "copying" ? "Copying inquiry…" : "Copy inquiry"}</button>
+
+        {/* Message Preview Box */}
+        <div className="min-w-0 sm:col-span-2">
+          <div className="rounded-xl border border-divider bg-paper/60 p-4">
+            <div className="flex items-center justify-between gap-2 pb-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+                Inquiry Message Preview
+              </span>
+              <button
+                type="button"
+                onClick={copyMessageToClipboard}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline"
+              >
+                {copyStatus === "success" ? "✓ Copied to clipboard!" : "Copy message"}
+              </button>
+            </div>
+            <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-ink/80">
+              {generatedMessage}
+            </pre>
           </div>
-        </details>
-        <div className="min-w-0 sm:col-span-2">
-          <button type="submit" disabled={!hasPhone} className="flex min-h-12 w-full items-center justify-center rounded-md bg-accent px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Open inquiry in SMS</button>
-          {messengerUrl && <a href={messengerUrl} target="_blank" rel="noopener noreferrer" onClick={copyMessageToClipboard} className={`${secondaryStyle} mt-3 w-full`}>Copy inquiry & open Messenger</a>}
-          {instagramUrl && (
-            <a
-              href={instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={copyMessageToClipboard}
-              className={`${secondaryStyle} mt-3 w-full`}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="min-w-0 sm:col-span-2 space-y-2.5">
+          {messengerUrl && (
+            <button
+              type="button"
+              onClick={handleMessengerClick}
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-accent-hover hover:-translate-y-0.5"
             >
-              Copy inquiry & open Instagram (@{instagram || "thehaus.26"})
-            </a>
+              <span>💬</span>
+              <span>Copy Inquiry & Open Facebook Messenger</span>
+            </button>
           )}
+
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            {instagramUrl && (
+              <button
+                type="button"
+                onClick={handleInstagramClick}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-divider bg-surface px-4 py-2.5 text-sm font-semibold text-ink shadow-sm transition-colors hover:bg-surface-elevated"
+              >
+                <span>📸</span>
+                <span>Open Instagram (@{instagram || "thehaus.26"})</span>
+              </button>
+            )}
+
+            {hasPhone && (
+              <button
+                type="button"
+                onClick={handleSmsClick}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-divider bg-surface px-4 py-2.5 text-sm font-semibold text-ink shadow-sm transition-colors hover:bg-surface-elevated"
+              >
+                <span>📱</span>
+                <span>Send via SMS / Text</span>
+              </button>
+            )}
+          </div>
+
           {email && (
             <a
               href={`mailto:${email}?subject=${encodeURIComponent(`Inquiry for ${name}`)}&body=${encodeURIComponent(generatedMessage)}`}
-              className={`${secondaryStyle} mt-3 w-full`}
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-divider bg-surface px-4 py-2 text-xs font-semibold text-muted transition-colors hover:bg-surface-elevated hover:text-ink"
             >
-              Email inquiry to {email}
+              <span>✉️</span>
+              <span>Or email inquiry to {email}</span>
             </a>
           )}
-          <div className="mt-3 text-sm leading-relaxed text-muted" aria-live="polite" role="status">
-            {copyStatus === "success" && copiedMessage === generatedMessage && <p className="mb-2">Inquiry copied. Paste it into your conversation with the host.</p>}
-            {copyStatus === "error" && <p className="mb-2 text-ink">Copying was unavailable. Select the inquiry text above and copy it manually.</p>}
-            {!hasPhone && <p className="mb-2">SMS inquiries are unavailable. {messengerUrl || instagramUrl ? "Use Messenger or Instagram to contact the host." : "Copy your inquiry to share with the host."}</p>}
-            <p>{smsOpened ? "Your messaging app should open with the inquiry filled in. Your host still needs to confirm the booking." : "Your host confirms availability and the final rate. A 50% deposit follows confirmation; no payment is taken through this inquiry."}</p>
+
+          <div className="pt-2 text-center text-xs text-muted">
+            {copyStatus === "success" && (
+              <p className="font-semibold text-accent">
+                ✓ Message copied! Paste it into your chat with the host.
+              </p>
+            )}
+            <p className="mt-1">
+              Your host confirms final availability and quote. 50% deposit required via GCash or Card to lock in dates.
+            </p>
           </div>
         </div>
       </form>
