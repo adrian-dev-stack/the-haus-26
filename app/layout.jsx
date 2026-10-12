@@ -16,6 +16,10 @@ export const viewport = {
 
 export const metadata = {
   metadataBase: new URL("https://thehaus26.com"),
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
   title: {
     default: `${property.name} | Private Pool Staycation in Limay, Bataan`,
     template: `%s | ${property.name}`,

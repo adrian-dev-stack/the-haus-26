@@ -648,6 +648,199 @@ function BlockedDatesManager({ onUnauthorized, onCountChange }) {
   );
 }
 
+function AdminSyncPanel({ calendarSync, onUnauthorized }) {
+  const [running, setRunning] = useState(false);
+  const [maintenanceFeedback, setMaintenanceFeedback] = useState(null);
+  const [copiedKey, setCopiedKey] = useState("");
+
+  const hostUrl = typeof window !== "undefined"
+    ? `${window.location.origin}${calendarSync?.hostUrl || "/api/calendar.ics"}`
+    : calendarSync?.hostUrl || "/api/calendar.ics";
+
+  const publicUrl = typeof window !== "undefined"
+    ? `${window.location.origin}${calendarSync?.publicUrl || "/api/calendar.ics"}`
+    : calendarSync?.publicUrl || "/api/calendar.ics";
+
+  const webcalHostUrl = hostUrl.replace(/^https?:\/\//, "webcal://");
+  const gcalSubscribeUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalHostUrl)}`;
+
+  async function copyToClipboard(text, key) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(""), 2500);
+    } catch {}
+  }
+
+  async function triggerMaintenance() {
+    if (running) return;
+    setRunning(true);
+    setMaintenanceFeedback(null);
+    try {
+      const res = await fetch("/api/bookings/maintenance", { method: "POST" });
+      if (res.status === 401) {
+        onUnauthorized?.();
+        return;
+      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || "Maintenance run failed.");
+      setMaintenanceFeedback({
+        success: true,
+        message: `Maintenance finished! Checked ${data.data?.checked ?? 0} hold(s), released ${data.data?.released ?? 0} expired hold(s), retained ${data.data?.retained ?? 0} active hold(s).`,
+      });
+    } catch (err) {
+      setMaintenanceFeedback({
+        success: false,
+        message: err.message || "Failed to trigger maintenance.",
+      });
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  return (
+    <div className="admin-sync-layout">
+      {/* Panel 1: Google Calendar / Apple Calendar Sync */}
+      <div className="admin-overview-panel">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
+          <div>
+            <h3 style={{ margin: 0 }}>📅 Google & Apple Calendar Sync</h3>
+            <p style={{ margin: "0.35rem 0 0", color: "var(--color-muted)", fontSize: "0.875rem" }}>
+              Subscribe directly in Google Calendar on your phone. All confirmed bookings automatically appear with guest name, pax, dates, and balance due.
+            </p>
+          </div>
+          <span className="admin-stat-badge badge-confirmed">Auto-Sync</span>
+        </div>
+
+        <div style={{ marginTop: "1.25rem", display: "grid", gap: "1rem" }}>
+          {/* Host Private Link */}
+          <div style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-divider)", borderRadius: "10px", padding: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+              <strong style={{ fontSize: "0.875rem" }}>Private Host Calendar (Full Guest Details)</strong>
+              <span style={{ fontSize: "0.75rem", color: "var(--color-accent)", fontWeight: 600 }}>Includes guest phone, rate, and notes</span>
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+              <input
+                type="text"
+                readOnly
+                value={hostUrl}
+                style={{ flex: "1 1 280px", fontSize: "0.8125rem", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid var(--color-line)", background: "var(--color-paper)" }}
+              />
+              <button
+                type="button"
+                className="booking-secondary"
+                onClick={() => copyToClipboard(hostUrl, "host")}
+                style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem" }}
+              >
+                {copiedKey === "host" ? "✓ Copied!" : "Copy Link"}
+              </button>
+              <a
+                href={gcalSubscribeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="button-primary"
+                style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem", textDecoration: "none" }}
+              >
+                Add to Google Calendar ↗
+              </a>
+              <a
+                href={`${calendarSync?.hostUrl || "/api/calendar.ics"}`}
+                download="thehaus26-calendar.ics"
+                className="booking-secondary"
+                style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem", textDecoration: "none" }}
+              >
+                Download .ICS
+              </a>
+            </div>
+          </div>
+
+          {/* Public Channel Sync Link */}
+          <div style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-divider)", borderRadius: "10px", padding: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+              <strong style={{ fontSize: "0.875rem" }}>Public Channel Feed (Airbnb / VRBO / Direct)</strong>
+              <span style={{ fontSize: "0.75rem", color: "var(--color-muted)" }}>Redacts private guest info to "Reserved"</span>
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+              <input
+                type="text"
+                readOnly
+                value={publicUrl}
+                style={{ flex: "1 1 280px", fontSize: "0.8125rem", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid var(--color-line)", background: "var(--color-paper)" }}
+              />
+              <button
+                type="button"
+                className="booking-secondary"
+                onClick={() => copyToClipboard(publicUrl, "public")}
+                style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem" }}
+              >
+                {copiedKey === "public" ? "✓ Copied!" : "Copy Link"}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ fontSize: "0.8125rem", color: "var(--color-muted)", lineHeight: 1.6, background: "var(--color-paper)", padding: "0.875rem 1rem", borderRadius: "8px" }}>
+            💡 <strong>Quick Setup:</strong> Open <em>Google Calendar</em> on web or mobile → Click <strong>Other calendars (+)</strong> → Select <strong>From URL</strong> → Paste your Private Host Calendar link. Your phone will sync and alert you of upcoming guest stays!
+          </div>
+        </div>
+      </div>
+
+      {/* Panel 2: Automated 30-Minute Hold Expiration & Maintenance */}
+      <div className="admin-overview-panel" style={{ marginTop: "1.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
+          <div>
+            <h3 style={{ margin: 0 }}>⏱️ Automated 30-Minute Hold Expiration</h3>
+            <p style={{ margin: "0.35rem 0 0", color: "var(--color-muted)", fontSize: "0.875rem" }}>
+              When guests begin booking, a temporary 30-minute hold protects their date. If checkout is abandoned, the date is automatically released so others can book.
+            </p>
+          </div>
+          <span className="admin-stat-badge badge-confirmed">Active</span>
+        </div>
+
+        <div style={{ marginTop: "1.25rem", display: "grid", gap: "1rem" }}>
+          <dl className="admin-meta-list">
+            <div className="admin-meta-row">
+              <dt>Hold Timeout Policy</dt>
+              <dd>30 minutes from checkout initiation</dd>
+            </div>
+            <div className="admin-meta-row">
+              <dt>Automated Triggers</dt>
+              <dd>Runs on availability checks, Vercel cron, and manual sync</dd>
+            </div>
+            <div className="admin-meta-row">
+              <dt>Unpaid Expired Checkouts</dt>
+              <dd>Released immediately back into public availability</dd>
+            </div>
+          </dl>
+
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap", paddingTop: "0.5rem", borderTop: "1px solid var(--color-divider)" }}>
+            <button
+              type="button"
+              className="button-primary"
+              disabled={running}
+              onClick={triggerMaintenance}
+              style={{ minHeight: "40px", padding: "0.5rem 1.25rem", fontSize: "0.875rem" }}
+            >
+              {running ? "Checking & Cleaning Holds..." : "Run Hold Maintenance Now ↺"}
+            </button>
+            <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+              Flushes any expired holds across your reservation database.
+            </span>
+          </div>
+
+          {maintenanceFeedback && (
+            <div
+              className={`admin-toast-feedback ${maintenanceFeedback.success ? "is-success" : "is-error"}`}
+              style={{ margin: 0 }}
+            >
+              {maintenanceFeedback.message}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function BookingAdmin() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("reservations");
@@ -656,6 +849,7 @@ export default function BookingAdmin() {
   const [page, setPage] = useState(1);
   const [bookings, setBookings] = useState([]);
   const [pagination, setPagination] = useState({ totalItems: 0, totalPages: 1 });
+  const [calendarSync, setCalendarSync] = useState(null);
   const [summary, setSummary] = useState({
     total: 0,
     requested: 0,
@@ -699,6 +893,9 @@ export default function BookingAdmin() {
         setPagination(result.data.pagination || { totalItems: 0, totalPages: 1 });
         if (result.data.summary) {
           setSummary(result.data.summary);
+        }
+        if (result.data.calendarSync) {
+          setCalendarSync(result.data.calendarSync);
         }
       } catch (failure) {
         if (failure.name !== "AbortError") {
@@ -913,6 +1110,14 @@ export default function BookingAdmin() {
         >
           <span>Financial Summary</span>
         </button>
+        <button
+          type="button"
+          className={`admin-tab-btn ${activeTab === "sync" ? "is-active" : ""}`}
+          onClick={() => setActiveTab("sync")}
+        >
+          <span>Sync & Automation</span>
+          <span className="admin-stat-badge badge-confirmed" style={{ padding: "0.15rem 0.45rem", fontSize: "0.7rem" }}>iCal</span>
+        </button>
       </nav>
 
       {error && <div className="admin-toast-feedback is-error" role="alert" style={{ marginTop: "1.5rem" }}>{error}</div>}
@@ -1126,6 +1331,13 @@ export default function BookingAdmin() {
             </dl>
           </div>
         </div>
+      )}
+
+      {activeTab === "sync" && (
+        <AdminSyncPanel
+          calendarSync={calendarSync}
+          onUnauthorized={unauthorized}
+        />
       )}
     </>
   );
