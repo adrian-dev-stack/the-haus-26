@@ -99,6 +99,8 @@ function BookingEntry({ booking, onChanged, onUnauthorized }) {
           ? "Quote approved and saved. Share the guest link so they can complete their deposit."
           : payload.action === "refresh"
           ? "PayMongo deposit status refreshed."
+          : payload.action === "refund_cancel"
+          ? "Reservation cancelled, deposit marked refunded, and dates released on calendar."
           : payload.action === "mark_balance_paid"
           ? payload.paid === false
             ? "Remaining balance reset to unpaid."
@@ -423,6 +425,40 @@ function BookingEntry({ booking, onChanged, onUnauthorized }) {
                   </form>
                 )}
               </div>
+            )}
+
+            {isConfirmed && (
+              <details className="admin-cancel-drawer" style={{ marginTop: "0.5rem" }}>
+                <summary style={{ color: "#c62828", fontWeight: 600 }}>Refund deposit & cancel reservation</summary>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const reason = new FormData(e.currentTarget).get("reason");
+                    action({ action: "refund_cancel", reason });
+                  }}
+                >
+                  <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+                    This marks the reservation cancelled, records the deposit as refunded, and immediately frees the stay dates on your calendar.
+                  </p>
+                  <textarea
+                    name="reason"
+                    minLength={3}
+                    maxLength={500}
+                    rows={2}
+                    required
+                    placeholder="Reason for refund/cancellation (e.g. Deposit refunded via GCash / customer requested)"
+                    disabled={!!pending}
+                  />
+                  <button
+                    type="submit"
+                    className="booking-secondary"
+                    disabled={!!pending}
+                    style={{ width: "fit-content", minHeight: "36px", fontSize: "0.8125rem", borderColor: "#c62828", color: "#c62828" }}
+                  >
+                    {pending === "refund_cancel" ? "Processing…" : "Confirm Refund & Cancel Stay"}
+                  </button>
+                </form>
+              </details>
             )}
 
             {canCancel && (

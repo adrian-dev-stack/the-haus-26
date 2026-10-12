@@ -1,4 +1,4 @@
-import { confirmBooking, refreshBookingPayment, cancelBooking, markBalancePaid } from "@/lib/bookings";
+import { confirmBooking, refreshBookingPayment, cancelBooking, markBalancePaid, refundAndCancelBooking } from "@/lib/bookings";
 import { parsePesoAmount } from "@/scripts/payment-request";
 import { property } from "@/lib/property";
 import { BookingHttpError, bookingResponse, bookingFailure, requireBookingAdmin, requireBookingOrigin, readBookingBody, limitBookingRequest } from "@/lib/booking-http";
@@ -19,6 +19,7 @@ export async function POST(request, { params }) {
       booking = await confirmBooking(id, { totalAmount, terms: body.terms }, { blockedDates: property.bookedDates });
     } else if (body.action === "refresh") booking = await refreshBookingPayment(id);
     else if (body.action === "cancel") booking = await cancelBooking(id, { reason: body.reason });
+    else if (body.action === "refund_cancel") booking = await refundAndCancelBooking(id, { reason: body.reason });
     else if (body.action === "mark_balance_paid") booking = await markBalancePaid(id, { method: body.method, paid: body.paid !== false });
     else throw new BookingHttpError("invalid-action", "Choose a supported booking action.", 400);
     return bookingResponse({ booking });
