@@ -73,12 +73,20 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
 
   useEffect(() => {
     setToday(calculateCheckoutDate(todayInManila(), 1));
-    function selectDate(event) { if (!requestLocked.current && typeof event.detail?.date === "string") setDate(event.detail.date); }
+    function selectDate(event) {
+      if (requestLocked.current) return;
+      if (typeof event.detail?.date === "string") setDate(event.detail.date);
+      if (event.detail?.days && Number(event.detail.days) >= 1) {
+        setDays(String(event.detail.days));
+      }
+    }
     function selectGuests(event) { if (!requestLocked.current && event.detail?.guests) setGuests(String(event.detail.guests)); }
     window.addEventListener("haus26:select-date", selectDate);
+    window.addEventListener("haus26:select-dates", selectDate);
     window.addEventListener("haus26:select-guests", selectGuests);
     return () => {
       window.removeEventListener("haus26:select-date", selectDate);
+      window.removeEventListener("haus26:select-dates", selectDate);
       window.removeEventListener("haus26:select-guests", selectGuests);
     };
   }, []);
@@ -96,7 +104,44 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
 
   function changeDate(value) {
     setDate(value);
-    window.dispatchEvent(new CustomEvent("haus26:select-date", { detail: { date: value } }));
+    const validDays = Math.max(1, Number(days) || 1);
+    const checkoutVal = calculateCheckoutDate(value, validDays);
+    window.dispatchEvent(new CustomEvent("haus26:select-dates", {
+      detail: { date: value, checkoutDate: checkoutVal, days: validDays }
+    }));
+    window.dispatchEvent(new CustomEvent("haus26:select-date", {
+      detail: { date: value, checkoutDate: checkoutVal, days: validDays }
+    }));
+  }
+
+  function changeCheckoutDate(newCheckout) {
+    if (!newCheckout || !date) return;
+    const dIn = new Date(`${date}T12:00:00Z`);
+    const dOut = new Date(`${newCheckout}T12:00:00Z`);
+    const diff = Math.round((dOut - dIn) / (24 * 60 * 60 * 1000));
+    if (diff >= 1) {
+      setDays(String(diff));
+      window.dispatchEvent(new CustomEvent("haus26:select-dates", {
+        detail: { date, checkoutDate: newCheckout, days: diff }
+      }));
+      window.dispatchEvent(new CustomEvent("haus26:select-date", {
+        detail: { date, checkoutDate: newCheckout, days: diff }
+      }));
+    }
+  }
+
+  function changeDays(newDays) {
+    const validDays = Math.max(1, Number(newDays) || 1);
+    setDays(String(validDays));
+    if (date) {
+      const checkoutVal = calculateCheckoutDate(date, validDays);
+      window.dispatchEvent(new CustomEvent("haus26:select-dates", {
+        detail: { date, checkoutDate: checkoutVal, days: validDays }
+      }));
+      window.dispatchEvent(new CustomEvent("haus26:select-date", {
+        detail: { date, checkoutDate: checkoutVal, days: validDays }
+      }));
+    }
   }
 
   async function submit(event) {
@@ -192,7 +237,19 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
       <form onSubmit={submit} className="booking-form" aria-busy={pending}>
         <fieldset disabled={pending || uncertain} className="booking-fieldset">
           <div className="booking-field"><label htmlFor={`${prefix}-date`}>Check-in date</label><input id={`${prefix}-date`} type="date" name="date" required min={today} value={date} onChange={(event) => changeDate(event.target.value)} /><p>{checkIn || "11:00 AM check-in"}</p></div>
-          <div className="booking-field"><label htmlFor={`${prefix}-checkout`}>Check-out date</label><input id={`${prefix}-checkout`} type="date" readOnly value={calculateCheckoutDate(date, days)} /><p>{Number(days) > 1 ? `9:00 AM check-out (${Number(days) * 24 - 2}-hour stay)` : (checkOut || "Following day at 9:00 AM (22-hour stay)")}</p></div>
+          <div className="booking-field">
+            <label htmlFor={`${prefix}-checkout`}>Check-out date</label>
+            <input
+              id={`${prefix}-checkout`}
+              type="date"
+              name="checkout"
+              required
+              min={calculateCheckoutDate(date, 1)}
+              value={calculateCheckoutDate(date, days)}
+              onChange={(event) => changeCheckoutDate(event.target.value)}
+            />
+            <p>{Number(days) > 1 ? `9:00 AM check-out (${Number(days) * 24 - 2}-hour stay)` : (checkOut || "Following day at 9:00 AM (22-hour stay)")}</p>
+          </div>
           
           <div className="booking-field booking-wide">
             <label htmlFor={`${prefix}-days`}>Stay duration (days)</label>
@@ -206,7 +263,7 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
                 step="1"
                 required
                 value={days}
-                onChange={(event) => setDays(event.target.value)}
+                onChange={(event) => changeDays(event.target.value)}
               />
               <div role="group" aria-label="Quick stay duration options">
                 {[
@@ -221,7 +278,7 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
                     type="button"
                     className="booking-secondary"
                     aria-pressed={Number(days) === option.count}
-                    onClick={() => setDays(String(option.count))}
+                    onClick={() => changeDays(String(option.count))}
                   >
                     {option.label}
                   </button>

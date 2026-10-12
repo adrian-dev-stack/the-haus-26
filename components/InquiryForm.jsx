@@ -2,20 +2,31 @@
 
 import { useEffect, useId, useState } from "react";
 
-function getRateEstimate(guestCount) {
+function getRateEstimate(guestCount, days = 1) {
   const count = Number(guestCount);
+  const stayDays = Math.max(1, Number(days) || 1);
   if (!Number.isInteger(count) || count < 1) return "Choose guest count";
-  if (count <= 4) return "₱5,000";
-  if (count <= 6) return "₱6,000";
-  if (count <= 10) return "₱8,000";
-  return `₱${(8000 + (count - 10) * 500).toLocaleString()}`;
+  let daily;
+  if (count <= 4) daily = 5000;
+  else if (count <= 6) daily = 6000;
+  else if (count <= 10) daily = 8000;
+  else daily = 8000 + (count - 10) * 500;
+  const total = daily * stayDays;
+  return `₱${total.toLocaleString()}${stayDays > 1 ? ` (${stayDays} days)` : ""}`;
 }
 
-function nextDate(value) {
+function nextDate(value, daysToAdd = 1) {
   if (!value) return "";
   const [year, month, day] = value.split("-").map(Number);
-  const date = new Date(year, month - 1, day + 1);
+  const date = new Date(year, month - 1, day + Math.max(1, Number(daysToAdd) || 1));
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function calcStayDays(start, end) {
+  if (!start || !end || end <= start) return 1;
+  const d1 = new Date(`${start}T12:00:00Z`);
+  const d2 = new Date(`${end}T12:00:00Z`);
+  return Math.max(1, Math.round((d2 - d1) / (24 * 60 * 60 * 1000)));
 }
 
 function getToday() {
@@ -43,7 +54,8 @@ export default function InquiryForm({ name, phone, messengerUrl, email, instagra
   const prefix = useId();
   const cleanPhone = (phone || "").replace(/[^0-9+]/g, "");
   const hasPhone = /\d/.test(cleanPhone);
-  const estimatedRate = getRateEstimate(guests);
+  const stayDays = calcStayDays(checkin, checkout);
+  const estimatedRate = getRateEstimate(guests, stayDays);
 
   useEffect(() => {
     setToday(nextDate(getToday()));
@@ -51,23 +63,51 @@ export default function InquiryForm({ name, phone, messengerUrl, email, instagra
 
   function handleCheckinChange(value, synchronize = true) {
     setCheckin(value);
-    setCheckout(nextDate(value));
-    if (synchronize) window.dispatchEvent(new CustomEvent("haus26:select-date", { detail: { date: value } }));
+    const updatedCheckout = checkout && checkout > value ? checkout : nextDate(value, 1);
+    setCheckout(updatedCheckout);
+    const days = calcStayDays(value, updatedCheckout);
+    if (synchronize) {
+      window.dispatchEvent(new CustomEvent("haus26:select-dates", { detail: { date: value, checkoutDate: updatedCheckout, days } }));
+      window.dispatchEvent(new CustomEvent("haus26:select-date", { detail: { date: value, checkoutDate: updatedCheckout, days } }));
+    }
+  }
+
+  function handleCheckoutChange(value, synchronize = true) {
+    setCheckout(value);
+    if (checkin && value > checkin) {
+      const days = calcStayDays(checkin, value);
+      if (synchronize) {
+        window.dispatchEvent(new CustomEvent("haus26:select-dates", { detail: { date: checkin, checkoutDate: value, days } }));
+        window.dispatchEvent(new CustomEvent("haus26:select-date", { detail: { date: checkin, checkoutDate: value, days } }));
+      }
+    }
   }
 
   useEffect(() => {
     function handleSelectDate(event) {
-      const date = event.detail?.date;
-      if (typeof date === "string") handleCheckinChange(date, false);
+      const inDate = event.detail?.date || event.detail?.checkin;
+      const outDate = event.detail?.checkoutDate || event.detail?.checkout;
+      if (typeof inDate === "string") {
+        setCheckin(inDate);
+        if (typeof outDate === "string" && outDate > inDate) {
+          setCheckout(outDate);
+        } else if (event.detail?.days && Number(event.detail.days) >= 1) {
+          setCheckout(nextDate(inDate, Number(event.detail.days)));
+        } else {
+          setCheckout(nextDate(inDate, 1));
+        }
+      }
     }
     function handleSelectGuests(event) {
       const count = event.detail?.guests;
       if (count) setGuests(String(count));
     }
     window.addEventListener("haus26:select-date", handleSelectDate);
+    window.addEventListener("haus26:select-dates", handleSelectDate);
     window.addEventListener("haus26:select-guests", handleSelectGuests);
     return () => {
       window.removeEventListener("haus26:select-date", handleSelectDate);
+      window.removeEventListener("haus26:select-dates", handleSelectDate);
       window.removeEventListener("haus26:select-guests", handleSelectGuests);
     };
   }, []);
@@ -77,7 +117,10 @@ Guest name: ${fullName.trim() || "[Your name]"}
 Purpose: ${occasion}
 Check-in: ${checkin || "[Choose a date]"}${checkIn ? ` (${checkIn})` : ""}
 Check-out: ${checkout || "[Choose a date]"}${checkOut ? ` (${checkOut})` : ""}
-Stay: 22-hour exclusive rental
+Stay: ${stayDays > 1 ? `${stayDays} days (${stayDays * 24 - 2}-hour stay)` : "22-hour exclusive rental"}
+Guests: ${guests || "[Guest count]"}
+Rate: ${estimatedRate}${note.trim() ? `\nNotes: ${note.trim()}` : ""}
+Could you confirm availability and the final rate? Thank you!`;
 Guests: ${guests || "[Guest count]"}
 Rate: ${estimatedRate}${note.trim() ? `\nNotes: ${note.trim()}` : ""}
 Could you confirm availability and the final rate? Thank you!`;
@@ -117,7 +160,7 @@ Could you confirm availability and the final rate? Thank you!`;
           <p className="mt-2 text-sm text-muted">Send your preferred dates directly to the host.</p>
         </div>
         <div>
-          <p className="text-sm text-muted">22-hour stay</p>
+          <p className="text-sm text-muted">{stayDays > 1 ? `${stayDays} days stay` : "22-hour stay"}</p>
           <p className="mt-1 text-xl font-semibold text-ink" aria-live="polite">{estimatedRate}</p>
         </div>
       </div>
@@ -139,8 +182,17 @@ Could you confirm availability and the final rate? Thank you!`;
         </div>
         <div className="min-w-0">
           <label htmlFor={`${prefix}-checkout`} className={labelStyle}>Check-out date</label>
-          <input id={`${prefix}-checkout`} name="checkout" type="date" readOnly value={checkout} className={fieldStyle} />
-          <p className="mt-2 text-sm text-muted">{checkOut || "Following day, after your 22-hour stay"}</p>
+          <input
+            id={`${prefix}-checkout`}
+            name="checkout"
+            type="date"
+            required
+            min={checkin ? nextDate(checkin, 1) : today}
+            value={checkout}
+            onChange={(event) => handleCheckoutChange(event.target.value)}
+            className={fieldStyle}
+          />
+          <p className="mt-2 text-sm text-muted">{Number(stayDays) > 1 ? `9:00 AM check-out (${stayDays * 24 - 2}-hour stay)` : (checkOut || "Following day, after your 22-hour stay")}</p>
         </div>
         <div className="min-w-0 sm:col-span-2">
           <label htmlFor={`${prefix}-guests`} className={labelStyle}>Number of guests</label>
