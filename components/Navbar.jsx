@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
-import ScrollProgress from "./ScrollProgress";
 
 const links = [
   { href: "/#gallery", label: "The house" },
@@ -32,7 +31,6 @@ export default function Navbar({ name, rate }) {
 
   return (
     <>
-      <ScrollProgress />
       <header className="site-nav">
         <nav aria-label="Main navigation" className="nav-inner">
           <Link href="/" className="nav-brand" onClick={() => setOpen(false)}>

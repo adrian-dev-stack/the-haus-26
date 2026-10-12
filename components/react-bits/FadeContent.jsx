@@ -3,7 +3,7 @@
 // Adapted from React Bits by David Haz; license in THIRD_PARTY_NOTICES.md.
 import { useEffect, useRef } from "react";
 
-export default function FadeContent({ children, className = "", duration = 400, threshold = 0.12 }) {
+export default function FadeContent({ children, className = "", duration = 600, threshold = 0.12 }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function FadeContent({ children, className = "", duration = 400, 
       if (bounds.top < window.innerHeight) return;
       gsap.registerPlugin(ScrollTrigger);
       context = gsap.context(() => {
-        gsap.set(element, { opacity: 0.55, y: 8 });
+        gsap.set(element, { opacity: 0.15, y: 28 });
         const timeline = gsap.timeline({ paused: true }).to(element, {
           opacity: 1, y: 0, duration: duration / 1000, ease: "power2.out", clearProps: "opacity,transform",
         });

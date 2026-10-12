@@ -76,17 +76,19 @@ export default function Page() {
           <AvailabilityCalendar bookedDates={p.bookedDates || []} phone={p.contact.phone} messengerUrl={p.contact.messengerUrl} email={p.contact.email} />
         </section>
         <section id="location" className="location-section" aria-labelledby="location-heading">
-          <FadeContent className="location-copy">
-            <p className="section-label">Meet us in Bataan</p>
-            <h2 id="location-heading">A place in Limay.</h2>
-            <p className="location-address">{p.address}</p>
-            <dl className="arrival-details">
-              <div><dt>Check-in</dt><dd>{p.checkIn}</dd></div>
-              <div><dt>Check-out</dt><dd>{p.checkOut}</dd></div>
-              <div><dt>Parking</dt><dd>Space for two sedans</dd></div>
-            </dl>
+          <div className="location-copy">
+            <FadeContent>
+              <p className="section-label">Meet us in Bataan</p>
+              <h2 id="location-heading">A place in Limay.</h2>
+              <p className="location-address">{p.address}</p>
+              <dl className="arrival-details">
+                <div><dt>Check-in</dt><dd>{p.checkIn}</dd></div>
+                <div><dt>Check-out</dt><dd>{p.checkOut}</dd></div>
+                <div><dt>Parking</dt><dd>Space for two sedans</dd></div>
+              </dl>
+            </FadeContent>
             <a href={p.mapsLink} target="_blank" rel="noopener noreferrer" className="text-link">Get directions on Google Maps</a>
-          </FadeContent>
+          </div>
           <div className="location-map"><iframe title={`Map showing ${p.name}`} loading="lazy" src={`https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`} /></div>
         </section>
         <section id="reservation-section" className="reservation-section" aria-labelledby="reservation-heading">
