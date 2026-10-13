@@ -9,10 +9,7 @@ export async function POST(request) {
     requireBookingOrigin(request);
     await limitBookingRequest(request, "booking-create", 8);
     const body = await readBookingBody(request);
-    const hasCapacityLimit = Number.isSafeInteger(property.maxGuests) && property.maxGuests > 0;
-    const hasTerms = Boolean(property.bookingTerms?.trim());
-    const autoApprove = hasCapacityLimit && hasTerms && Number(body.guests) <= property.maxGuests;
-    const result = await createBookingRequest(body, { blockedDates: property.bookedDates, autoApprove });
+    const result = await createBookingRequest(body, { blockedDates: property.bookedDates, autoApprove: true });
     return bookingResponse({
       booking: result.booking,
       guestUrl: `${getPaymentConfig().siteUrl}/book/${result.token}`,

@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const STATES = {
   requested: ["Your request is with the host.", "The host is reviewing your date and group size. Your date is not reserved yet. Save this private link and check it for updates."],
-  awaiting_payment: ["Your stay is approved for a deposit.", "Review the confirmed quote and the host’s terms below. Your 50% deposit completes the booking once payment is verified."],
+  awaiting_payment: ["Your dates are held.", "Your dates are held for 30 minutes. Complete your 50% deposit below to lock in your reservation."],
   confirmed: ["Your stay is booked.", "Your 50% deposit has been verified. Contact the host to arrange arrival details and your remaining balance."],
   test_paid: ["Test payment received.", "This was a PayMongo test checkout. No real money was collected and no live reservation was made."],
   cancelled: ["This booking is cancelled.", "Contact the host if you would like to request a different date."],

@@ -80,7 +80,7 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
   const [copyMessage, setCopyMessage] = useState("");
   const [livemode, setLivemode] = useState(null);
   const rate = estimateRate(guests, days);
-  const instantBookingReady = Number.isSafeInteger(maxGuests) && maxGuests > 0 && Boolean(bookingTerms?.trim());
+  const instantBookingReady = true;
 
   useEffect(() => {
     setToday(calculateCheckoutDate(todayInManila(), 1));
@@ -172,7 +172,11 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
       const guestUrl = result.data?.guestUrl;
       const path = new URL(guestUrl, window.location.origin);
       if (path.origin !== window.location.origin || !path.pathname.startsWith("/book/")) throw new Error("Your request was saved, but its private link could not be opened. Please contact the host.");
-      setSubmitted({ booking: result.data.booking, guestUrl: path.pathname });
+      const paymentToken = result.data?.paymentToken || result.data?.booking?.paymentToken;
+      setSubmitted({ booking: result.data.booking, guestUrl: path.pathname, paymentToken });
+      if (paymentToken) {
+        window.location.assign(`/pay/${encodeURIComponent(paymentToken)}`);
+      }
     } catch (failure) {
       if (submittedPayload.current) { setUncertain(true); requestLocked.current = true; }
       else { requestLocked.current = false; }
@@ -188,22 +192,27 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
   }
 
   if (submitted) {
-    const isApproved = submitted.booking?.status === "awaiting_payment" && submitted.booking?.paymentToken;
+    const isApproved = (submitted.booking?.status === "awaiting_payment" && submitted.booking?.paymentToken) || submitted.paymentToken;
     const stayDays = submitted.booking?.days || 1;
+    const activePaymentToken = submitted.paymentToken || submitted.booking?.paymentToken;
     return (
       <div className="booking-panel booking-success" role="status">
         <p className="section-label">{submitted.booking.status === "awaiting_payment" ? "Date Held" : "Request Received"} · {submitted.booking.reference}</p>
-        <Heading ref={successHeading} tabIndex={-1}>{submitted.booking.status === "awaiting_payment" ? "Your dates are held." : "Your booking request is saved."}</Heading>
+        <Heading ref={successHeading} tabIndex={-1}>
+          {activePaymentToken ? "Dates held! Redirecting to payment..." : submitted.booking.status === "awaiting_payment" ? "Your dates are held." : "Your booking request is saved."}
+        </Heading>
         <p>
-          {submitted.booking.status === "awaiting_payment"
+          {activePaymentToken
+            ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Redirecting to complete your 50% deposit...`
+            : submitted.booking.status === "awaiting_payment"
             ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Complete your 50% deposit to lock in your reservation.`
             : `Open your private booking link to check the latest status for your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}).`}
         </p>
         {submitted.booking.status === "awaiting_payment" && !isApproved && <p className="booking-notice">Your quote is saved, but checkout is not ready. Open your booking details and contact the host before starting another request.</p>}
         {submitted.booking.livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
         <div className="booking-actions">
-          {isApproved && <Link href={`/pay/${encodeURIComponent(submitted.booking.paymentToken)}`} className="button-primary">Pay 50% Deposit (GCash / Card)</Link>}
-          <Link href={submitted.guestUrl} className={isApproved ? "booking-secondary" : "button-primary"}>View booking details</Link>
+          {activePaymentToken && <Link href={`/pay/${encodeURIComponent(activePaymentToken)}`} className="button-primary">Proceed to Pay 50% Deposit (GCash / Card)</Link>}
+          <Link href={submitted.guestUrl} className={activePaymentToken ? "booking-secondary" : "button-primary"}>View booking details</Link>
           <button type="button" className="booking-secondary" onClick={copyLink}>Copy private link</button>
         </div>
         {copyMessage && <p aria-live="polite">{copyMessage}</p>}
@@ -312,23 +321,23 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
             <p>
               {maxGuests ? `Property capacity: up to ${maxGuests} guests.` : "Covers private stay for your group."}{" "}
               {instantBookingReady
-                ? "Submitting starts a 30-minute hold for deposit payment."
+                ? "Available dates are held immediately for 30 minutes to complete your deposit."
                 : "Dates are held only after approval by host."}
             </p>
           </div>
           <div className="booking-field booking-wide"><label htmlFor={`${prefix}-name`}>Your full name</label><input id={`${prefix}-name`} name="name" required minLength={2} maxLength={100} autoComplete="name" placeholder="Your full name" /></div>
           <div className="booking-field"><label htmlFor={`${prefix}-email`}>Email address</label><input id={`${prefix}-email`} name="email" type="email" required maxLength={254} autoComplete="email" placeholder="you@example.com" /></div>
-          <div className="booking-field"><label htmlFor={`${prefix}-phone`}>Mobile number</label><input id={`${prefix}-phone`} name="phone" type="tel" required maxLength={30} autoComplete="tel" placeholder="09… or +63…" /></div>
+          <div className="booking-field"><label htmlFor={`${prefix}-phone`}>Mobile number</label><input id={`${prefix}-phone`} name="phone" type="tel" required maxLength={30} autoComplete="tel" placeholder="09... or +63..." /></div>
           <div className="booking-field booking-wide"><label htmlFor={`${prefix}-occasion`}>Occasion <span>(optional)</span></label><select id={`${prefix}-occasion`} name="occasion" defaultValue=""><option value="">Choose an occasion</option>{["Family staycation", "Barkada / friends outing", "Birthday / celebration", "Other"].map((value) => <option key={value}>{value}</option>)}</select></div>
           <div className="booking-field booking-wide"><label htmlFor={`${prefix}-notes`}>Questions or requests <span>(optional)</span></label><textarea id={`${prefix}-notes`} name="notes" maxLength={1000} rows={3} placeholder="Arrival questions, parking needs, or anything the host should know" /></div>
           <label className="booking-consent booking-wide" htmlFor={`${prefix}-consent`}><input id={`${prefix}-consent`} name="consent" type="checkbox" required /><span>I agree that the host may use these contact details to handle this booking request and send booking confirmations by email and SMS.</span></label>
         </fieldset>
         {error && <p className="booking-error" role="alert">{error}</p>}
         {uncertain && <p className="booking-form-note">Your original details are kept on this page for a safe retry. Please keep the page open until your request is checked.</p>}
-        <button className="button-primary booking-submit" type="submit" disabled={pending}>{pending ? "Sending your request…" : uncertain ? "Retry my original request" : "Request to book"}</button>
+        <button className="button-primary booking-submit" type="submit" disabled={pending}>{pending ? "Holding your dates..." : uncertain ? "Retry reservation" : "Reserve & Pay 50% Deposit"}</button>
         <p className="booking-form-note">
           {instantBookingReady
-            ? "Submitting your request starts a 30-minute hold. Complete the 50% deposit via PayMongo (GCash / Card) to lock in your reservation."
+            ? "Available dates are held immediately for 30 minutes. You will proceed directly to secure 50% deposit payment via PayMongo (GCash, Maya, or Card)."
             : "Selecting dates or submitting does not reserve them. Your host confirms group capacity and quote before holding the date."}
         </p>
       </form>

@@ -6,18 +6,18 @@ import { property } from "@/lib/property";
 
 export const metadata = {
   title: "Book your stay",
-  description: "Choose your stay dates and group size. Review your approved quote and host's terms before paying a 50% booking deposit.",
+  description: "Instant booking: Choose your stay dates and group size. Available dates are held immediately for 30 minutes to complete your 50% deposit via PayMongo.",
   robots: { index: true, follow: true },
   alternates: { canonical: "/book" },
   openGraph: {
     title: "Book your stay | The HauS 26",
-    description: "Choose your stay dates and group size. Review your approved quote and host's terms before paying a 50% booking deposit.",
+    description: "Instant booking: Choose your stay dates and group size. Available dates are held immediately for 30 minutes to complete your 50% deposit via PayMongo.",
     url: "/book",
   },
   twitter: {
     card: "summary",
     title: "Book your stay | The HauS 26",
-    description: "Choose your stay dates and group size. Review your approved quote and host's terms before paying a 50% booking deposit.",
+    description: "Instant booking: Choose your stay dates and group size. Available dates are held immediately for 30 minutes to complete your 50% deposit via PayMongo.",
   },
 };
 
@@ -28,7 +28,7 @@ export default function BookPage() {
         <p className="section-label">Exclusive Staycation</p>
         <h1>Plan Your Private Stay.</h1>
         <p>
-          Select your stay dates and group size, then send your request. Dates are held for 30 minutes only after your booking is approved for a deposit. Review your quote and the host's terms before paying.
+          Select your stay dates and group size. If the dates are available, they will be held immediately for 30 minutes so you can proceed directly to pay your 50% deposit.
         </p>
         <Link href="/" className="text-link">
           ← Back to villa overview & rates

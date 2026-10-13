@@ -77,7 +77,7 @@ const faqs = [
 
 export default function Page() {
   const { lat, lng } = p.coords;
-  const instantBookingReady = Number.isSafeInteger(p.maxGuests) && p.maxGuests > 0 && Boolean(p.bookingTerms?.trim());
+  const instantBookingReady = true;
 
   return (
     <>
@@ -246,11 +246,7 @@ export default function Page() {
           <div className="rate-note-box">
             <span className="text-xl">🔒</span>
             <div>
-              <strong>{instantBookingReady ? "Booking deposit:" : "Host approval first:"}</strong>{" "}
-              {instantBookingReady
-                ? "Submit your booking to start a 30-minute payment hold. Review the saved quote and terms, then complete your 50% deposit via GCash or Card."
-                : "Send a request for the host to review your group size, quote, and booking terms. Selecting dates or sending a request does not reserve them. An approved booking starts a 30-minute hold for your 50% deposit."}{" "}
-              Remaining balance is payable upon arrival.
+              <strong>Instant Booking:</strong> Submit your details to automatically hold your dates for 30 minutes and complete your 50% deposit via GCash or Card. Remaining balance is settled upon arrival.
             </div>
           </div>
         </section>
@@ -263,7 +259,7 @@ export default function Page() {
               Pick your preferred<br />stay dates.
             </h2>
             <p>
-              Select your check-in and check-out dates. Dates are checked again when you submit your request. Selecting dates does not reserve them.
+              Select your check-in and check-out dates. If the dates are available, submit your details to hold them and proceed directly to payment.
             </p>
           </div>
           <AvailabilityCalendar
