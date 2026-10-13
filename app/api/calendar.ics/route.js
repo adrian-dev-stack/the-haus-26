@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { getCalendarEvents } from "@/lib/bookings";
 import { generateIcalFeed } from "@/lib/booking-ical";
 import { getAdminSession, verifyAdminPassword } from "@/lib/booking-auth";
@@ -42,13 +43,28 @@ export async function GET(request) {
 
     const { bookings, blockedDates } = await getCalendarEvents({ isHost });
     const icsContent = generateIcalFeed({ bookings, blockedDates, isHost });
+    const etag = `"${createHash("sha256").update(icsContent).digest("hex").slice(0, 32)}"`;
+    const cacheControl = isHost ? "private, no-cache, max-age=0, must-revalidate" : "public, max-age=300, stale-while-revalidate=600";
+
+    const ifNoneMatch = request.headers.get("if-none-match");
+    if (ifNoneMatch && ifNoneMatch === etag) {
+      return new Response(null, {
+        status: 304,
+        headers: {
+          "ETag": etag,
+          "Cache-Control": cacheControl,
+          "X-Calendar-Role": isHost ? "host" : "public",
+        },
+      });
+    }
 
     return new Response(icsContent, {
       status: 200,
       headers: {
         "Content-Type": "text/calendar; charset=utf-8",
         "Content-Disposition": 'inline; filename="thehaus26-calendar.ics"',
-        "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+        "ETag": etag,
+        "Cache-Control": cacheControl,
         "X-Calendar-Role": isHost ? "host" : "public",
       },
     });

@@ -10,9 +10,8 @@ import {
   getBookingStore, getGuestBooking, getUnavailableDates, initializeBookingStore, listAdminBookings,
   refreshBookingPayment, syncBookingFromPayment, HOLD_DURATION_MS,
   addBlockedDate, getBlockedDates, removeBlockedDate, markBalancePaid,
-  getStayDates, getCheckOutDate, runBookingMaintenance,
+  getStayDates, getCheckOutDate, runBookingMaintenance, getBookingEvents, recordBookingEvent,
 } from "../lib/bookings.js";
-
 
 import { getPaymentConfig, readPaymentToken } from "../lib/payments.js";
 
@@ -597,6 +596,29 @@ test("unpayable instant totals fail before persistence or provider work", async 
     assert.equal((await client.execute("SELECT COUNT(*) AS count FROM booking_holds")).rows[0].count, 0);
   });
 });
+
+test("audit log records lifecycle events and retrieves chronological history", async () => {
+  await database(async (client) => {
+    const fake = provider();
+    const result = await createBookingRequest(input(), { client, now, config });
+    const eventsAfterCreate = await getBookingEvents(result.booking.id, { client });
+    assert.equal(eventsAfterCreate.length, 1);
+    assert.equal(eventsAfterCreate[0].eventType, "requested");
+    assert.equal(eventsAfterCreate[0].actor, "guest");
+
+    await confirmBooking(result.booking.id, { totalAmount: 500000, terms: "Standard stay terms" }, { client, config, fetchImpl: fake.fetchImpl, now });
+    const eventsAfterConfirm = await getBookingEvents(result.booking.id, { client });
+    assert.equal(eventsAfterConfirm.length, 2);
+    assert.equal(eventsAfterConfirm[1].eventType, "quote_approved");
+    assert.equal(eventsAfterConfirm[1].actor, "host");
+
+    const admin = await getAdminBooking(result.booking.id, { client });
+    assert.ok(Array.isArray(admin.events));
+    assert.equal(admin.events.length, 2);
+  });
+});
+
+
 
 
 

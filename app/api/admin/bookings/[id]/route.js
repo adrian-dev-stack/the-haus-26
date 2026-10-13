@@ -1,9 +1,18 @@
-import { confirmBooking, refreshBookingPayment, cancelBooking, markBalancePaid, refundAndCancelBooking } from "@/lib/bookings";
+import { confirmBooking, refreshBookingPayment, cancelBooking, markBalancePaid, refundAndCancelBooking, getAdminBooking } from "@/lib/bookings";
 import { parsePesoAmount } from "@/scripts/payment-request";
 import { property } from "@/lib/property";
 import { BookingHttpError, bookingResponse, bookingFailure, requireBookingAdmin, requireBookingOrigin, readBookingBody, limitBookingRequest } from "@/lib/booking-http";
 
 export const runtime = "nodejs";
+
+export async function GET(request, { params }) {
+  try {
+    await requireBookingAdmin();
+    const { id } = await params;
+    const booking = await getAdminBooking(id);
+    return bookingResponse({ booking });
+  } catch (error) { return bookingFailure(error); }
+}
 export async function POST(request, { params }) {
   try {
     requireBookingOrigin(request);
