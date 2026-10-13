@@ -6,11 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/verify-property.js && node --expose-gc --test scripts/payments.test.js scripts/booking-auth.test.js scripts/bookings.test.js scripts/booking-webhook.test.js scripts/booking-ical.test.js",
+    "test": "node scripts/verify-property.js && node --expose-gc --test scripts/payments.test.js scripts/booking-auth.test.js scripts/bookings.test.js scripts/booking-webhook.test.js scripts/booking-ical.test.js scripts/notification-providers.test.js scripts/booking-notifications.test.js",
     "payment:request": "node scripts/payment-request.js",
     "booking:setup": "node scripts/booking-setup.js",
     "booking:retention": "node scripts/booking-retention.js",
-    "booking:cron": "node scripts/booking-cron.js"
+    "booking:cron": "node scripts/booking-cron.js",
+    "notifications": "node scripts/booking-notifications.js"
   },
   "dependencies": {
     "@libsql/client": "0.18.0",

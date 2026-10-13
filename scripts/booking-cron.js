@@ -13,6 +13,10 @@ async function tick() {
   const timestamp = new Date().toLocaleTimeString("en-US", { hour12: false });
   try {
     const result = await runBookingMaintenance();
+    if (result.notifications) {
+      const summary = result.notifications;
+      console.log(`\n[${timestamp}] Notifications: ${summary.serviceUnavailable ? "service unavailable" : summary.configurationError ? "configuration invalid" : `accepted=${summary.accepted}, deferred=${summary.deferred}, failed=${summary.failed}, review=${summary.review}`}`);
+    }
     if (result.released > 0 || result.checked > 0) {
       console.log(`[${timestamp}] Holds maintenance: checked=${result.checked}, released=${result.released}, retained=${result.retained}`);
     } else {

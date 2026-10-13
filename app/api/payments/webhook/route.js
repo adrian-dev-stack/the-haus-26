@@ -3,8 +3,10 @@ import { getBookingStore } from "@/lib/booking-store";
 import { getBookingByPaymentReference, refreshBookingPayment } from "@/lib/bookings";
 import { verifyPaymongoWebhook } from "@/lib/booking-webhook";
 import { BookingHttpError, bookingResponse, bookingFailure, readBookingBody } from "@/lib/booking-http";
+import { runBookingNotifications } from "@/lib/booking-notifications";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 export async function POST(request) {
   let client;
   let eventKey;
@@ -42,6 +44,7 @@ export async function POST(request) {
     }
     await refreshBookingPayment(booking.id, { client, config });
     await client.execute({ sql: "UPDATE booking_webhook_events SET processed_at=?,lease_until=0 WHERE event_id=?", args: [Date.now(), eventKey] });
+    await runBookingNotifications({ client, bookingId: booking.id, siteUrl: config.siteUrl }).catch(() => {});
     return bookingResponse({ received: true });
   } catch (error) {
     if (client && eventKey) await client.execute({ sql: "UPDATE booking_webhook_events SET lease_until=0 WHERE event_id=? AND processed_at IS NULL", args: [eventKey] }).catch(() => {});

@@ -45,8 +45,8 @@ To manage the same bookings locally, set the remote database URL and token in `.
 ## Booking and host workflow
 
 1. Guests choose available dates and group size. The current published daily rates are PHP 5,000 for up to four guests, PHP 6,000 for five to six, PHP 8,000 for seven to ten, and PHP 8,000 plus PHP 500 per guest above ten. Prices multiply by the configured stay duration; the browser cannot override them.
-2. The booking is stored with a frozen quote and date holds before PayMongo is called. The guest reviews their total, 50% deposit, balance and terms on their private page, then opens checkout. No automatic host emails or messages are sent.
-3. A verified live deposit changes the booking to confirmed. Payment return, guest status refresh, host refresh and a configured webhook retrieve PayMongo's actual checkout. A redirect or screenshot does not prove payment.
+2. The booking is stored with a frozen quote and date holds before PayMongo is called. The guest reviews their total, 50% deposit, balance and terms on their private page, then opens checkout.
+3. A verified live deposit changes the booking to confirmed. Payment return, guest status refresh, host refresh and a configured webhook retrieve PayMongo's actual checkout. A redirect or screenshot does not prove payment. When enabled, this confirmation queues a guest email, guest SMS and host email alert. Test notifications require a separate flag and go only to configured test recipients; setup and limits are in [NOTIFICATIONS.md](NOTIFICATIONS.md).
 4. Use `/admin` to contact the guest and arrange arrival. The property has no configured maximum capacity; confirm and configure the real guest limit before accepting live instant bookings. The module's technical input bound is not a capacity claim.
 5. Legacy/manual requests can still be reviewed and approved in admin with an agreed final quote and terms. Once frozen, the quote cannot be changed by retrying.
 6. Cancel an unpaid request with a reason. When a checkout exists, cancellation expires it in PayMongo and verifies that it is unpaid before releasing its dates. Paid, refunded, partial-refund or pending-refund cases retain their holds for host review. Refunds and release decisions require reconciliation in PayMongo; this module does not issue refunds or auto-release those dates. Test payments are excluded from collected-revenue totals.
@@ -55,7 +55,9 @@ The agreed quote is frozen after approval. Retrying an interrupted creation reus
 
 ## Expired-hold maintenance
 
-Configure a trusted scheduler to call `GET /api/bookings/maintenance` with `Authorization: Bearer CRON_SECRET` every few minutes. The endpoint processes at most one overdue checkout per call and uses a database lease so concurrent calls cannot repeat cleanup. Provision a scheduler frequency supported by your hosting plan; no schedule has been deployed by this change. Verify throughput for the property's actual request volume.
+Configure a trusted scheduler to call `GET /api/bookings/maintenance` with `Authorization: Bearer CRON_SECRET` every few minutes. The endpoint processes at most one overdue checkout and one notification job per call, using database leases to prevent concurrent workers from processing the same job. Provision a scheduler frequency supported by your hosting plan; no online schedule has been deployed by this change. Verify throughput for the property's actual request volume.
+
+For a local trial, `npm run booking:cron` checks every 60 seconds by default; `npm run booking:cron -- --once` performs one check. The runner also processes queued notifications. Restart it after changing `.env.local`. It stops when your PC shuts down or sleeps. The payment webhook attempts notifications immediately; other verified payment refreshes queue notifications for maintenance. Automatic retries need the runner or online maintenance endpoint. Use an online scheduler for retries while your PC is off.
 
 The public calendar performs only database reads. It never bulk-reconciles PayMongo transactions. A guest status refresh or a new request may reconcile a related expired hold, but unrelated transactions are not swept by anonymous calendar visitors. If maintenance is not configured, expired dates can remain held until an authorized host or relevant guest refreshes them. This preserves payment safety during provider outages; a pending or unknown checkout is not treated as cancelled merely because its timer elapsed.
 
@@ -68,6 +70,8 @@ The handler validates `Paymongo-Signature` against timestamp plus exact raw body
 ## Contact details and retention
 
 Names, email, phone, occasion, special requests and free-text terms are private booking data. They are stored for the host's review and contact purpose, behind password-protected endpoints. Guest links and public availability responses exclude contact data; request logs must not contain it. No guest contact data is included in the server-created PayMongo checkout payload; the hosted provider collects its own billing details.
+
+Enabled notification providers receive the recipient and booking message needed for delivery. Notification jobs store status, provider references and a payload hash, without copying contact details or message bodies into the queue. Provider message records follow the providers' retention policies; see [NOTIFICATIONS.md](NOTIFICATIONS.md).
 
 Run `npm run booking:retention` monthly, or schedule it from a trusted host machine with database credentials. It redacts contact data and free text from inactive, past requests after 180 days, preserving non-personal reference and payment audit fields. Change `BOOKING_CONTACT_RETENTION_DAYS` if the host adopts a different retention period. It does not release dates, erase unresolved holds, or erase paid booking records. Paid-record retention and individual correction/deletion requests must be handled by the host according to the property's actual recordkeeping needs. Apply the same retention to private backups, and rerun the job after restoring a backup.
 

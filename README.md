@@ -14,4 +14,6 @@ Booking deposits: see [PAYMENTS.md](./PAYMENTS.md) for PayMongo setup and standa
 
 Guest requests and the private host dashboard are documented in [BOOKINGS.md](BOOKINGS.md). Run `npm run booking:setup` for local host access; Vercel requires a remote libSQL database.
 
+Optional guest email/SMS confirmations and host email alerts use Resend and UniSMS. Follow [NOTIFICATIONS.md](NOTIFICATIONS.md) to test with your own inbox and phone before enabling guest delivery. Notifications are disabled by default.
+
 The home page uses adapted React Bits FadeContent and SpotlightCard components. Source and license notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

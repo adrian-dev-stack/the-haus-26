@@ -68,6 +68,9 @@ export default function PrivacyPage() {
             <p>
               We <strong>never sell, lease, or trade</strong> your personal information to marketing firms, advertising networks, or unauthorized third parties.
             </p>
+            <p>
+              When booking notifications are enabled, we use <strong>Resend</strong> to send confirmation emails and <strong>UniSMS</strong> to send confirmation text messages. These providers receive the recipient email address or mobile number and the booking details included in the message. The host also receives an email alert for a verified booking deposit. We use these notifications to service your booking. During testing, messages go only to the host's configured test inbox and phone.
+            </p>
           </section>
 
           <section className="policy-section">
