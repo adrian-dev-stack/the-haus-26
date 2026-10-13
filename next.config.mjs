@@ -48,7 +48,7 @@ const nextConfig = {
           },
         ],
       },
-      ...["/pay/:path*", "/payment/:path*", "/book/:path*", "/admin/:path*", "/api/payments/:path*", "/api/bookings/:path*", "/api/admin/:path*"].map((source) => ({
+      ...["/pay/:path*", "/payment/:path*", "/book/:token/:path*", "/admin/:path*", "/api/payments/:path*", "/api/bookings/:path*", "/api/admin/:path*"].map((source) => ({
         source,
         headers: [
           { key: "Referrer-Policy", value: "strict-origin" },

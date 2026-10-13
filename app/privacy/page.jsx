@@ -4,11 +4,21 @@ import Navbar from "@/components/Navbar";
 import CookiePreferenceButton from "@/components/CookiePreferenceButton";
 
 export const metadata = {
-  title: "Privacy & Cookie Policy | The HauS 26",
+  title: "Privacy & Cookie Policy",
   description:
-    "Learn how The HauS 26 collects, handles, and protects your personal data and cookies in accordance with the Philippine Data Privacy Act of 2012.",
+    "How The HauS 26 uses booking contact details, essential browser storage, and third-party payment and notification services.",
   alternates: {
     canonical: "/privacy",
+  },
+  openGraph: {
+    title: "Privacy & Cookie Policy | The HauS 26",
+    description: "How we use booking contact details and essential browser storage.",
+    url: "/privacy",
+  },
+  twitter: {
+    card: "summary",
+    title: "Privacy & Cookie Policy | The HauS 26",
+    description: "How we use booking contact details and essential browser storage.",
   },
 };
 
@@ -90,17 +100,17 @@ export default function PrivacyPage() {
             </p>
             <ul>
               <li>
-                <strong>Security & Session Cookies:</strong> Encrypted, HTTP-only session cookies used solely for authorized host administration to prevent session forgery and credential tampering.
+                <strong>Security & Session Cookies:</strong> Signed, HTTP-only session cookies used for authorized host administration.
               </li>
               <li>
-                <strong>Functional Local Storage:</strong> Temporary browser storage (`localStorage`) utilized to retain your cookie banner acknowledgement (`haus26_cookie_consent`) so the notice is not repeatedly displayed, and to maintain form state if your connection temporarily drops during submission.
+                <strong>Notice Acknowledgement:</strong> Local browser storage retains your acknowledgement of the storage notice (<code>haus26_cookie_consent</code>) so it is not repeatedly displayed. Booking form details and the original request reference stay in the current page's memory for retries; they are not persisted in browser storage and are lost when you reload or close the page.
               </li>
               <li>
-                <strong>No Third-Party Advertising Trackers:</strong> We do <strong>not</strong> employ tracking pixels, Google remarketing cookies, Facebook Pixel advertising identifiers, or cross-site tracking scripts.
+                <strong>No Optional Site Tracking:</strong> We do not add advertising pixels or optional analytics cookies. Embedded Google Maps and PayMongo checkout are third-party services with their own privacy and storage practices.
               </li>
             </ul>
             <p>
-              You have the right to accept or decline cookies. You can manage or update your choice below at any time:
+              The site uses essential storage only, so this notice does not offer an optional cookie setting. You can view the notice again below and manage stored site data through your browser settings:
             </p>
             <CookiePreferenceButton />
           </section>

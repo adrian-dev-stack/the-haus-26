@@ -31,8 +31,7 @@ const rateTiers = [
     count: 8,
     price: "₱8,000",
     note: "Same flat rate for groups of 7, 8, 9, or 10 guests.",
-    popular: true,
-    badge: "Barkada Favorite",
+    popular: false,
   },
   {
     guests: "11 guests or more",
@@ -44,19 +43,19 @@ const rateTiers = [
 ];
 
 const amenityDescriptions = {
-  "Private swimming pool": "Clean, refreshing tiled pool with patio night lights and lounger floaters for day and night swims.",
-  "Billiard table": "Full-size billiards table with cues and ambient lamp for friendly games.",
-  "Outdoor grill": "Heavy-duty barbecue grill ready for your inihaw, burgers, and outdoor feasts.",
-  "2 air-conditioned bedrooms": "Spacious bedrooms with comfortable bunk beds, cool AC, and fresh linens.",
-  "Kitchen with refrigerator and stove": "Equipped with refrigerator, gas stove, and prep space. No corkage fee for outside food!",
-  "Wi-Fi": "Fast wireless internet connection available throughout the villa.",
-  "Free parking for guests (fits two sedans)": "Gated, secure on-site parking that easily accommodates up to two vehicles.",
+  "Private swimming pool": "A swimming pool for your group's private use during your stay.",
+  "Billiard table": "A billiard table included with your private rental.",
+  "Outdoor grill": "An outdoor grill for preparing meals with your group.",
+  "2 air-conditioned bedrooms": "Two bedrooms with air conditioning. Ask the host to confirm sleeping arrangements for your group.",
+  "Kitchen with refrigerator and stove": "A kitchen with a refrigerator and stove for your stay.",
+  "Wi-Fi": "Wi-Fi is included with your rental.",
+  "Free parking for guests (fits two sedans)": "Guest parking with space for two sedans.",
 };
 
 const faqs = [
   {
     q: "Can we bring outside food and drinks?",
-    a: "Yes! There are no corkage fees. You have full private access to the kitchen with a refrigerator and stove, plus an outdoor barbecue grill for your inihaw.",
+    a: "The property includes a kitchen with a refrigerator and stove, plus an outdoor grill. Ask the host about outside food and drinks before you book.",
   },
   {
     q: "Are pets allowed at the villa?",
@@ -68,7 +67,7 @@ const faqs = [
   },
   {
     q: "How does the deposit and payment work?",
-    a: "A 50% deposit via GCash or Card confirms and locks in your date. The remaining 50% balance is settled upon arrival at the property.",
+    a: "Review your approved quote and the host's payment, cancellation, rescheduling, and refund terms before paying. Your date is reserved once the 50% deposit via GCash or Card is verified. The remaining balance is payable upon arrival.",
   },
   {
     q: "Where is The HauS 26 located?",
@@ -78,6 +77,7 @@ const faqs = [
 
 export default function Page() {
   const { lat, lng } = p.coords;
+  const instantBookingReady = Number.isSafeInteger(p.maxGuests) && p.maxGuests > 0 && Boolean(p.bookingTerms?.trim());
 
   return (
     <>
@@ -98,7 +98,7 @@ export default function Page() {
               A house to yourselves. A private pool to dive into.
             </p>
             <p className="hero-description">
-              Unwind in complete privacy. Stay for 22 exclusive hours with your own pool, full-size billiards table, outdoor grill, and space to celebrate with family and friends.
+              Unwind in complete privacy. Stay for 22 exclusive hours with your own pool, billiard table, and outdoor grill for time with family and friends.
             </p>
 
             <div className="hero-feature-chips">
@@ -188,10 +188,6 @@ export default function Page() {
                 ))}
                 <li>
                   <span>✓</span>
-                  <span>No corkage fee for outside food & drinks</span>
-                </li>
-                <li>
-                  <span>✓</span>
                   <span>Check-in: {p.checkIn} | Check-out: {p.checkOut}</span>
                 </li>
               </ul>
@@ -250,7 +246,11 @@ export default function Page() {
           <div className="rate-note-box">
             <span className="text-xl">🔒</span>
             <div>
-              <strong>Instant Confirmation:</strong> Your selected dates are held automatically for 30 minutes while you complete your 50% deposit via GCash or Card. Remaining balance is payable upon arrival.
+              <strong>{instantBookingReady ? "Booking deposit:" : "Host approval first:"}</strong>{" "}
+              {instantBookingReady
+                ? "Submit your booking to start a 30-minute payment hold. Review the saved quote and terms, then complete your 50% deposit via GCash or Card."
+                : "Send a request for the host to review your group size, quote, and booking terms. Selecting dates or sending a request does not reserve them. An approved booking starts a 30-minute hold for your 50% deposit."}{" "}
+              Remaining balance is payable upon arrival.
             </div>
           </div>
         </section>
@@ -263,7 +263,7 @@ export default function Page() {
               Pick your preferred<br />stay dates.
             </h2>
             <p>
-              Select your check-in and check-out dates. Availability is checked in real-time, holding your reservation while you review the quote.
+              Select your check-in and check-out dates. Dates are checked again when you submit your request. Selecting dates does not reserve them.
             </p>
           </div>
           <AvailabilityCalendar
@@ -292,7 +292,7 @@ export default function Page() {
                 </div>
                 <div>
                   <dt>Parking</dt>
-                  <dd>Secure on-site parking for two sedans</dd>
+                  <dd>Guest parking for two sedans</dd>
                 </div>
               </dl>
             </FadeContent>
@@ -341,7 +341,7 @@ export default function Page() {
               Ready to escape?<br />Reserve your date.
             </h2>
             <p>
-              Send your stay dates, group count, and details below. You will receive an instant private confirmation link with secure GCash/Card payment.
+              Send your stay dates, group count, and details below. Save your private booking link to review the quote, host's terms, and latest status before paying a deposit.
             </p>
             <p>
               Have a custom request or question first? Reach the host directly anytime:
@@ -383,6 +383,8 @@ export default function Page() {
             <BookingForm
               checkIn={p.checkIn}
               checkOut={p.checkOut}
+            maxGuests={p.maxGuests}
+            bookingTerms={p.bookingTerms}
             />
           </div>
         </section>

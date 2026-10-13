@@ -11,6 +11,7 @@ import {
   refreshBookingPayment, syncBookingFromPayment, HOLD_DURATION_MS,
   addBlockedDate, getBlockedDates, removeBlockedDate, markBalancePaid,
   getStayDates, getCheckOutDate, runBookingMaintenance, getBookingEvents, recordBookingEvent,
+  refundAndCancelBooking,
 } from "../lib/bookings.js";
 
 import { getPaymentConfig, readPaymentToken } from "../lib/payments.js";
@@ -29,6 +30,42 @@ const rejectCode = (code) => (error) => error?.code === code;
 const input = (overrides = {}) => ({ requestId: randomUUID(), name: "Test Guest", email: "guest@example.test", phone: "+639123456789",
   date: "2030-02-01", guests: 4, occasion: "Family stay", notes: "Private request notes", consent: true, ...overrides });
 const approved = { totalAmount: 500000, terms: "22-hour stay. Final arrival and departure times confirmed with the host." };
+
+test("a released refunded cancellation remains cancelled after repeated payment updates", async () => {
+  await database(async (client) => {
+    const fake = provider();
+    const { booking } = await create(client);
+    const pending = await confirmBooking(booking.id, approved, { client, config, now, fetchImpl: fake.fetchImpl });
+    const request = readPaymentToken(pending.paymentToken, config);
+    fake.pay(request.sessionId, { refunds: [{ attributes: { amount: request.depositAmount, status: "succeeded" } }] });
+    await refundAndCancelBooking(booking.id, { reason: "Guest refund verified and dates released" }, { client, config, fetchImpl: fake.fetchImpl });
+    for (const status of ["refunded", "paid", "refunded"]) {
+      await syncBookingFromPayment({ request, status, paymentId: `pay_${request.sessionId}` }, { client, now });
+      const checked = await getAdminBooking(booking.id, { client });
+      assert.equal(checked.status, "cancelled");
+      assert.equal(checked.paymentStatus, "refunded");
+      assert.deepEqual(await getUnavailableDates({ client, config }), []);
+    }
+  });
+});
+
+test("public availability never invokes payment maintenance even for overdue checkouts", async () => {
+  await database(async (client) => {
+    const fake = provider();
+    const { booking } = await create(client);
+    await confirmBooking(booking.id, approved, { client, config, now, fetchImpl: fake.fetchImpl });
+    const overdue = Date.now() - HOLD_DURATION_MS - 60000;
+    await client.execute({ sql: "UPDATE bookings SET checkout_started_at=? WHERE id=?", args: [overdue, booking.id] });
+    const originalFetch = globalThis.fetch;
+    let calls = 0;
+    globalThis.fetch = async () => { calls++; throw new Error("Public reads must not contact payment providers"); };
+    try {
+      assert.deepEqual(await getUnavailableDates({ client, config }), [booking.date]);
+      assert.equal(calls, 0);
+      assert.equal((await getAdminBooking(booking.id, { client })).paymentIssue, null);
+    } finally { globalThis.fetch = originalFetch; }
+  });
+});
 
 async function database(operation) {
   const directory = await mkdtemp(path.join(os.tmpdir(), "haus26-bookings-"));

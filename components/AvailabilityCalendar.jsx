@@ -63,15 +63,9 @@ export default function AvailabilityCalendar({
   headingLevel = 3,
 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
-  const [today, setToday] = useState(getToday);
-  const [currentMonth, setCurrentMonth] = useState(() => {
-    const parts = getToday().split("-").map(Number);
-    return parts[1] - 1;
-  });
-  const [currentYear, setCurrentYear] = useState(() => {
-    const parts = getToday().split("-").map(Number);
-    return parts[0];
-  });
+  const [today, setToday] = useState("");
+  const [currentMonth, setCurrentMonth] = useState(null);
+  const [currentYear, setCurrentYear] = useState(null);
   const [todayYear, todayMonth] = today ? today.split("-").map(Number) : [null, null];
 
   const [checkInDate, setCheckInDate] = useState("");
@@ -91,7 +85,10 @@ export default function AvailabilityCalendar({
 
   useEffect(() => {
     const currentDate = getToday();
+    const [year, month] = currentDate.split("-").map(Number);
     setToday(currentDate);
+    setCurrentMonth(month - 1);
+    setCurrentYear(year);
   }, []);
 
   useEffect(() => {
@@ -103,8 +100,12 @@ export default function AvailabilityCalendar({
         if (!response.ok || !Array.isArray(result.data?.bookedDates)) throw new Error("Availability unavailable");
         setSavedDates(result.data.bookedDates.filter((date) => typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)));
         setAvailabilityStatus("ready");
+        window.dispatchEvent(new CustomEvent("haus26:availability-loaded", { detail: result.data }));
       } catch (failure) {
-        if (failure.name !== "AbortError") setAvailabilityStatus("error");
+        if (failure.name !== "AbortError") {
+          setAvailabilityStatus("error");
+          window.dispatchEvent(new CustomEvent("haus26:availability-loaded", { detail: { livemode: null } }));
+        }
       }
     }
     loadAvailability();
@@ -263,7 +264,7 @@ export default function AvailabilityCalendar({
     return (
       <div className="min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-6">
         <Heading className="availability-heading">Choose your stay dates</Heading>
-        <p className="mt-2 text-sm leading-relaxed text-muted">Your host confirms availability before a booking is made.</p>
+        <p className="mt-2 text-sm leading-relaxed text-muted">Selecting dates does not reserve them.</p>
         <p className="mt-6 min-h-64 text-sm text-muted" role="status">Loading the date calendar…</p>
       </div>
     );
@@ -458,8 +459,8 @@ export default function AvailabilityCalendar({
           {availabilityStatus === "loading"
             ? "Checking the latest dates…"
             : availabilityStatus === "error"
-            ? "Latest availability could not be loaded. Your host will confirm your requested dates."
-            : "Dates checked. The host confirms each request."}
+            ? "Latest availability could not be loaded. Dates will be checked when you submit your request."
+            : "Dates checked. Selecting dates does not reserve them; availability is checked again when you submit."}
         </p>
       </div>
 

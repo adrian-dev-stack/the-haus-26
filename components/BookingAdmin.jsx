@@ -689,16 +689,19 @@ function AdminSyncPanel({ calendarSync, onUnauthorized }) {
   const [maintenanceFeedback, setMaintenanceFeedback] = useState(null);
   const [copiedKey, setCopiedKey] = useState("");
 
-  const hostUrl = typeof window !== "undefined"
-    ? `${window.location.origin}${calendarSync?.hostUrl || "/api/calendar.ics"}`
-    : calendarSync?.hostUrl || "/api/calendar.ics";
+  const hasHostUrl = Boolean(calendarSync?.hostUrl);
+  const hostUrl = hasHostUrl
+    ? typeof window !== "undefined"
+      ? `${window.location.origin}${calendarSync.hostUrl}`
+      : calendarSync.hostUrl
+    : "";
 
   const publicUrl = typeof window !== "undefined"
     ? `${window.location.origin}${calendarSync?.publicUrl || "/api/calendar.ics"}`
     : calendarSync?.publicUrl || "/api/calendar.ics";
 
-  const webcalHostUrl = hostUrl.replace(/^https?:\/\//, "webcal://");
-  const gcalSubscribeUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalHostUrl)}`;
+  const webcalHostUrl = hostUrl ? hostUrl.replace(/^https?:\/\//, "webcal://") : "";
+  const gcalSubscribeUrl = webcalHostUrl ? `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalHostUrl)}` : "";
 
   async function copyToClipboard(text, key) {
     try {
@@ -755,39 +758,45 @@ function AdminSyncPanel({ calendarSync, onUnauthorized }) {
               <strong style={{ fontSize: "0.875rem" }}>Private Host Calendar (Full Guest Details)</strong>
               <span style={{ fontSize: "0.75rem", color: "var(--color-accent)", fontWeight: 600 }}>Includes guest phone, rate, and notes</span>
             </div>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
-              <input
-                type="text"
-                readOnly
-                value={hostUrl}
-                style={{ flex: "1 1 280px", fontSize: "0.8125rem", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid var(--color-line)", background: "var(--color-paper)" }}
-              />
-              <button
-                type="button"
-                className="booking-secondary"
-                onClick={() => copyToClipboard(hostUrl, "host")}
-                style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem" }}
-              >
-                {copiedKey === "host" ? "✓ Copied!" : "Copy Link"}
-              </button>
-              <a
-                href={gcalSubscribeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="button-primary"
-                style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem", textDecoration: "none" }}
-              >
-                Add to Google Calendar ↗
-              </a>
-              <a
-                href={`${calendarSync?.hostUrl || "/api/calendar.ics"}`}
-                download="thehaus26-calendar.ics"
-                className="booking-secondary"
-                style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem", textDecoration: "none" }}
-              >
-                Download .ICS
-              </a>
-            </div>
+            {hasHostUrl ? (
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+                <input
+                  type="text"
+                  readOnly
+                  value={hostUrl}
+                  style={{ flex: "1 1 280px", fontSize: "0.8125rem", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid var(--color-line)", background: "var(--color-paper)" }}
+                />
+                <button
+                  type="button"
+                  className="booking-secondary"
+                  onClick={() => copyToClipboard(hostUrl, "host")}
+                  style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem" }}
+                >
+                  {copiedKey === "host" ? "✓ Copied!" : "Copy Link"}
+                </button>
+                <a
+                  href={gcalSubscribeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="button-primary"
+                  style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem", textDecoration: "none" }}
+                >
+                  Add to Google Calendar ↗
+                </a>
+                <a
+                  href={calendarSync.hostUrl}
+                  download="thehaus26-calendar.ics"
+                  className="booking-secondary"
+                  style={{ minHeight: "36px", padding: "0.35rem 0.85rem", fontSize: "0.8125rem", textDecoration: "none" }}
+                >
+                  Download .ICS
+                </a>
+              </div>
+            ) : (
+              <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+                Private calendar URL requires a dedicated token. Configure <code>BOOKING_CALENDAR_TOKEN</code> in your environment or run <code>npm run booking:setup</code> to generate one.
+              </p>
+            )}
           </div>
 
           {/* Public Channel Sync Link */}

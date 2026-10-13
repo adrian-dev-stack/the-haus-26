@@ -1737,16 +1737,9 @@ body:has(.admin-shell), body:has(.admin-app-root) { padding-bottom: 0; }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.cookie-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
+.cookie-popup-card::backdrop {
   background: rgba(27, 34, 27, 0.55);
   backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
   animation: fadeIn 200ms ease-out;
 }
 
@@ -1754,11 +1747,18 @@ body:has(.admin-shell), body:has(.admin-app-root) { padding-bottom: 0; }
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
   border-radius: 18px;
-  width: min(100%, 32rem);
+  width: min(calc(100% - 2rem), 32rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  margin: auto;
   padding: 2rem;
   box-shadow: 0 24px 54px rgba(27, 34, 27, 0.2);
   animation: popupSlide 250ms var(--ease-out);
-  position: relative;
+  color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-popup-card, .cookie-popup-card::backdrop { animation: none; }
 }
 
 .cookie-popup-header {

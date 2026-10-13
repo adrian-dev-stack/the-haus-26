@@ -20,7 +20,11 @@ export default function CookiePreferenceButton() {
       readConsent();
     }
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    window.addEventListener("haus26:cookie-notice-updated", onStorage);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("haus26:cookie-notice-updated", onStorage);
+    };
   }, []);
 
   function handleReopen() {
@@ -56,12 +60,11 @@ export default function CookiePreferenceButton() {
               fontWeight: 600,
             }}
           >
-            Your Current Browser Preference
+            Essential Site Storage
           </span>
           <p style={{ margin: "0.35rem 0 0", fontSize: "0.9375rem", fontWeight: 500 }}>
-            {consent === "allowed" && "✓ Cookies Allowed (Full experience & secure PayMongo session storage)"}
-            {consent === "essential_only" && "✓ Essential Storage Only (Non-essential cookies disabled)"}
-            {consent === "not_set" && "Not yet chosen (Standard essential storage)"}
+            {(consent === "allowed" || consent === "essential_only") && "Storage notice acknowledged. This site uses essential storage only."}
+            {consent === "not_set" && "This site uses essential storage only. Notice not yet acknowledged."}
             {consent === null && "Checking browser storage..."}
           </p>
         </div>
@@ -71,7 +74,7 @@ export default function CookiePreferenceButton() {
           className="button-primary"
           style={{ minHeight: "42px", padding: "0.5rem 1.15rem", fontSize: "0.875rem" }}
         >
-          Change Cookie Choice
+          View storage notice
         </button>
       </div>
     </div>

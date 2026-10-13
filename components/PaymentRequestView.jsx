@@ -69,11 +69,19 @@ export default function PaymentRequestView({ payment, token, returned = false, b
           <div className="payment-total"><dt>50% deposit{paid ? " paid" : ""}</dt><dd>{pesos(request.depositAmount)}</dd></div>
           <div><dt>Remaining balance{status === "refunded" ? " before adjustments" : ""}</dt><dd>{pesos(request.totalAmount - request.depositAmount)}</dd></div>
         </dl>
+        <div style={{ marginTop: "1.25rem", padding: "1rem", borderRadius: "10px", border: "1px solid var(--color-line)", background: "var(--color-surface-elevated)" }}>
+          <strong style={{ display: "block", marginBottom: "0.35rem", fontSize: "0.875rem", color: "var(--color-ink)" }}>
+            Cancellation & Rescheduling Policy
+          </strong>
+          <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--color-muted)", lineHeight: 1.55 }}>
+            {booking?.terms || property.bookingTerms || "A 50% deposit confirms and holds your stay dates. The remaining 50% balance is payable upon arrival. To cancel or reschedule, please inform the host at least 7 days before your check-in date. Cancellations and refunds require host review."}
+          </p>
+        </div>
         {pending && (
-          <form action="/api/payments/continue" method="post" className="payment-action">
+          <form action="/api/payments/continue" method="post" className="payment-action" style={{ marginTop: "1rem" }}>
             <input type="hidden" name="token" value={token} />
             <button type="submit" className="button-primary">{test ? "Open test checkout" : `Pay ${pesos(request.depositAmount)} deposit`}</button>
-            <p>You’ll continue to PayMongo to choose a payment method. Please agree cancellation and rescheduling terms with the host before paying.</p>
+            <p>You will continue to PayMongo to complete your deposit via GCash or Card. By paying, you agree to the stay details and cancellation terms above.</p>
           </form>
         )}
         {returned && pending && <a href={`/pay/${token}`} className="text-link">Check payment status again</a>}

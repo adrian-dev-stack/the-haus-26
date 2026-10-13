@@ -6,7 +6,19 @@ import { property } from "@/lib/property";
 
 export const metadata = {
   title: "Book your stay",
-  description: "Choose your date and book a private 22-hour stay. Instant confirmation with a 50% deposit.",
+  description: "Choose your stay dates and group size. Review your approved quote and host's terms before paying a 50% booking deposit.",
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/book" },
+  openGraph: {
+    title: "Book your stay | The HauS 26",
+    description: "Choose your stay dates and group size. Review your approved quote and host's terms before paying a 50% booking deposit.",
+    url: "/book",
+  },
+  twitter: {
+    card: "summary",
+    title: "Book your stay | The HauS 26",
+    description: "Choose your stay dates and group size. Review your approved quote and host's terms before paying a 50% booking deposit.",
+  },
 };
 
 export default function BookPage() {
@@ -16,7 +28,7 @@ export default function BookPage() {
         <p className="section-label">Exclusive Staycation</p>
         <h1>Plan Your Private Stay.</h1>
         <p>
-          Select your preferred stay dates and group size. Your reservation is held automatically for 30 minutes while you complete your 50% deposit via GCash or Card.
+          Select your stay dates and group size, then send your request. Dates are held for 30 minutes only after your booking is approved for a deposit. Review your quote and the host's terms before paying.
         </p>
         <Link href="/" className="text-link">
           ← Back to villa overview & rates
@@ -37,6 +49,8 @@ export default function BookPage() {
             headingLevel={2}
             checkIn={property.checkIn}
             checkOut={property.checkOut}
+            maxGuests={property.maxGuests}
+            bookingTerms={property.bookingTerms}
           />
         </div>
       </div>

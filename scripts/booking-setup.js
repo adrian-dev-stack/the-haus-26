@@ -20,7 +20,7 @@ function setValue(name, value) {
   else contents += `\n${name}=${value}\n`;
 }
 
-for (const name of ["BOOKING_SESSION_SECRET", "BOOKING_TOKEN_SECRET", "CRON_SECRET"]) {
+for (const name of ["BOOKING_SESSION_SECRET", "BOOKING_TOKEN_SECRET", "CRON_SECRET", "BOOKING_CALENDAR_TOKEN"]) {
   if (!configured(name)) setValue(name, randomBytes(32).toString("hex"));
 }
 let password;

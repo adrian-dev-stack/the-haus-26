@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto";
 import { getCalendarEvents } from "@/lib/bookings";
 import { generateIcalFeed } from "@/lib/booking-ical";
-import { getAdminSession, verifyAdminPassword } from "@/lib/booking-auth";
+import { getAdminSession } from "@/lib/booking-auth";
+import { verifyCalendarToken } from "@/lib/booking-calendar-auth";
+import { BookingHttpError, bookingFailure, limitBookingRequest } from "@/lib/booking-http";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,42 +11,22 @@ export const dynamic = "force-dynamic";
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const key = searchParams.get("key") || "";
-
     let isHost = false;
-
-    // Check host key authorization
-    if (key) {
-      const validSecrets = [
-        process.env.BOOKING_SESSION_SECRET,
-        process.env.CRON_SECRET,
-        process.env.BOOKING_TOKEN_SECRET,
-        process.env.PAYMENT_LINK_SECRET,
-      ].filter(Boolean);
-
-      if (validSecrets.includes(key)) {
-        isHost = true;
-      } else {
-        try {
-          if (await verifyAdminPassword(key)) {
-            isHost = true;
-          }
-        } catch {}
+    if (searchParams.has("key")) {
+      const keys = searchParams.getAll("key");
+      if (keys.length !== 1 || !verifyCalendarToken(keys[0])) {
+        await limitBookingRequest(request, "calendar-auth", 10);
+        throw new BookingHttpError("invalid-calendar-key", "Calendar authorization is invalid.", 401);
       }
-    }
-
-    // Also check active admin cookie session if accessing from browser
-    if (!isHost) {
-      try {
-        const session = await getAdminSession();
-        if (session) isHost = true;
-      } catch {}
+      isHost = true;
+    } else {
+      try { isHost = Boolean(await getAdminSession()); } catch {}
     }
 
     const { bookings, blockedDates } = await getCalendarEvents({ isHost });
     const icsContent = generateIcalFeed({ bookings, blockedDates, isHost });
     const etag = `"${createHash("sha256").update(icsContent).digest("hex").slice(0, 32)}"`;
-    const cacheControl = isHost ? "private, no-cache, max-age=0, must-revalidate" : "public, max-age=300, stale-while-revalidate=600";
+    const cacheControl = isHost ? "private, no-store, max-age=0" : "public, max-age=300, stale-while-revalidate=600";
 
     const ifNoneMatch = request.headers.get("if-none-match");
     if (ifNoneMatch && ifNoneMatch === etag) {
@@ -69,9 +51,6 @@ export async function GET(request) {
       },
     });
   } catch (error) {
-    return new Response(`Failed to generate calendar: ${error?.message || "Internal error"}`, {
-      status: 500,
-      headers: { "Content-Type": "text/plain" },
-    });
+    return bookingFailure(error);
   }
 }

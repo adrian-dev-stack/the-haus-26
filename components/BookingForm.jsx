@@ -60,7 +60,7 @@ function estimateRate(guests, days = 1) {
   };
 }
 
-export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
+export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms, headingLevel = 3 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const prefix = useId();
   const requestId = useRef(null);
@@ -80,6 +80,7 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
   const [copyMessage, setCopyMessage] = useState("");
   const [livemode, setLivemode] = useState(null);
   const rate = estimateRate(guests, days);
+  const instantBookingReady = Number.isSafeInteger(maxGuests) && maxGuests > 0 && Boolean(bookingTerms?.trim());
 
   useEffect(() => {
     setToday(calculateCheckoutDate(todayInManila(), 1));
@@ -135,6 +136,10 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
       setError("Same-day bookings cannot be accommodated. Please choose tomorrow or a future date to give our housekeeper time to ready the property.");
       return;
     }
+    if (maxGuests && Number(guests) > maxGuests) {
+      setError(`Maximum capacity for this villa is ${maxGuests} guests. Please contact the host for larger groups.`);
+      return;
+    }
     const form = new FormData(event.currentTarget);
     setPending(true);
     requestLocked.current = true;
@@ -187,7 +192,7 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
     const stayDays = submitted.booking?.days || 1;
     return (
       <div className="booking-panel booking-success" role="status">
-        <p className="section-label">Date Held · {submitted.booking.reference}</p>
+        <p className="section-label">{submitted.booking.status === "awaiting_payment" ? "Date Held" : "Request Received"} · {submitted.booking.reference}</p>
         <Heading ref={successHeading} tabIndex={-1}>{submitted.booking.status === "awaiting_payment" ? "Your dates are held." : "Your booking request is saved."}</Heading>
         <p>
           {submitted.booking.status === "awaiting_payment"
@@ -209,7 +214,10 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
   return (
     <div className="booking-panel">
       <div className="booking-form-heading">
-        <div><Heading>Reserve your stay</Heading><p>Instant booking with 30-minute hold for deposit.</p></div>
+        <div>
+          <Heading>Reserve your stay</Heading>
+          <p>{instantBookingReady ? "Instant booking with 30-minute hold for deposit." : "Submit your request for host review and quote confirmation."}</p>
+        </div>
         <div className="booking-estimate">
           <span>Total (50% Deposit)</span>
           <strong aria-live="polite">
@@ -253,7 +261,11 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
                       {formatDisplayDate(checkoutDate || calculateCheckoutDate(date, days))}
                     </strong>
                     <span className="text-xs text-muted block mt-0.5">
-                      {pendingCheckout ? "Select 2nd date on calendar (or 9:00 AM next day)" : (checkOut || "9:00 AM")}
+                      {pendingCheckout
+                        ? "Select check-out date on calendar (or default 9:00 AM next day)"
+                        : Number(days) === 1
+                        ? "9:00 AM next day (22-hour stay)"
+                        : `9:00 AM on departure day (${Number(days) * 24 - 2}-hour stay)`}
                     </span>
                   </div>
                 </div>
@@ -269,7 +281,41 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
             )}
           </div>
 
-          <div className="booking-field booking-wide"><label htmlFor={`${prefix}-guests`}>Number of guests</label><div className="booking-guest-count"><input id={`${prefix}-guests`} type="number" name="guests" min="1" step="1" required value={guests} onChange={(event) => setGuests(event.target.value)} /><div role="group" aria-label="Quick guest counts">{[4, 6, 8, 10].map((count) => <button key={count} type="button" className="booking-secondary" aria-pressed={Number(guests) === count} onClick={() => setGuests(String(count))}>{count}</button>)}</div></div><p>Covers private stay for your group. Dates are held for 30 minutes upon reservation for deposit payment.</p></div>
+          <div className="booking-field booking-wide">
+            <label htmlFor={`${prefix}-guests`}>Number of guests</label>
+            <div className="booking-guest-count">
+              <input
+                id={`${prefix}-guests`}
+                type="number"
+                name="guests"
+                min="1"
+                max={maxGuests || undefined}
+                step="1"
+                required
+                value={guests}
+                onChange={(event) => setGuests(event.target.value)}
+              />
+              <div role="group" aria-label="Quick guest counts">
+                {[4, 6, 8, 10].filter((count) => !maxGuests || count <= maxGuests).map((count) => (
+                  <button
+                    key={count}
+                    type="button"
+                    className="booking-secondary"
+                    aria-pressed={Number(guests) === count}
+                    onClick={() => setGuests(String(count))}
+                  >
+                    {count}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p>
+              {maxGuests ? `Property capacity: up to ${maxGuests} guests.` : "Covers private stay for your group."}{" "}
+              {instantBookingReady
+                ? "Submitting starts a 30-minute hold for deposit payment."
+                : "Dates are held only after approval by host."}
+            </p>
+          </div>
           <div className="booking-field booking-wide"><label htmlFor={`${prefix}-name`}>Your full name</label><input id={`${prefix}-name`} name="name" required minLength={2} maxLength={100} autoComplete="name" placeholder="Your full name" /></div>
           <div className="booking-field"><label htmlFor={`${prefix}-email`}>Email address</label><input id={`${prefix}-email`} name="email" type="email" required maxLength={254} autoComplete="email" placeholder="you@example.com" /></div>
           <div className="booking-field"><label htmlFor={`${prefix}-phone`}>Mobile number</label><input id={`${prefix}-phone`} name="phone" type="tel" required maxLength={30} autoComplete="tel" placeholder="09… or +63…" /></div>
@@ -280,7 +326,11 @@ export default function BookingForm({ checkIn, checkOut, headingLevel = 3 }) {
         {error && <p className="booking-error" role="alert">{error}</p>}
         {uncertain && <p className="booking-form-note">Your original details are kept on this page for a safe retry. Please keep the page open until your request is checked.</p>}
         <button className="button-primary booking-submit" type="submit" disabled={pending}>{pending ? "Sending your request…" : uncertain ? "Retry my original request" : "Request to book"}</button>
-        <p className="booking-form-note">A request holds your date for 30 minutes. Complete the 50% deposit via PayMongo (GCash / Card) to lock in your reservation.</p>
+        <p className="booking-form-note">
+          {instantBookingReady
+            ? "Submitting your request starts a 30-minute hold. Complete the 50% deposit via PayMongo (GCash / Card) to lock in your reservation."
+            : "Selecting dates or submitting does not reserve them. Your host confirms group capacity and quote before holding the date."}
+        </p>
       </form>
     </div>
   );
