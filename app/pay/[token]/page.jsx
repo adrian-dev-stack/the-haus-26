@@ -3,6 +3,7 @@ import PaymentRequestView, { PaymentUnavailable } from "@/components/PaymentRequ
 import { getPaymentConfig, retrievePaymentRequest } from "@/lib/payments";
 import { limitPaymentRead } from "@/lib/booking-http";
 import { syncBookingFromPayment } from "@/lib/bookings";
+import { runBookingNotifications } from "@/lib/booking-notifications";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,16 @@ export default async function BookingPaymentPage({ params, searchParams }) {
   let booking;
   try { await limitPaymentRead(); payment = await retrievePaymentRequest(token, getPaymentConfig()); }
   catch (error) { failure = error.code || "provider-unavailable"; }
-  if (payment) { try { const synced = await syncBookingFromPayment(payment); bookingUrl = synced?.guestUrl; if (synced) booking = { days: synced.days, endDate: synced.endDate }; } catch {} }
+  if (payment) {
+    try {
+      const synced = await syncBookingFromPayment(payment);
+      bookingUrl = synced?.guestUrl;
+      if (synced) booking = { days: synced.days, endDate: synced.endDate };
+      if (payment.status === "paid") {
+        await runBookingNotifications({ bookingId: synced?.id, siteUrl: getPaymentConfig().siteUrl }).catch(() => {});
+      }
+    } catch {}
+  }
   return (
     <PaymentLayout>
       {payment
