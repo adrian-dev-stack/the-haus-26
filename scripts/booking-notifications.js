@@ -52,6 +52,13 @@ try {
   } else throw new Error("Use preview, status or test.");
 } catch (error) {
   console.error(error?.message || "Notification command failed.");
+  if (error?.code === "provider-rejected") {
+    if (values?.channel === "sms") {
+      console.error("Tip: Check your UniSMS dashboard (unismsapi.com/dashboard) to verify SMS credits and Sender ID approval.");
+    } else if (values?.channel === "email") {
+      console.error("Tip: Check your Resend dashboard (resend.com) to verify your API key and sender domain restrictions.");
+    }
+  }
   if (error?.ambiguous) console.error("The provider may have accepted this message. Check its dashboard before another send.");
   process.exitCode = 1;
 }

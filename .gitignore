@@ -5,3 +5,4 @@ node_modules
 .payment-requests/
 .booking-data/
 .ua
+.test-sms-email
