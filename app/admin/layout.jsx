@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { property } from "@/lib/property";
+import "./operations.css";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Host Dashboard | The HauS 26", robots: { index: false, follow: false, noarchive: true } };

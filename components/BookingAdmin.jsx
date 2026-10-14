@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import AdminExpenses from "./AdminExpenses";
+import AdminInventory from "./AdminInventory";
+import AdminFinancialSummary from "./AdminFinancialSummary";
 
 const STATUS_LABELS = {
   requested: "New Request",
@@ -889,6 +892,7 @@ function AdminSyncPanel({ calendarSync, onUnauthorized }) {
 export default function BookingAdmin() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("reservations");
+  const [operationsRefreshKey, setOperationsRefreshKey] = useState(0);
   const [status, setStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -1006,7 +1010,7 @@ export default function BookingAdmin() {
           <span className="section-label">Executive Host Dashboard</span>
           <h1 className="admin-dash-title">Host Command Center</h1>
           <p className="admin-dash-subtitle">
-            Track reservation inquiries, review quotes, verify PayMongo deposits, and manage blackout dates.
+            Manage reservations, payments, property expenses, inventory, and blackout dates.
           </p>
         </div>
         <div className="admin-dash-actions">
@@ -1014,7 +1018,10 @@ export default function BookingAdmin() {
             type="button"
             className="booking-secondary"
             disabled={loading}
-            onClick={() => load()}
+            onClick={() => {
+              setOperationsRefreshKey((current) => current + 1);
+              load();
+            }}
             style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem" }}
           >
             <span>↻</span>
@@ -1154,6 +1161,22 @@ export default function BookingAdmin() {
           onClick={() => setActiveTab("financials")}
         >
           <span>Financial Summary</span>
+        </button>
+        <button
+          type="button"
+          className={`admin-tab-btn ${activeTab === "expenses" ? "is-active" : ""}`}
+          aria-pressed={activeTab === "expenses"}
+          onClick={() => setActiveTab("expenses")}
+        >
+          Expenses
+        </button>
+        <button
+          type="button"
+          className={`admin-tab-btn ${activeTab === "inventory" ? "is-active" : ""}`}
+          aria-pressed={activeTab === "inventory"}
+          onClick={() => setActiveTab("inventory")}
+        >
+          Inventory
         </button>
         <button
           type="button"
@@ -1321,61 +1344,20 @@ export default function BookingAdmin() {
       )}
 
       {activeTab === "financials" && (
-        <div className="admin-overview-grid">
-          <div className="admin-overview-panel">
-            <h3>Revenue Snapshot</h3>
-            <p style={{ margin: "0 0 1.25rem", color: "var(--color-muted)", fontSize: "0.875rem" }}>
-              Summary of all confirmed reservations and collected receipts.
-            </p>
-            <dl className="admin-meta-list">
-              <div className="admin-meta-row">
-                <dt>Gross Confirmed Stays</dt>
-                <dd style={{ fontSize: "1.125rem", color: "var(--color-ink)" }}>{money(summary.confirmedRevenue)}</dd>
-              </div>
-              <div className="admin-meta-row">
-                <dt>50% Online Deposits Collected (PayMongo)</dt>
-                <dd style={{ color: "#2e7d32" }}>{money(summary.collectedDeposits)}</dd>
-              </div>
-              <div className="admin-meta-row">
-                <dt>On-Site Balances Recorded Paid</dt>
-                <dd style={{ color: "#2e7d32" }}>{money(summary.collectedBalances)}</dd>
-              </div>
-              <div className="admin-meta-row">
-                <dt>Remaining Outstanding Balances on Arrival</dt>
-                <dd style={{ color: "#b76e00" }}>{money(summary.confirmedRevenue - summary.collectedDeposits - summary.collectedBalances)}</dd>
-              </div>
-            </dl>
-          </div>
+        <AdminFinancialSummary
+          fallbackSummary={summary}
+          onUnauthorized={unauthorized}
+          refreshKey={operationsRefreshKey}
+          onNavigateTab={setActiveTab}
+        />
+      )}
 
-          <div className="admin-overview-panel">
-            <h3>Reservation Volume Breakdown</h3>
-            <p style={{ margin: "0 0 1.25rem", color: "var(--color-muted)", fontSize: "0.875rem" }}>
-              Total reservation lifecycle count across all inquiries.
-            </p>
-            <dl className="admin-meta-list">
-              <div className="admin-meta-row">
-                <dt>All-Time Inquiries</dt>
-                <dd>{summary.total}</dd>
-              </div>
-              <div className="admin-meta-row">
-                <dt>Confirmed Stays</dt>
-                <dd>{summary.confirmed}</dd>
-              </div>
-              <div className="admin-meta-row">
-                <dt>Pending Approval (Quotes Needed)</dt>
-                <dd>{summary.requested}</dd>
-              </div>
-              <div className="admin-meta-row">
-                <dt>Pending Guest Deposit</dt>
-                <dd>{summary.awaitingPayment}</dd>
-              </div>
-              <div className="admin-meta-row">
-                <dt>Cancelled / Expired</dt>
-                <dd>{summary.cancelled}</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
+      {activeTab === "expenses" && (
+        <AdminExpenses onUnauthorized={unauthorized} refreshKey={operationsRefreshKey} />
+      )}
+
+      {activeTab === "inventory" && (
+        <AdminInventory onUnauthorized={unauthorized} refreshKey={operationsRefreshKey} />
       )}
 
       {activeTab === "sync" && (

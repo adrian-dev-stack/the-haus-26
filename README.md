@@ -16,4 +16,6 @@ Guest requests and the private host dashboard are documented in [BOOKINGS.md](BO
 
 Optional guest email/SMS confirmations and host email alerts use Resend and UniSMS. Follow [NOTIFICATIONS.md](NOTIFICATIONS.md) to test with your own inbox and phone before enabling guest delivery. Notifications are disabled by default.
 
+The host dashboard also tracks monthly expenses, including water and electricity bills, and inventory for supplies and reusable items. See [OPERATIONS.md](OPERATIONS.md) for entry, stock adjustments, and history.
+
 The home page uses adapted React Bits FadeContent and SpotlightCard components. Source and license notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
