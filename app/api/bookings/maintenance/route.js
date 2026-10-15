@@ -22,7 +22,10 @@ export async function GET(request) {
       }
 
       const { searchParams } = new URL(request.url);
-      if (searchParams.get("key") === secret) {
+      const queryKey = searchParams.get("key") || "";
+      const expectedKey = Buffer.from(secret);
+      const receivedKey = Buffer.from(queryKey);
+      if (expectedKey.length === receivedKey.length && timingSafeEqual(expectedKey, receivedKey)) {
         authorized = true;
       }
     }

@@ -1,5 +1,5 @@
 import { confirmBooking, refreshBookingPayment, cancelBooking, markBalancePaid, refundAndCancelBooking, getAdminBooking } from "@/lib/bookings";
-import { parsePesoAmount } from "@/scripts/payment-request";
+import { parsePesoAmount } from "@/lib/payments";
 import { property } from "@/lib/property";
 import { BookingHttpError, bookingResponse, bookingFailure, requireBookingAdmin, requireBookingOrigin, readBookingBody, limitBookingRequest } from "@/lib/booking-http";
 

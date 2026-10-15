@@ -31,7 +31,6 @@ export async function POST(request) {
     const booking = await getBookingByPaymentReference(checkout.attributes?.reference_number);
     if (!booking) return bookingResponse({ received: true, ignored: true });
     client = await getBookingStore();
-    await client.execute("CREATE TABLE IF NOT EXISTS booking_webhook_events (event_id TEXT PRIMARY KEY, processed_at INTEGER, lease_until INTEGER NOT NULL)");
     eventKey = `${config.livemode ? "live" : "test"}:${event.id}`;
     const now = Date.now();
     const claim = await client.execute({ sql: "INSERT INTO booking_webhook_events (event_id,processed_at,lease_until) VALUES (?,NULL,?) ON CONFLICT(event_id) DO UPDATE SET lease_until=excluded.lease_until WHERE booking_webhook_events.processed_at IS NULL AND booking_webhook_events.lease_until<=? RETURNING event_id",

@@ -11,20 +11,13 @@ import {
   getPaymentConfig,
   retrievePaymentRequest,
   validateQuote,
+  parsePesoAmount,
 } from "../lib/payments.js";
 
 const PROJECT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SAFE_RETRY_WINDOW = 23 * 60 * 60 * 1000;
 
-export function parsePesoAmount(value) {
-  if (typeof value !== "string" || !/^\d+(?:\.\d{1,2})?$/.test(value)) {
-    throw new PaymentError("invalid-request", "Enter --total in pesos, for example 5000 or 5000.50.");
-  }
-  const [whole, fraction = ""] = value.split(".");
-  const amount = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
-  if (!Number.isSafeInteger(amount)) throw new PaymentError("invalid-request", "The booking total is too large.");
-  return amount;
-}
+export { parsePesoAmount };
 
 async function saveRecord(filename, record) {
   const temporary = `${filename}.${randomUUID()}.tmp`;
