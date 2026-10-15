@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPaymentConfig, retrievePaymentRequest } from "@/lib/payments";
-import { limitBookingRequest } from "@/lib/booking-http";
+import { limitBookingRequest, requireBookingOrigin } from "@/lib/booking-http";
 import { syncBookingFromPayment } from "@/lib/bookings";
 
 export const runtime = "nodejs";
@@ -16,7 +16,9 @@ export async function POST(request) {
   let config;
   try { config = getPaymentConfig(); }
   catch { return failure("Online checkout is unavailable. Please contact the host.", 503); }
-  if (request.headers.get("origin") !== config.siteUrl) {
+  try {
+    requireBookingOrigin(request);
+  } catch {
     return failure("Please open your original payment link to continue.", 403);
   }
   if (!request.headers.get("content-type")?.startsWith("application/x-www-form-urlencoded")) {
