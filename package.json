@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/verify-property.js && node --expose-gc --test scripts/payments.test.js scripts/booking-auth.test.js scripts/bookings.test.js scripts/booking-calendar-auth.test.js scripts/booking-webhook.test.js scripts/booking-ical.test.js scripts/notification-providers.test.js scripts/booking-notifications.test.js scripts/admin-operations.test.js",
+    "test": "node scripts/verify-property.js && node --expose-gc --test scripts/anti-inspect.test.js scripts/payments.test.js scripts/booking-auth.test.js scripts/bookings.test.js scripts/booking-calendar-auth.test.js scripts/booking-webhook.test.js scripts/booking-ical.test.js scripts/notification-providers.test.js scripts/booking-notifications.test.js scripts/admin-operations.test.js",
     "test:operations:browser": "node --expose-gc scripts/admin-operations.browser.js",
     "test:home:browser": "node --expose-gc scripts/home-background.browser.js",
     "payment:request": "node scripts/payment-request.js",

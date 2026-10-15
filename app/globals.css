@@ -790,9 +790,33 @@ h2 {
 
 .faq-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.25rem;
   margin-top: 2rem;
+}
+
+@media (min-width: 640px) {
+  .faq-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .faq-card:nth-child(5) {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .faq-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .faq-card:nth-child(1),
+  .faq-card:nth-child(2),
+  .faq-card:nth-child(3) {
+    grid-column: span 2;
+  }
+  .faq-card:nth-child(4),
+  .faq-card:nth-child(5) {
+    grid-column: span 3;
+  }
 }
 
 .faq-card {

@@ -3,6 +3,7 @@ import "./globals.css";
 import { property } from "@/lib/property";
 import JsonLd from "@/components/JsonLd";
 import CookieBanner from "@/components/CookieBanner";
+import AntiInspect from "@/components/AntiInspect";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
@@ -104,6 +105,7 @@ export default function RootLayout({ children }) {
         </a>
         {children}
         <CookieBanner />
+        <AntiInspect />
       </body>
     </html>
   );
