@@ -15,8 +15,10 @@ const links = [
 
 export default function Navbar({ name, rate }) {
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const menuId = useId();
   const menuButton = useRef(null);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     if (!open) return;
@@ -30,9 +32,48 @@ export default function Navbar({ name, rate }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
+  useEffect(() => {
+    const motionPref = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motionPref.matches) return;
+
+    let ticking = false;
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY || window.pageYOffset || 0;
+        const dy = y - lastScrollY.current;
+
+        if (open) {
+          setHidden(false);
+          lastScrollY.current = y;
+          ticking = false;
+          return;
+        }
+
+        if (y < 24) {
+          setHidden(false);
+        } else if (Math.abs(dy) > 2) {
+          const down = dy > 0;
+          setHidden(down && y > 60);
+        }
+
+        lastScrollY.current = y;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [open]);
+
   return (
     <>
-      <header className="site-nav">
+      <header
+        className={`site-nav ${hidden && !open ? "off" : ""}`}
+        onFocus={() => setHidden(false)}
+      >
         <nav aria-label="Main navigation" className="nav-inner">
           <Link href="/" className="nav-brand" onClick={() => setOpen(false)}>
             <div className="nav-brand-logo-frame">
