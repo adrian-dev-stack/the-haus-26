@@ -93,7 +93,9 @@ export default function Page() {
               <span>🌴</span>
               <span>Limay, Bataan · Private Pool Staycation</span>
             </div>
-            <h1 id="hero-title">Your Private Villa & Pool Escape in Bataan.</h1>
+            <h1 id="hero-title" className="hero-title-shine">
+              Your Private Villa & Pool Escape in Bataan.
+            </h1>
           </div>
           <HeroPhoto photo={p.photos[0]} />
           <div className="hero-copy">

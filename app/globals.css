@@ -325,6 +325,48 @@ section, #inquire { scroll-margin-top: 6.5rem; }
   text-wrap: balance;
 }
 
+/* Shine Sweep Typography Animation */
+.hero-title-shine,
+.shine-sweep {
+  --shine-ink: var(--color-ink, #1B221B);
+  --shine-accent-1: var(--color-gold, #C07F33);
+  --shine-accent-2: #F5D7A6;
+  background: linear-gradient(
+    105deg,
+    var(--shine-ink) 30%,
+    var(--shine-accent-1) 42%,
+    var(--shine-accent-2) 50%,
+    var(--shine-accent-1) 58%,
+    var(--shine-ink) 70%
+  );
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: shine-sweep 3.8s linear infinite;
+}
+
+@keyframes shine-sweep {
+  0% {
+    background-position: 130% 0;
+  }
+  70%, 100% {
+    background-position: -30% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title-shine,
+  .shine-sweep {
+    animation: none !important;
+    background: none !important;
+    color: var(--color-ink, #1B221B) !important;
+    -webkit-text-fill-color: var(--color-ink, #1B221B) !important;
+  }
+}
+
 .hero-intro {
   margin-top: 1.25rem;
   font-size: clamp(1.25rem, 2.8vw, 1.65rem);

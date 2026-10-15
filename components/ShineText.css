@@ -1,0 +1,80 @@
+/* Shine Sweep Animation
+ * Adapted from modern UI typography interaction for The HauS 26
+ */
+
+.shine-sweep {
+  --shine-ink: var(--color-ink, #1B221B);
+  --shine-mid: var(--color-gold, #C07F33);
+  --shine-highlight: #F5D7A6;
+  background: linear-gradient(
+    105deg,
+    var(--shine-ink) 30%,
+    var(--shine-mid) 42%,
+    var(--shine-highlight) 50%,
+    var(--shine-mid) 58%,
+    var(--shine-ink) 70%
+  );
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: shine-sweep 3.8s linear infinite;
+}
+
+/* Luxury Gold Theme (Default for HauS 26) */
+.shine-sweep--gold {
+  --shine-mid: #C07F33;
+  --shine-highlight: #F5D7A6;
+}
+
+/* Emerald Villa Theme */
+.shine-sweep--emerald {
+  --shine-mid: #2D6B44;
+  --shine-highlight: #6EC48F;
+}
+
+/* Radiant Lagoon (Emerald + Gold Sunbeam) */
+.shine-sweep--radiant {
+  background: linear-gradient(
+    105deg,
+    var(--shine-ink) 30%,
+    #255938 40%,
+    #C07F33 48%,
+    #F6DCA8 52%,
+    #255938 60%,
+    var(--shine-ink) 70%
+  );
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Snippet Theme (Faithful to original HTML snippet: Blue #0A6CFF / #4FA3FF) */
+.shine-sweep--snippet,
+.shine-sweep--blue {
+  --shine-mid: #4FA3FF;
+  --shine-highlight: #0A6CFF;
+}
+
+@keyframes shine-sweep {
+  0% {
+    background-position: 130% 0;
+  }
+  70%, 100% {
+    background-position: -30% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shine-sweep {
+    animation: none !important;
+    background: none !important;
+    color: var(--color-ink, #1B221B) !important;
+    -webkit-text-fill-color: var(--color-ink, #1B221B) !important;
+  }
+}
