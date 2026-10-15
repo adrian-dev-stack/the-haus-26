@@ -177,7 +177,18 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
       const paymentToken = result.data?.paymentToken || result.data?.booking?.paymentToken;
       setSubmitted({ booking: result.data.booking, guestUrl: path.pathname, paymentToken });
       if (paymentToken) {
-        window.location.assign(`/pay/${encodeURIComponent(paymentToken)}`);
+        // Direct one-step checkout: automatically advance straight to PayMongo payment
+        const formEl = document.createElement("form");
+        formEl.method = "POST";
+        formEl.action = "/api/payments/continue";
+        formEl.style.display = "none";
+        const tokenInput = document.createElement("input");
+        tokenInput.type = "hidden";
+        tokenInput.name = "token";
+        tokenInput.value = paymentToken;
+        formEl.appendChild(tokenInput);
+        document.body.appendChild(formEl);
+        formEl.submit();
       }
     } catch (failure) {
       if (submittedPayload.current) { setUncertain(true); requestLocked.current = true; }
@@ -201,11 +212,11 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
       <div className="booking-panel booking-success" role="status">
         <p className="section-label">{submitted.booking.status === "awaiting_payment" ? "Date Held" : "Request Received"} · {submitted.booking.reference}</p>
         <Heading ref={successHeading} tabIndex={-1}>
-          {activePaymentToken ? "Dates held! Redirecting to payment..." : submitted.booking.status === "awaiting_payment" ? "Your dates are held." : "Your booking request is saved."}
+          {activePaymentToken ? "Dates held! Opening checkout..." : submitted.booking.status === "awaiting_payment" ? "Your dates are held." : "Your booking request is saved."}
         </Heading>
         <p>
           {activePaymentToken
-            ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Redirecting to complete your 50% deposit...`
+            ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Opening secure PayMongo checkout...`
             : submitted.booking.status === "awaiting_payment"
             ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Complete your 50% deposit to lock in your reservation.`
             : `Open your private booking link to check the latest status for your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}).`}
@@ -213,7 +224,12 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
         {submitted.booking.status === "awaiting_payment" && !isApproved && <p className="booking-notice">Your quote is saved, but checkout is not ready. Open your booking details and contact the host before starting another request.</p>}
         {submitted.booking.livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
         <div className="booking-actions">
-          {activePaymentToken && <Link href={`/pay/${encodeURIComponent(activePaymentToken)}`} className="button-primary">Proceed to Pay 50% Deposit (GCash / Card)</Link>}
+          {activePaymentToken && (
+            <form action="/api/payments/continue" method="post" style={{ display: "inline" }}>
+              <input type="hidden" name="token" value={activePaymentToken} />
+              <button type="submit" className="button-primary">Proceed to Pay 50% Deposit (GCash / Card)</button>
+            </form>
+          )}
           <Link href={submitted.guestUrl} className={activePaymentToken ? "booking-secondary" : "button-primary"}>View booking details</Link>
           <button type="button" className="booking-secondary" onClick={copyLink}>Copy private link</button>
         </div>
@@ -396,7 +412,7 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
         </fieldset>
         {error && <p className="booking-error" role="alert">{error}</p>}
         {uncertain && <p className="booking-form-note">Your original details are kept on this page for a safe retry. Please keep the page open until your request is checked.</p>}
-        <button className="button-primary booking-submit" type="submit" disabled={pending}>{pending ? "Holding your dates..." : uncertain ? "Retry reservation" : "Reserve & Pay 50% Deposit"}</button>
+        <button className="button-primary booking-submit" type="submit" disabled={pending}>{pending ? "Holding dates & opening checkout..." : uncertain ? "Retry reservation" : "Reserve & Pay 50% Deposit"}</button>
         <p className="booking-form-note">
           {instantBookingReady
             ? "Available dates are held immediately for 30 minutes. You will proceed directly to secure 50% deposit payment via PayMongo (GCash, Maya, or Card)."
