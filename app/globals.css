@@ -101,22 +101,7 @@ section, #inquire { scroll-margin-top: 6.5rem; }
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--color-divider);
-  transition: transform 587ms linear(0, 0.0941 5.6%, 0.2736 11.1%, 0.4548 16.7%, 0.6076 22.2%, 0.7255 27.8%, 0.8119 33.3%, 0.8732 38.9%, 0.9156 44.4%, 0.9444 50.0%, 0.9636 55.6%, 0.9764 61.1%, 0.9848 66.7%, 0.9902 72.2%, 0.9938 77.8%, 0.9960 83.3%, 0.9975 88.9%, 0.9984 94.4%, 1 100%),
-              background-color 200ms ease,
-              border-color 200ms ease;
-  will-change: transform;
-}
-
-.site-nav.off {
-  transform: translateY(-110%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .site-nav,
-  .site-nav.off {
-    transform: none !important;
-    transition: none !important;
-  }
+  transition: all 200ms ease;
 }
 
 .nav-inner {
@@ -1921,14 +1906,14 @@ body:has(.admin-shell), body:has(.admin-app-root) { padding-bottom: 0; }
   .desktop-links a:hover { color: var(--color-accent); }
   .nav-book { display: inline-flex !important; }
   .menu-toggle, .mobile-menu, .mobile-booking-bar { display: none; }
-  .stay-hero { grid-template-columns: 1.05fr 1fr; grid-template-rows: auto auto; align-items: center; column-gap: 4.5rem; row-gap: 0; padding-top: 3.5rem; }
-  .hero-title-block { grid-column: 1; align-self: end; }
-  .hero-copy { grid-column: 1; grid-row: 2; align-self: start; }
-  .hero-photo { grid-column: 2; grid-row: 1 / 3; }
-  .hero-intro { margin-top: 1.75rem; }
-  .hero-actions { margin-top: 2.25rem; }
-  .hero-facts { margin-top: 2.75rem; }
-  .gallery-spread { margin-top: 6rem; }
+  .stay-hero { display: flex; flex-direction: column; max-width: 68rem; gap: 2rem; padding-top: 3.5rem; }
+  .hero-title-block { align-self: start; }
+  .hero-copy { align-self: start; width: 100%; }
+  .hero-intro { margin-top: 1.5rem; }
+  .hero-description { max-width: 64ch; }
+  .hero-actions { margin-top: 2rem; }
+  .hero-facts { margin-top: 2.5rem; }
+  .gallery-spread { margin-top: 4.5rem; }
   .amenities-section, .calendar-section, .reservation-section { grid-template-columns: .8fr 1.2fr; gap: 5rem; }
   .amenities-section { margin-top: 8rem; }
   .rates-section { margin-top: 7rem; }

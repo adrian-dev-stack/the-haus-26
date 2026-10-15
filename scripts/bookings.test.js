@@ -152,7 +152,7 @@ test("requests retain private contact only for admin and store only a hash of gu
     const admin = await getAdminBooking(booking.id, { client });
     assert.equal(admin.email, "guest@example.test");
     assert.equal(admin.guestUrl, `http://localhost:3000/book/${token}`);
-    await assert.rejects(getGuestBooking(`${token.slice(0, 20)}x${token.slice(21)}`, { client }), rejectCode("not-found"));
+    await assert.rejects(getGuestBooking(`${token.slice(0, 20)}${token[20] === "x" ? "y" : "x"}${token.slice(21)}`, { client }), rejectCode("not-found"));
     assert.deepEqual(await getUnavailableDates({ client, config }), [], "A request alone never holds a date");
   });
 });

@@ -1,0 +1,160 @@
+/* Photo Marquee Component Styles
+ * Adapted from UI photo marquee for The HauS 26
+ */
+
+.photo-marquee-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 0.75rem 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+}
+
+.photo-marquee-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.photo-marquee-row {
+  overflow: hidden;
+  padding: 4px 0;
+  width: 100%;
+}
+
+.photo-marquee-track {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  will-change: transform;
+  animation: photo-marquee-scroll 34s linear infinite;
+}
+
+.photo-marquee-track.is-reverse {
+  animation: photo-marquee-scroll-rev 38s linear infinite;
+}
+
+
+/* Individual Photo Card */
+.photo-marquee-card {
+  position: relative;
+  flex: none;
+  height: 220px;
+  width: 250px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--color-divider, #E4DCD2);
+  background: var(--color-surface, #FFFFFF);
+  box-shadow: 0 4px 16px -2px rgba(27, 34, 27, 0.08);
+  cursor: pointer;
+  appearance: none;
+  padding: 0;
+  text-align: left;
+  transition: transform 300ms var(--ease-out, cubic-bezier(.23, 1, .32, 1)),
+              box-shadow 300ms var(--ease-out, cubic-bezier(.23, 1, .32, 1));
+}
+
+@media (min-width: 640px) {
+  .photo-marquee-card {
+    height: 250px;
+    width: 280px;
+  }
+}
+
+.photo-marquee-card.is-wide {
+  width: 320px;
+}
+
+@media (min-width: 640px) {
+  .photo-marquee-card.is-wide {
+    width: 390px;
+  }
+}
+
+.photo-marquee-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 28px -4px rgba(27, 34, 27, 0.16);
+  z-index: 2;
+}
+
+.photo-marquee-card:focus-visible {
+  outline: 2px solid var(--color-accent, #1B452D);
+  outline-offset: 3px;
+  z-index: 3;
+}
+
+/* Photo card glassmorphic caption overlay */
+.photo-card-info {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 0.65rem 0.85rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(27, 34, 27, 0.82) 100%);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #FFFFFF;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  pointer-events: none;
+}
+
+.photo-card-expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.photo-marquee-card:hover .photo-card-expand {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Keyframes for seamless 50% loop */
+@keyframes photo-marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes photo-marquee-scroll-rev {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Reduced Motion fallback */
+@media (prefers-reduced-motion: reduce) {
+  .photo-marquee-container {
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    overflow-x: auto !important;
+  }
+  .photo-marquee-track {
+    animation: none !important;
+    width: max-content;
+  }
+  .photo-marquee-card:hover {
+    transform: none !important;
+  }
+}

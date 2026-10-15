@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { property as p } from "@/lib/property";
 import Navbar from "@/components/Navbar";
-import HeroPhoto from "@/components/HeroPhoto";
 import PhotoGallery from "@/components/PhotoGallery";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import BookingForm from "@/components/BookingForm";
@@ -97,7 +96,6 @@ export default function Page() {
               Your Private Villa & Pool Escape in Bataan.
             </h1>
           </div>
-          <HeroPhoto photo={p.photos[0]} />
           <div className="hero-copy">
             <p className="hero-intro">
               A house to yourselves. A private pool to dive into.

@@ -230,7 +230,8 @@ async function checkDesktop() {
       if (/THREE\.WebGLRenderer|THREE\.WebGLProgram|threejs\.org\/docs/.test(source || "")) threeChunks.add(chunk);
     }
     assert.ok(threeChunks.size, "The production browser must load a separate Three.js chunk.");
-    assert.ok((await page.locator(".hero-photo-frame").boundingBox()).width > 300, "The desktop hero must retain a large property photograph.");
+    const photoLocator = page.locator(".hero-photo-frame, .photo-marquee-card").first();
+    assert.ok((await photoLocator.boundingBox()).width > 200, "The desktop view must retain property photographs.");
     await noOverflow(page);
     await screenshot(page, "desktop");
     const pause = page.getByRole("button", { name: "Pause background", exact: true });

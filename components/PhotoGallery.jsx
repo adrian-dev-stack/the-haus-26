@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import PhotoMarquee from "./PhotoMarquee";
 
 function GalleryImage({ photo, fullSize = false }) {
   const [status, setStatus] = useState("loading");
@@ -133,31 +134,10 @@ export default function PhotoGallery({ photos = [] }) {
           House photos are not available here yet. Please contact Haus 26 to ask for recent photos.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3">
-          {galleryPhotos.map((photo, index) => (
-            <button
-              key={`${photo.src}-${index}`}
-              type="button"
-              onClick={(event) => openPhoto(index, event)}
-              className="group min-w-0 cursor-pointer text-left focus-visible:rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-              aria-label={`View photo ${index + 1} of ${photoCount}: ${photo.title || photo.alt || "Haus 26"}`}
-              aria-haspopup="dialog"
-            >
-              <span className="relative block aspect-[4/5] overflow-hidden rounded-2xl border border-divider/60 bg-surface shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1">
-                <GalleryImage photo={photo} />
-                <span className="absolute bottom-3 right-3 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-medium text-white opacity-0 backdrop-blur-md transition-opacity duration-200 group-hover:opacity-100">
-                  Expand
-                </span>
-              </span>
-              <span className="mt-3 flex min-h-11 items-start justify-between gap-2 text-sm font-semibold leading-relaxed text-ink transition-colors duration-150 group-hover:text-accent sm:text-base">
-                <span>{photo.title || photo.alt || `House photo ${index + 1}`}</span>
-                <svg aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />
-                </svg>
-              </span>
-            </button>
-          ))}
-        </div>
+        <PhotoMarquee
+          photos={galleryPhotos}
+          onPhotoClick={(index, event) => openPhoto(index, event)}
+        />
       )}
 
       <dialog
