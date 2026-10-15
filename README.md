@@ -19,3 +19,5 @@ Optional guest email/SMS confirmations and host email alerts use Resend and UniS
 The host dashboard also tracks monthly expenses, including water and electricity bills, and inventory for supplies and reusable items. See [OPERATIONS.md](OPERATIONS.md) for entry, stock adjustments, and history.
 
 The home page uses adapted React Bits FadeContent and SpotlightCard components. Source and license notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+The public homepage retains its large property photo, with a lazy-loaded animated Three.js water-light background behind the page. Its pause/play control is in the footer. Reduced motion, data saving, low-memory devices, forced colors, or unavailable WebGL use a static surface; rendering pauses in hidden tabs. After `npm run build`, run `npm run test:home:browser` to verify rendering, fallbacks, and desktop/mobile interactions in an isolated local server. Renderer and GPU resources follow the [Three.js cleanup guidance](https://threejs.org/manual/pages/cleanup.html).

@@ -10,6 +10,7 @@ import TierSelectButton from "@/components/TierSelectButton";
 import FadeContent from "@/components/react-bits/FadeContent";
 import SpotlightCard from "@/components/react-bits/SpotlightCard";
 import { getAmenityIcon } from "@/components/AmenityIcons";
+import WaterBackground from "@/components/WaterBackground";
 
 const rateTiers = [
   {
@@ -80,7 +81,8 @@ export default function Page() {
   const instantBookingReady = true;
 
   return (
-    <>
+    <div className="homepage">
+      <WaterBackground />
       <Navbar name={p.name} rate={p.rate} />
       <main id="main" className="site-shell">
         {/* Hero Section */}
@@ -522,6 +524,7 @@ export default function Page() {
               <Link className="text-muted hover:text-accent transition-colors" href="/payment">
                 Deposit & Booking Guide
               </Link>
+              <span id="homepage-background-controls" />
             </div>
             <a href="#main" className="back-to-top-btn">
               Back to top ↑
@@ -529,6 +532,6 @@ export default function Page() {
           </div>
         </footer>
       </main>
-    </>
+    </div>
   );
 }

@@ -64,6 +64,24 @@ button:not(:disabled), a, input, select, textarea { -webkit-tap-highlight-color:
 a, button { touch-action: manipulation; }
 :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
 button:disabled { cursor: not-allowed; }
+.homepage { position: relative; isolation: isolate; min-height: 100vh; }
+.home-water-background {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; contain: strict;
+  background: linear-gradient(125deg, #faf7f2 15%, #eef2ea 100%);
+}
+.home-water-background canvas { display: block; width: 100%; height: 100%; }
+.background-motion-toggle {
+  display: inline-flex; align-items: center; min-height: 44px; padding: .25rem 0;
+  border: 0; background: transparent; color: var(--color-muted); font-size: .75rem;
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-water-background canvas, .background-motion-toggle { display: none; }
+}
+@media (forced-colors: active) {
+  .home-water-background { background: Canvas; }
+  .home-water-background canvas, .background-motion-toggle { display: none; }
+}
 section, #inquire { scroll-margin-top: 6.5rem; }
 :where(main button, main a, main input, main select, main textarea, main summary, main [tabindex]) {
   scroll-margin-block: 1rem calc(6rem + env(safe-area-inset-bottom));
