@@ -1,6 +1,6 @@
 # Third-party notices
 
-FadeContent, SpotlightCard, MagneticButton, ShineText, and PhotoMarquee are adapted from React Bits by David Haz: https://github.com/DavidHDev/react-bits. Their original license is reproduced below. The local adaptations preserve visible server-rendered content, follow the HauS 26 palette, and respect reduced-motion and touch input.
+FadeContent, SpotlightCard, MagneticButton, ShineText, PhotoMarquee, and HideOnScrollDown are adapted from React Bits by David Haz: https://github.com/DavidHDev/react-bits. Their original license is reproduced below. The local adaptations preserve visible server-rendered content, follow the HauS 26 palette, and respect reduced-motion and touch input.
 
 MIT + Commons Clause License Condition v1.0
 

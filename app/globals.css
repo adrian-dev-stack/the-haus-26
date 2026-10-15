@@ -101,7 +101,13 @@ section, #inquire { scroll-margin-top: 6.5rem; }
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--color-divider);
-  transition: all 200ms ease;
+  transition: transform 587ms linear(0, 0.0941 5.6%, 0.2736 11.1%, 0.4548 16.7%, 0.6076 22.2%, 0.7255 27.8%, 0.8119 33.3%, 0.8732 38.9%, 0.9156 44.4%, 0.9444 50.0%, 0.9636 55.6%, 0.9764 61.1%, 0.9848 66.7%, 0.9902 72.2%, 0.9938 77.8%, 0.9960 83.3%, 0.9975 88.9%, 0.9984 94.4%, 1 100%),
+              background 200ms ease;
+  will-change: transform;
+}
+
+.site-nav.off {
+  transform: translateY(-110%);
 }
 
 .nav-inner {
@@ -1460,6 +1466,12 @@ h2 {
   border-top: 1px solid var(--color-divider);
   padding: .85rem 1.25rem calc(.85rem + env(safe-area-inset-bottom));
   box-shadow: 0 -4px 16px rgba(27, 34, 27, 0.05);
+  transition: transform 587ms linear(0, 0.0941 5.6%, 0.2736 11.1%, 0.4548 16.7%, 0.6076 22.2%, 0.7255 27.8%, 0.8119 33.3%, 0.8732 38.9%, 0.9156 44.4%, 0.9444 50.0%, 0.9636 55.6%, 0.9764 61.1%, 0.9848 66.7%, 0.9902 72.2%, 0.9938 77.8%, 0.9960 83.3%, 0.9975 88.9%, 0.9984 94.4%, 1 100%);
+  will-change: transform;
+}
+
+.mobile-booking-bar.off {
+  transform: translateY(120%);
 }
 
 .mobile-booking-bar > div {
@@ -1935,6 +1947,7 @@ body:has(.admin-shell), body:has(.admin-app-root) { padding-bottom: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .site-nav, .site-nav.off, .mobile-booking-bar, .mobile-booking-bar.off { transform: none !important; }
   .hero-photo-frame:hover .hero-image, .button-primary:active { transform: none; }
   .bits-fade { opacity: 1 !important; transform: none !important; }
 }

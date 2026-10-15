@@ -15,8 +15,28 @@ const links = [
 
 export default function Navbar({ name, rate }) {
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const menuId = useId();
   const menuButton = useRef(null);
+
+  useEffect(() => {
+    let last = typeof window !== "undefined" ? window.scrollY : 0;
+    function onScroll() {
+      if (open) return;
+      const y = window.scrollY;
+      const dy = y - last;
+      if (Math.abs(dy) > 1.5) {
+        const down = dy > 0;
+        setHidden(down && y > 36);
+        last = y;
+      }
+      if (y < 20) {
+        setHidden(false);
+      }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -32,7 +52,7 @@ export default function Navbar({ name, rate }) {
 
   return (
     <>
-      <header className="site-nav">
+      <header className={`site-nav ${hidden ? "off" : ""}`}>
         <nav aria-label="Main navigation" className="nav-inner">
           <Link href="/" className="nav-brand" onClick={() => setOpen(false)}>
             <div className="nav-brand-logo-frame">
@@ -81,7 +101,7 @@ export default function Navbar({ name, rate }) {
           </div>
         )}
       </header>
-      <div className="mobile-booking-bar" aria-label="Booking shortcut">
+      <div className={`mobile-booking-bar ${hidden ? "off" : ""}`} aria-label="Booking shortcut">
         <div>
           <span>{rate || "From ₱5,000"}</span>
           <small>22-hour private stay</small>
