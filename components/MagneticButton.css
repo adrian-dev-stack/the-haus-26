@@ -1,0 +1,175 @@
+/* Magnetic Button Component Styles
+ * Adapted from magnetic physics spring demo for The HauS 26
+ */
+
+.magnetic-zone {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  touch-action: manipulation;
+}
+
+/* Invisible magnetic capture perimeter around the button */
+.magnetic-zone::before {
+  content: "";
+  position: absolute;
+  inset: -16px;
+  border-radius: 9999px;
+  pointer-events: auto;
+  z-index: 0;
+}
+
+.magnetic-btn {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.85rem;
+  border-radius: 9999px;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  appearance: none;
+  border: none;
+  will-change: transform;
+  transform: translate(0, 0);
+  user-select: none;
+  -webkit-user-select: none;
+  text-align: center;
+  box-sizing: border-box;
+  transition: box-shadow 220ms var(--ease-out, cubic-bezier(.23, 1, .32, 1)),
+              background 220ms var(--ease-out, cubic-bezier(.23, 1, .32, 1)),
+              color 220ms var(--ease-out, cubic-bezier(.23, 1, .32, 1)),
+              border-color 220ms var(--ease-out, cubic-bezier(.23, 1, .32, 1));
+}
+
+.magnetic-btn-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  will-change: transform;
+  transform: translate(0, 0);
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.magnetic-btn:active .magnetic-btn-label {
+  opacity: 0.88;
+}
+
+/* HauS 26 Theme - Deep Luxury Emerald / Gold accent */
+.magnetic-btn--primary {
+  background: linear-gradient(135deg, #1B452D 0%, #26593B 100%);
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 16px rgba(27, 69, 45, 0.28), 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.magnetic-btn--primary:hover {
+  background: linear-gradient(135deg, #143823 0%, #204C33 100%);
+  box-shadow: 0 8px 26px rgba(27, 69, 45, 0.38), 0 2px 6px rgba(0, 0, 0, 0.12);
+  color: #FFFFFF !important;
+}
+
+.magnetic-btn--primary:active {
+  box-shadow: 0 2px 8px rgba(27, 69, 45, 0.22);
+}
+
+.magnetic-btn:focus-visible {
+  outline: 2px solid var(--color-gold, #C07F33);
+  outline-offset: 3px;
+}
+
+/* Gold Variant */
+.magnetic-btn--gold {
+  background: linear-gradient(135deg, #C07F33 0%, #D49B55 100%);
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 16px rgba(192, 127, 51, 0.3), 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.magnetic-btn--gold:hover {
+  background: linear-gradient(135deg, #AA6C25 0%, #C48B47 100%);
+  box-shadow: 0 8px 24px rgba(192, 127, 51, 0.4), 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Snippet / Light Variant (Faithful to the original demo snippet) */
+.magnetic-btn--snippet,
+.magnetic-btn--light {
+  background: #FFFFFF;
+  color: #1D1D1F !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 18px 40px rgba(16, 24, 40, 0.14);
+  border: 1px solid #E3E9F2;
+}
+
+.magnetic-btn--snippet:hover,
+.magnetic-btn--light:hover {
+  background: #F9FAFC;
+  box-shadow: 0 2px 4px rgba(16, 24, 40, 0.06), 0 22px 48px rgba(16, 24, 40, 0.18);
+}
+
+.magnetic-btn--snippet:focus-visible,
+.magnetic-btn--light:focus-visible {
+  outline: 2px solid #0A6CFF;
+  outline-offset: 3px;
+}
+
+/* Secondary / Subtle Outline Variant */
+.magnetic-btn--secondary {
+  background: var(--color-surface, #FFFFFF);
+  color: var(--color-ink, #1B221B) !important;
+  border: 1px solid var(--color-divider, #E4DCD2);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(27, 34, 27, 0.04));
+}
+
+.magnetic-btn--secondary:hover {
+  background: var(--color-surface-hover, #EBE3D8);
+  box-shadow: var(--shadow-md, 0 6px 20px -3px rgba(27, 34, 27, 0.07));
+}
+
+/* Simulated cursor (only when showCursor is active for playground/demo) */
+.magnetic-cur {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  background: rgba(10, 108, 255, 0.15);
+  border: 1.5px solid #4FA3FF;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  opacity: 1;
+  z-index: 10;
+}
+
+.magnetic-zone.is-real .magnetic-cur {
+  opacity: 0;
+}
+
+/* Reduced Motion & Touch Devices */
+@media (prefers-reduced-motion: reduce) {
+  .magnetic-btn,
+  .magnetic-btn-label {
+    transform: none !important;
+    will-change: auto !important;
+  }
+  .magnetic-cur {
+    display: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .magnetic-btn {
+    border: 2px solid ButtonText !important;
+  }
+}

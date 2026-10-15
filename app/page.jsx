@@ -9,6 +9,7 @@ import BookingForm from "@/components/BookingForm";
 import TierSelectButton from "@/components/TierSelectButton";
 import FadeContent from "@/components/react-bits/FadeContent";
 import SpotlightCard from "@/components/react-bits/SpotlightCard";
+import MagneticButton from "@/components/MagneticButton";
 import { getAmenityIcon } from "@/components/AmenityIcons";
 import WaterBackground from "@/components/WaterBackground";
 
@@ -112,9 +113,9 @@ export default function Page() {
             </div>
 
             <div className="hero-actions">
-              <a href="#calendar" className="button-primary">
+              <MagneticButton href="#calendar" variant="primary">
                 Check Dates & Book
-              </a>
+              </MagneticButton>
               <a href="#rates" className="button-secondary">
                 View Rates (From ₱5,000)
               </a>
