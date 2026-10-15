@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
+import FloatingLabel from "@/components/FloatingLabel";
 
 function todayInManila() {
   const parts = new Intl.DateTimeFormat("en", { timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
@@ -78,6 +79,7 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(null);
   const [copyMessage, setCopyMessage] = useState("");
+  const [occasion, setOccasion] = useState("");
   const [livemode, setLivemode] = useState(null);
   const rate = estimateRate(guests, days);
   const instantBookingReady = true;
@@ -325,11 +327,71 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
                 : "Dates are held only after approval by host."}
             </p>
           </div>
-          <div className="booking-field booking-wide"><label htmlFor={`${prefix}-name`}>Your full name</label><input id={`${prefix}-name`} name="name" required minLength={2} maxLength={100} autoComplete="name" placeholder="Your full name" /></div>
-          <div className="booking-field"><label htmlFor={`${prefix}-email`}>Email address</label><input id={`${prefix}-email`} name="email" type="email" required maxLength={254} autoComplete="email" placeholder="you@example.com" /></div>
-          <div className="booking-field"><label htmlFor={`${prefix}-phone`}>Mobile number</label><input id={`${prefix}-phone`} name="phone" type="tel" required maxLength={30} autoComplete="tel" placeholder="09... or +63..." /></div>
-          <div className="booking-field booking-wide"><label htmlFor={`${prefix}-occasion`}>Occasion <span>(optional)</span></label><select id={`${prefix}-occasion`} name="occasion" defaultValue=""><option value="">Choose an occasion</option>{["Family staycation", "Barkada / friends outing", "Birthday / celebration", "Other"].map((value) => <option key={value}>{value}</option>)}</select></div>
-          <div className="booking-field booking-wide"><label htmlFor={`${prefix}-notes`}>Questions or requests <span>(optional)</span></label><textarea id={`${prefix}-notes`} name="notes" maxLength={1000} rows={3} placeholder="Arrival questions, parking needs, or anything the host should know" /></div>
+          <div className="booking-field booking-wide">
+            <FloatingLabel htmlFor={`${prefix}-name`} label="Your full name">
+              <input
+                id={`${prefix}-name`}
+                name="name"
+                required
+                minLength={2}
+                maxLength={100}
+                autoComplete="name"
+                placeholder=" "
+              />
+            </FloatingLabel>
+          </div>
+          <div className="booking-field">
+            <FloatingLabel htmlFor={`${prefix}-email`} label="Email address">
+              <input
+                id={`${prefix}-email`}
+                name="email"
+                type="email"
+                required
+                maxLength={254}
+                autoComplete="email"
+                placeholder=" "
+              />
+            </FloatingLabel>
+          </div>
+          <div className="booking-field">
+            <FloatingLabel htmlFor={`${prefix}-phone`} label="Mobile number (09... or +63...)">
+              <input
+                id={`${prefix}-phone`}
+                name="phone"
+                type="tel"
+                required
+                maxLength={30}
+                autoComplete="tel"
+                placeholder=" "
+              />
+            </FloatingLabel>
+          </div>
+          <div className="booking-field booking-wide">
+            <FloatingLabel htmlFor={`${prefix}-occasion`} label="Occasion (optional)" hasValue={Boolean(occasion)}>
+              <select
+                id={`${prefix}-occasion`}
+                name="occasion"
+                defaultValue=""
+                onChange={(e) => setOccasion(e.target.value)}
+              >
+                <option value="" disabled hidden></option>
+                {["Family staycation", "Barkada / friends outing", "Birthday / celebration", "Other"].map((value) => (
+                  <option key={value} value={value}>{value}</option>
+                ))}
+              </select>
+            </FloatingLabel>
+          </div>
+          <div className="booking-field booking-wide">
+            <FloatingLabel htmlFor={`${prefix}-notes`} label="Questions or requests (optional)" isTextarea>
+              <textarea
+                id={`${prefix}-notes`}
+                name="notes"
+                maxLength={1000}
+                rows={3}
+                placeholder=" "
+              />
+            </FloatingLabel>
+          </div>
           <label className="booking-consent booking-wide" htmlFor={`${prefix}-consent`}><input id={`${prefix}-consent`} name="consent" type="checkbox" required /><span>I agree that the host may use these contact details to handle this booking request and send booking confirmations by email and SMS.</span></label>
         </fieldset>
         {error && <p className="booking-error" role="alert">{error}</p>}
