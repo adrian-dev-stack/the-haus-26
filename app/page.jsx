@@ -11,6 +11,7 @@ import SpotlightCard from "@/components/react-bits/SpotlightCard";
 import MagneticButton from "@/components/MagneticButton";
 import { getAmenityIcon } from "@/components/AmenityIcons";
 import WaterBackground from "@/components/WaterBackground";
+import HeroPhoto from "@/components/HeroPhoto";
 
 const rateTiers = [
   {
@@ -100,48 +101,53 @@ export default function Page() {
               Your Private Villa & Pool Escape in Bataan.
             </h1>
           </div>
-          <div className="hero-copy">
-            <p className="hero-intro">
-              A house to yourselves. A private pool to dive into.
-            </p>
-            <p className="hero-description">
-              Unwind in complete privacy. Stay for 22 exclusive hours with your own pool, billiard table, and outdoor grill for time with family and friends.
-            </p>
+          <div className="hero-grid">
+            <div className="hero-copy">
+              <p className="hero-intro">
+                A house to yourselves. A private pool to dive into.
+              </p>
+              <p className="hero-description">
+                Unwind in complete privacy. Stay for 22 exclusive hours with your own pool, billiard table, and outdoor grill for time with family and friends.
+              </p>
 
-            <div className="hero-feature-chips">
-              <span className="hero-chip">🏊 Private Pool</span>
-              <span className="hero-chip">🎱 Billiards Table</span>
-              <span className="hero-chip">🥩 BBQ Grill</span>
-              <span className="hero-chip">🐾 Pet-Friendly</span>
-              <span className="hero-chip">🚗 Free Parking</span>
+              <div className="hero-feature-chips">
+                <span className="hero-chip">🏊 Private Pool</span>
+                <span className="hero-chip">🎱 Billiards Table</span>
+                <span className="hero-chip">🥩 BBQ Grill</span>
+                <span className="hero-chip">🐾 Pet-Friendly</span>
+                <span className="hero-chip">🚗 Free Parking</span>
+              </div>
+
+              <div className="hero-actions">
+                <MagneticButton href="#calendar" variant="primary">
+                  Check Dates & Book
+                </MagneticButton>
+                <a href="#rates" className="button-secondary">
+                  View Rates (From ₱5,000)
+                </a>
+                <a href="#gallery" className="text-link">
+                  View all {p.photos.length} photos
+                </a>
+              </div>
+
+              <dl className="hero-facts">
+                <div>
+                  <dt>Stay Duration</dt>
+                  <dd>22 Hours</dd>
+                </div>
+                <div>
+                  <dt>Starting Rate</dt>
+                  <dd>{p.rate?.replace(/^From\s+/i, "") || "₱5,000"}</dd>
+                </div>
+                <div>
+                  <dt>Privacy</dt>
+                  <dd>100% Exclusive</dd>
+                </div>
+              </dl>
             </div>
-
-            <div className="hero-actions">
-              <MagneticButton href="#calendar" variant="primary">
-                Check Dates & Book
-              </MagneticButton>
-              <a href="#rates" className="button-secondary">
-                View Rates (From ₱5,000)
-              </a>
-              <a href="#gallery" className="text-link">
-                View all {p.photos.length} photos
-              </a>
+            <div className="hero-media">
+              <HeroPhoto photo={p.photos[0]} />
             </div>
-
-            <dl className="hero-facts">
-              <div>
-                <dt>Stay Duration</dt>
-                <dd>22 Hours</dd>
-              </div>
-              <div>
-                <dt>Starting Rate</dt>
-                <dd>{p.rate?.replace(/^From\s+/i, "") || "₱5,000"}</dd>
-              </div>
-              <div>
-                <dt>Privacy</dt>
-                <dd>100% Exclusive</dd>
-              </div>
-            </dl>
           </div>
         </section>
 
