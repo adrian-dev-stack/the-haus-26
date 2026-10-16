@@ -180,18 +180,9 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, dayVisitorCa
       const paymentToken = result.data?.paymentToken || result.data?.booking?.paymentToken;
       setSubmitted({ booking: result.data.booking, guestUrl: path.pathname, paymentToken });
       if (paymentToken) {
-        // Direct one-step checkout: automatically advance straight to PayMongo payment
-        const formEl = document.createElement("form");
-        formEl.method = "POST";
-        formEl.action = "/api/payments/continue";
-        formEl.style.display = "none";
-        const tokenInput = document.createElement("input");
-        tokenInput.type = "hidden";
-        tokenInput.name = "token";
-        tokenInput.value = paymentToken;
-        formEl.appendChild(tokenInput);
-        document.body.appendChild(formEl);
-        formEl.submit();
+        // Route guests to the review screen first so they review dates, quote, and cancellation policy
+        window.location.assign(`/pay/${encodeURIComponent(paymentToken)}`);
+        return;
       }
     } catch (failure) {
       if (submittedPayload.current) { setUncertain(true); requestLocked.current = true; }
@@ -215,11 +206,11 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, dayVisitorCa
       <div className="booking-panel booking-success" role="status">
         <p className="section-label">{submitted.booking.status === "awaiting_payment" ? "Date Held" : "Request Received"} · {submitted.booking.reference}</p>
         <Heading ref={successHeading} tabIndex={-1}>
-          {activePaymentToken ? "Dates held! Opening checkout..." : submitted.booking.status === "awaiting_payment" ? "Your dates are held." : "Your booking request is saved."}
+          {activePaymentToken ? "Dates held. Review your stay summary..." : submitted.booking.status === "awaiting_payment" ? "Your dates are held." : "Your booking request is saved."}
         </Heading>
         <p>
           {activePaymentToken
-            ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Opening secure PayMongo checkout...`
+            ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Please review your stay details, quote, and cancellation terms before paying your deposit.`
             : submitted.booking.status === "awaiting_payment"
             ? `Your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}) is held for 30 minutes. Complete your 50% deposit to lock in your reservation.`
             : `Open your private booking link to check the latest status for your ${stayDays}-day stay (${submitted.booking.date} to ${submitted.booking.endDate || calculateCheckoutDate(submitted.booking.date, stayDays)}).`}
@@ -228,10 +219,9 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, dayVisitorCa
         {submitted.booking.livemode === false && <p className="booking-notice">Test booking mode. No real reservation or payment is made.</p>}
         <div className="booking-actions">
           {activePaymentToken && (
-            <form action="/api/payments/continue" method="post" style={{ display: "inline" }}>
-              <input type="hidden" name="token" value={activePaymentToken} />
-              <button type="submit" className="button-primary">Proceed to Pay 50% Deposit (GCash / Card)</button>
-            </form>
+            <Link href={`/pay/${encodeURIComponent(activePaymentToken)}`} className="button-primary">
+              Review summary & pay deposit
+            </Link>
           )}
           <Link href={submitted.guestUrl} className={activePaymentToken ? "booking-secondary" : "button-primary"}>View booking details</Link>
           <button type="button" className="booking-secondary" onClick={copyLink}>Copy private link</button>
@@ -246,7 +236,7 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, dayVisitorCa
       <div className="booking-form-heading">
         <div>
           <Heading>Reserve your stay</Heading>
-          <p>{instantBookingReady ? "Instant booking with 30-minute hold for deposit." : "Submit your request for host review and quote confirmation."}</p>
+          <p>{instantBookingReady ? "Choose dates → Review total and terms → Pay 50% → Booking confirmed." : "Submit your request for host review and quote confirmation."}</p>
         </div>
         <div className="booking-estimate">
           <span>Total (50% Deposit)</span>
@@ -415,10 +405,10 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, dayVisitorCa
         </fieldset>
         {error && <p className="booking-error" role="alert">{error}</p>}
         {uncertain && <p className="booking-form-note">Your original details are kept on this page for a safe retry. Please keep the page open until your request is checked.</p>}
-        <button className="button-primary booking-submit" type="submit" disabled={pending}>{pending ? "Holding dates & opening checkout..." : uncertain ? "Retry reservation" : "Reserve & Pay 50% Deposit"}</button>
+        <button className="button-primary booking-submit" type="submit" disabled={pending}>{pending ? "Holding dates & opening review..." : uncertain ? "Retry reservation" : "Review total and terms"}</button>
         <p className="booking-form-note">
           {instantBookingReady
-            ? "Available dates are held immediately for 30 minutes. You will proceed directly to secure 50% deposit payment via PayMongo (GCash, Maya, or Card)."
+            ? "Available dates are held immediately for 30 minutes. You will review the full stay breakdown and cancellation policy before proceeding to pay the 50% deposit via PayMongo."
             : "Selecting dates or submitting does not reserve them. Your host confirms group capacity and quote before holding the date."}
         </p>
       </form>

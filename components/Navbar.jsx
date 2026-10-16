@@ -75,7 +75,7 @@ export default function Navbar({ name, rate }) {
             ))}
           </div>
           <Link href="/book" className="nav-book button-primary">
-            Request to book
+            Book your stay
           </Link>
           <button
             type="button"
@@ -96,7 +96,7 @@ export default function Navbar({ name, rate }) {
               </Link>
             ))}
             <Link href="/book" onClick={() => setOpen(false)} style={{ color: "var(--color-accent)", fontWeight: 600 }}>
-              Book a stay →
+              Book your stay
             </Link>
           </div>
         )}
@@ -107,7 +107,7 @@ export default function Navbar({ name, rate }) {
           <small>22-hour private stay</small>
         </div>
         <Link href="/book" className="button-primary">
-          Request to book
+          Book your stay
         </Link>
       </div>
     </>

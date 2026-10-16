@@ -245,7 +245,7 @@ export default function Page() {
                   </div>
                   <TierSelectButton
                     guests={tier.count}
-                    label="Select Group Size"
+                    label="Select tier & choose dates"
                     className="rate-action"
                   />
                 </div>
