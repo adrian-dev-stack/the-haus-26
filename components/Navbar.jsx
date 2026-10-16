@@ -16,14 +16,19 @@ const links = [
 export default function Navbar({ name, rate }) {
   const [open, setOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
   const menuId = useId();
   const menuButton = useRef(null);
 
   useEffect(() => {
     let last = typeof window !== "undefined" ? window.scrollY : 0;
     function onScroll() {
-      if (open) return;
       const y = window.scrollY;
+      const hero = document.getElementById("hero") || document.querySelector(".stay-hero");
+      const heroThreshold = hero ? Math.max(hero.offsetTop + hero.offsetHeight - 140, 350) : 400;
+      setPastHero(y > heroThreshold);
+
+      if (open) return;
       const dy = y - last;
       if (Math.abs(dy) > 1.5) {
         const down = dy > 0;
@@ -35,6 +40,7 @@ export default function Navbar({ name, rate }) {
       }
     }
     window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, [open]);
 
@@ -101,7 +107,11 @@ export default function Navbar({ name, rate }) {
           </div>
         )}
       </header>
-      <div className={`mobile-booking-bar ${hidden ? "off" : ""}`} aria-label="Booking shortcut">
+      <div
+        className={`mobile-booking-bar ${(!pastHero || hidden) ? "off" : ""}`}
+        aria-label="Booking shortcut"
+        aria-hidden={!pastHero}
+      >
         <div>
           <span>{rate || "From ₱5,000"}</span>
           <small>22-hour private stay</small>
