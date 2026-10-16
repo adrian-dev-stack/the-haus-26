@@ -68,7 +68,11 @@ const faqs = [
   },
   {
     q: "How does the deposit and payment work?",
-    a: "Review your approved quote and the host's payment, cancellation, rescheduling, and refund terms before paying. Your date is reserved once the 50% deposit via GCash or Card is verified. The remaining balance is payable upon arrival.",
+    a: "Your dates are held for 30 minutes while you complete your 50% deposit via PayMongo (GCash, Maya, or Card). Once verified, your booking is confirmed and held. The remaining 50% balance is payable upon arrival.",
+  },
+  {
+    q: "What is the cancellation and rescheduling policy?",
+    a: "Cancellations notified at least 7 days before check-in receive a 100% deposit refund (processed in 5 to 10 business days). Cancellations within 7 days and no-shows forfeit the deposit. One free date reschedule is allowed with at least 7 days notice (valid within 60 days). For weather emergencies with official PAGASA typhoon alerts affecting Bataan on check-in day, guests may reschedule without penalty or receive a full 100% refund.",
   },
   {
     q: "Where is The HauS 26 located?",
