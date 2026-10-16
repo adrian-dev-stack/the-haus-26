@@ -156,28 +156,8 @@ export default function Page() {
             <p>
               The entire property, private pool, and amenities belong exclusively to your group throughout your 22-hour stay.
             </p>
-          </FadeContent>
 
-          <div className="amenities-details">
-            <div className="amenities-cards-grid">
-              {p.amenities.map((amenity) => {
-                const IconComponent = getAmenityIcon(amenity);
-                const description =
-                  amenityDescriptions[amenity] ||
-                  "Exclusive amenity included with your 22-hour private rental.";
-                return (
-                  <div key={amenity} className="amenity-card">
-                    <div className="amenity-icon-wrapper">
-                      <IconComponent className="h-6 w-6" />
-                    </div>
-                    <h3>{amenity}</h3>
-                    <p>{description}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="stay-guidelines-box mt-6">
+            <div className="stay-guidelines-box">
               <h3>
                 <span>📋</span>
                 <span>Stay Guidelines & House Rules</span>
@@ -185,15 +165,42 @@ export default function Page() {
               <ul>
                 {p.rules.map((rule) => (
                   <li key={rule}>
-                    <span>✓</span>
+                    <span className="guideline-check">✓</span>
                     <span>{rule}</span>
                   </li>
                 ))}
                 <li>
-                  <span>✓</span>
+                  <span className="guideline-check">✓</span>
                   <span>Check-in: {p.checkIn} | Check-out: {p.checkOut}</span>
                 </li>
               </ul>
+            </div>
+          </FadeContent>
+
+          <div className="amenities-details">
+            <div className="amenities-cards-grid">
+              {p.amenities.map((amenity, index) => {
+                const IconComponent = getAmenityIcon(amenity);
+                const description =
+                  amenityDescriptions[amenity] ||
+                  "Exclusive amenity included with your 22-hour private rental.";
+                const isLastOdd =
+                  index === p.amenities.length - 1 && p.amenities.length % 2 !== 0;
+                return (
+                  <div
+                    key={amenity}
+                    className={`amenity-card ${isLastOdd ? "col-span-full" : ""}`}
+                  >
+                    <div className="amenity-icon-wrapper">
+                      <IconComponent className="h-6 w-6" />
+                    </div>
+                    <div className="amenity-card-content">
+                      <h3>{amenity}</h3>
+                      <p>{description}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
