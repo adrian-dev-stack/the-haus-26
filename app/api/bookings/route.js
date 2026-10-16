@@ -8,8 +8,11 @@ export async function POST(request) {
   try {
     requireBookingOrigin(request);
     await limitBookingRequest(request, "booking-create", 8);
-    const body = await readBookingBody(request);
-    const result = await createBookingRequest(body, { blockedDates: property.bookedDates, autoApprove: true });
+    const result = await createBookingRequest(body, {
+      blockedDates: property.bookedDates,
+      autoApprove: true,
+      maxGuests: property.maxGuests || 15,
+    });
     return bookingResponse({
       booking: result.booking,
       guestUrl: `${getPaymentConfig().siteUrl}/book/${result.token}`,

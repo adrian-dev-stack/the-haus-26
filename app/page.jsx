@@ -389,8 +389,9 @@ export default function Page() {
             <BookingForm
               checkIn={p.checkIn}
               checkOut={p.checkOut}
-            maxGuests={p.maxGuests}
-            bookingTerms={p.bookingTerms}
+              maxGuests={p.maxGuests}
+              dayVisitorCapacity={p.dayVisitorCapacity}
+              bookingTerms={p.bookingTerms}
             />
           </div>
         </section>

@@ -50,6 +50,7 @@ export default function BookPage() {
             checkIn={property.checkIn}
             checkOut={property.checkOut}
             maxGuests={property.maxGuests}
+            dayVisitorCapacity={property.dayVisitorCapacity}
             bookingTerms={property.bookingTerms}
           />
         </div>

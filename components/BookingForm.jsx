@@ -61,7 +61,9 @@ function estimateRate(guests, days = 1) {
   };
 }
 
-export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms, headingLevel = 3 }) {
+export default function BookingForm({ checkIn, checkOut, maxGuests, dayVisitorCapacity, bookingTerms, headingLevel = 3 }) {
+  const effectiveMaxGuests = maxGuests || 15;
+  const effectiveDayCapacity = dayVisitorCapacity || 20;
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const prefix = useId();
   const requestId = useRef(null);
@@ -138,8 +140,9 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
       setError("Same-day bookings cannot be accommodated. Please choose tomorrow or a future date to give our housekeeper time to ready the property.");
       return;
     }
-    if (maxGuests && Number(guests) > maxGuests) {
-      setError(`Maximum capacity for this villa is ${maxGuests} guests. Please contact the host for larger groups.`);
+    const guestCount = Number(guests);
+    if (!Number.isSafeInteger(guestCount) || guestCount < 1 || guestCount > effectiveMaxGuests) {
+      setError(`Please choose between 1 and ${effectiveMaxGuests} guests. The maximum overnight capacity is ${effectiveMaxGuests} guests.`);
       return;
     }
     const form = new FormData(event.currentTarget);
@@ -316,14 +319,14 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
                 type="number"
                 name="guests"
                 min="1"
-                max={maxGuests || undefined}
+                max={effectiveMaxGuests}
                 step="1"
                 required
                 value={guests}
                 onChange={(event) => setGuests(event.target.value)}
               />
               <div role="group" aria-label="Quick guest counts">
-                {[4, 6, 8, 10].filter((count) => !maxGuests || count <= maxGuests).map((count) => (
+                {[4, 6, 8, 10, 15].filter((count) => count <= effectiveMaxGuests).map((count) => (
                   <button
                     key={count}
                     type="button"
@@ -337,7 +340,7 @@ export default function BookingForm({ checkIn, checkOut, maxGuests, bookingTerms
               </div>
             </div>
             <p>
-              {maxGuests ? `Property capacity: up to ${maxGuests} guests.` : "Covers private stay for your group."}{" "}
+              Property capacity: up to {effectiveMaxGuests} overnight guests (up to {effectiveDayCapacity} day visitors). Covers exclusive private stay for your group.{" "}
               {instantBookingReady
                 ? "Available dates are held immediately for 30 minutes to complete your deposit."
                 : "Dates are held only after approval by host."}
