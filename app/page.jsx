@@ -11,7 +11,6 @@ import SpotlightCard from "@/components/react-bits/SpotlightCard";
 import MagneticButton from "@/components/MagneticButton";
 import { getAmenityIcon } from "@/components/AmenityIcons";
 import WaterBackground from "@/components/WaterBackground";
-import HeroPhoto from "@/components/HeroPhoto";
 
 const rateTiers = [
   {
@@ -45,13 +44,13 @@ const rateTiers = [
 ];
 
 const amenityDescriptions = {
-  "Private swimming pool": "Blue-tiled pool with ~3 ft kiddie area and ~4.5 to 5 ft adult section. Non-slip deck, patio seating, and outdoor rinse shower.",
-  "Billiard table": "Standard blue-felt billiard table with pool cues and balls for leisure play in the shaded lounge.",
-  "Outdoor grill": "Charcoal BBQ grill beside the patio umbrella. Guests are invited to bring their own charcoal and grill ingredients.",
-  "2 air-conditioned bedrooms": "Bedroom 1 with sturdy double bunk beds (sleeps 4 to 6) and Bedroom 2 with queen family bed plus pull-out (sleeps 4 to 6). Fresh linens and pillows provided.",
-  "Kitchen with refrigerator and stove": "Equipped with refrigerator, 2-burner gas stove (LPG included), microwave, rice cooker, electric kettle, cookware, and dishwashing soap.",
-  "Wi-Fi": "High-speed Wi-Fi throughout the villa and patio for work or entertainment.",
-  "Free parking for guests (fits two sedans)": "Private gated compound with secure parking for 2 to 3 sedans or SUVs.",
+  "Private swimming pool": "A swimming pool for your group's private use during your stay.",
+  "Billiard table": "A billiard table included with your private rental.",
+  "Outdoor grill": "An outdoor grill for preparing meals with your group.",
+  "2 air-conditioned bedrooms": "Two bedrooms with air conditioning. Ask the host to confirm sleeping arrangements for your group.",
+  "Kitchen with refrigerator and stove": "A kitchen with a refrigerator and stove for your stay.",
+  "Wi-Fi": "Wi-Fi is included with your rental.",
+  "Free parking for guests (fits two sedans)": "Guest parking with space for two sedans.",
 };
 
 const faqs = [
@@ -101,53 +100,48 @@ export default function Page() {
               Your Private Villa & Pool Escape in Bataan.
             </h1>
           </div>
-          <div className="hero-grid">
-            <div className="hero-copy">
-              <p className="hero-intro">
-                A house to yourselves. A private pool to dive into.
-              </p>
-              <p className="hero-description">
-                Unwind in complete privacy. Stay for 22 exclusive hours with your own pool, billiard table, and outdoor grill for time with family and friends.
-              </p>
+          <div className="hero-copy">
+            <p className="hero-intro">
+              A house to yourselves. A private pool to dive into.
+            </p>
+            <p className="hero-description">
+              Unwind in complete privacy. Stay for 22 exclusive hours with your own pool, billiard table, and outdoor grill for time with family and friends.
+            </p>
 
-              <div className="hero-feature-chips">
-                <span className="hero-chip">🏊 Private Pool</span>
-                <span className="hero-chip">🎱 Billiards Table</span>
-                <span className="hero-chip">🥩 BBQ Grill</span>
-                <span className="hero-chip">🐾 Pet-Friendly</span>
-                <span className="hero-chip">🚗 Free Parking</span>
-              </div>
-
-              <div className="hero-actions">
-                <MagneticButton href="#calendar" variant="primary">
-                  Check Dates & Book
-                </MagneticButton>
-                <a href="#rates" className="button-secondary">
-                  View Rates (From ₱5,000)
-                </a>
-                <a href="#gallery" className="text-link">
-                  View all {p.photos.length} photos
-                </a>
-              </div>
-
-              <dl className="hero-facts">
-                <div>
-                  <dt>Stay Duration</dt>
-                  <dd>22 Hours</dd>
-                </div>
-                <div>
-                  <dt>Starting Rate</dt>
-                  <dd>{p.rate?.replace(/^From\s+/i, "") || "₱5,000"}</dd>
-                </div>
-                <div>
-                  <dt>Privacy</dt>
-                  <dd>100% Exclusive</dd>
-                </div>
-              </dl>
+            <div className="hero-feature-chips">
+              <span className="hero-chip">🏊 Private Pool</span>
+              <span className="hero-chip">🎱 Billiards Table</span>
+              <span className="hero-chip">🥩 BBQ Grill</span>
+              <span className="hero-chip">🐾 Pet-Friendly</span>
+              <span className="hero-chip">🚗 Free Parking</span>
             </div>
-            <div className="hero-media">
-              <HeroPhoto photo={p.photos[0]} />
+
+            <div className="hero-actions">
+              <MagneticButton href="#calendar" variant="primary">
+                Check Dates & Book
+              </MagneticButton>
+              <a href="#rates" className="button-secondary">
+                View Rates (From ₱5,000)
+              </a>
+              <a href="#gallery" className="text-link">
+                View all {p.photos.length} photos
+              </a>
             </div>
+
+            <dl className="hero-facts">
+              <div>
+                <dt>Stay Duration</dt>
+                <dd>22 Hours</dd>
+              </div>
+              <div>
+                <dt>Starting Rate</dt>
+                <dd>{p.rate?.replace(/^From\s+/i, "") || "₱5,000"}</dd>
+              </div>
+              <div>
+                <dt>Privacy</dt>
+                <dd>100% Exclusive</dd>
+              </div>
+            </dl>
           </div>
         </section>
 
@@ -211,89 +205,6 @@ export default function Page() {
                   </div>
                 );
               })}
-            </div>
-
-            {/* Stay Details & Room Specifications */}
-            <div className="stay-specs-wrap">
-              <div className="stay-specs-header">
-                <h3>Stay details & room specifications</h3>
-                <p>Everything you need to confirm before reserving your dates.</p>
-              </div>
-              <div className="stay-specs-grid">
-                <div className="stay-spec-card">
-                  <div className="stay-spec-title">
-                    <span className="stay-spec-icon">🛏️</span>
-                    <h4>Bedrooms & Sleeping</h4>
-                  </div>
-                  <ul className="stay-spec-items">
-                    <li><strong>Bedroom 1:</strong> Air-conditioned bunk room with sturdy double bunk beds (sleeps 4 to 6).</li>
-                    <li><strong>Bedroom 2:</strong> Air-conditioned room with queen family bed and pull-out layout (sleeps 4 to 6).</li>
-                    <li><strong>Capacity:</strong> Accommodates up to 15 overnight guests with comfortable additional mattresses.</li>
-                    <li><strong>Linens:</strong> Clean bed sheets and pillows provided for all booked guests.</li>
-                  </ul>
-                </div>
-
-                <div className="stay-spec-card">
-                  <div className="stay-spec-title">
-                    <span className="stay-spec-icon">🚿</span>
-                    <h4>Bathroom & Hygiene</h4>
-                  </div>
-                  <ul className="stay-spec-items">
-                    <li><strong>Fixtures:</strong> Private bathroom with hot & cold shower, bidet spray, and modern vanity.</li>
-                    <li><strong>Provided:</strong> Complimentary hand soap and initial supply of toilet paper.</li>
-                    <li><strong>Guest note:</strong> For hygiene reasons, guests should bring their own bath towels and personal toiletries.</li>
-                  </ul>
-                </div>
-
-                <div className="stay-spec-card">
-                  <div className="stay-spec-title">
-                    <span className="stay-spec-icon">🍳</span>
-                    <h4>Kitchen & Free Corkage</h4>
-                  </div>
-                  <ul className="stay-spec-items">
-                    <li><strong>Appliances:</strong> Refrigerator with freezer, 2-burner gas stove (LPG included), microwave, and electric kettle.</li>
-                    <li><strong>Cookware:</strong> Rice cooker, frying pans, pots, cooking utensils, and dishwashing soap.</li>
-                    <li><strong>Outdoor BBQ:</strong> Charcoal grill on the patio (bring your own charcoal).</li>
-                    <li><strong>Zero Corkage:</strong> Free to bring all outside food, snacks, and beverages!</li>
-                  </ul>
-                </div>
-
-                <div className="stay-spec-card">
-                  <div className="stay-spec-title">
-                    <span className="stay-spec-icon">🏊</span>
-                    <h4>Pool Depth & Safety</h4>
-                  </div>
-                  <ul className="stay-spec-items">
-                    <li><strong>Depth:</strong> Kiddie section (~3 ft depth) and adult pool (~4.5 ft to 5 ft depth).</li>
-                    <li><strong>Features:</strong> Non-slip surrounding deck tiles, patio seating, and outdoor shower.</li>
-                    <li><strong>Safety:</strong> No lifeguard on duty. Children must be accompanied by an adult at all times.</li>
-                  </ul>
-                </div>
-
-                <div className="stay-spec-card">
-                  <div className="stay-spec-title">
-                    <span className="stay-spec-icon">🚗</span>
-                    <h4>Entrance & Parking</h4>
-                  </div>
-                  <ul className="stay-spec-items">
-                    <li><strong>Access:</strong> Private gated compound with dedicated entrance and driveway.</li>
-                    <li><strong>Parking:</strong> Free secure on-site parking accommodating 2 to 3 sedans or SUVs.</li>
-                    <li><strong>Location:</strong> Peaceful residential neighborhood in Hulo, Alangan, Limay, Bataan.</li>
-                  </ul>
-                </div>
-
-                <div className="stay-spec-card">
-                  <div className="stay-spec-title">
-                    <span className="stay-spec-icon">🎒</span>
-                    <h4>Packing & Pet Policy</h4>
-                  </div>
-                  <ul className="stay-spec-items">
-                    <li><strong>What to bring:</strong> Bath towels, personal toiletries, charcoal for the grill, drinking water, and food.</li>
-                    <li><strong>Pets:</strong> Fur babies welcome! Please keep pets leashed outdoors and clean up after them.</li>
-                    <li><strong>Quiet hours:</strong> 10:00 PM for a restful neighborhood environment.</li>
-                  </ul>
-                </div>
-              </div>
             </div>
           </div>
         </section>
