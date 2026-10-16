@@ -721,6 +721,91 @@ h2 {
   flex-shrink: 0;
 }
 
+/* Stay Details & Room Specifications */
+.stay-specs-wrap {
+  margin-top: 2.75rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-divider);
+}
+
+.stay-specs-header h3 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -.02em;
+}
+
+.stay-specs-header p {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.stay-specs-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .stay-specs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stay-spec-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 16px;
+  padding: 1.35rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: all 180ms var(--ease-out);
+}
+
+.stay-spec-card:hover {
+  border-color: var(--color-line);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1.5px);
+}
+
+.stay-spec-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stay-spec-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.stay-spec-title h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.stay-spec-items {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+.stay-spec-items strong {
+  color: var(--color-ink);
+}
+
 /* Rates & Tier Cards */
 .section-heading {
   display: flex;
